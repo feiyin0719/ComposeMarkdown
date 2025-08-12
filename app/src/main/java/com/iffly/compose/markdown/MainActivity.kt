@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -20,10 +21,32 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComposeMarkdownTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Column {
+                        Greeting(
+                            name = "Android",
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                        MarkdownView(
+                            content = """
+                            # Hello World
+                            
+                            This is a simple markdown example.
+                            
+                            ## Subheading
+                            
+                            - Item 1
+                            - Item 2
+                            
+                            **Bold Text**
+                            
+                            *Italic Text*
+                            
+                            [Link to Google](https://www.google.com)
+                        """.trimIndent(),
+                            modifier = Modifier.padding(innerPadding),
+                        )
+                    }
+
                 }
             }
         }
