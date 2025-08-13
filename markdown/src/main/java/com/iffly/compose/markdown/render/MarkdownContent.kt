@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.parser.ParserFactory
 import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
+import org.commonmark.node.BulletList
 import org.commonmark.node.Heading
 import org.commonmark.node.Node
 import org.commonmark.node.Paragraph
@@ -48,7 +48,9 @@ fun ColumnScope.MarkdownNode(
             is Heading -> {
                 MarkdownText(node, modifier = modifier)
             }
-
+            is BulletList -> {
+                MarkdownText(node, modifier = modifier, indentLevel = 1)
+            }
             else -> {
                 // Handle other node types if necessary
                 // For now, we just skip them
@@ -69,7 +71,7 @@ private fun MarkdownContentPreview() {
         This is a **bold text** and this is *italic text*.
         ## Subheading
 
-        - Item 1
+        - **Item 1**
         - Item 2
         - Item 3
     """.trimIndent()
