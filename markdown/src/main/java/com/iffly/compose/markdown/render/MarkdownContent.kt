@@ -20,6 +20,7 @@ import com.iffly.compose.markdown.util.MarkdownPreview
 import org.commonmark.node.BulletList
 import org.commonmark.node.Heading
 import org.commonmark.node.Node
+import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
 
 @Composable
@@ -51,6 +52,9 @@ fun ColumnScope.MarkdownNode(
             is BulletList -> {
                 MarkdownText(node, modifier = modifier, indentLevel = 1)
             }
+            is OrderedList -> {
+                MarkdownText(node, modifier = modifier, indentLevel = 1)
+            }
             else -> {
                 // Handle other node types if necessary
                 // For now, we just skip them
@@ -70,10 +74,18 @@ private fun MarkdownContentPreview() {
 
         This is a **bold text** and this is *italic text*.
         ## Subheading
+        
+        ### h3 Heading
 
+        ---
+        
         - **Item 1**
         - Item 2
         - Item 3
+        
+        1. Ordered Item 1
+        2. Ordered Item 2
+        3. *Ordered Item 3*
     """.trimIndent()
     val node = ParserFactory().build().parse(testText)
     CompositionLocalProvider(

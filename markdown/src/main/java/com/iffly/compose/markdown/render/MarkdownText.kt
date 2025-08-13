@@ -7,13 +7,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.style.currentTypographyStyle
+import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getSpanStyle
 import com.iffly.compose.markdown.widget.BasicText
 import org.commonmark.internal.util.Parsing
 import org.commonmark.node.BulletList
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
-import org.commonmark.node.ListBlock
 import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
@@ -25,6 +25,7 @@ import kotlin.text.Typography.nbsp
 
 @Composable
 fun MarkdownText(parent: Node, modifier: Modifier = Modifier, indentLevel: Int = 0) {
+
     BasicText(
         text = markdownText(parent, indentLevel),
         modifier = modifier,
@@ -62,15 +63,15 @@ fun AnnotatedString.Builder.buildAnnotatedString(parent: Node, indentLevel: Int 
             is BulletList -> {
                 buildAnnotatedString(node, indentLevel + 1)
             }
+            is OrderedList -> {
+                buildAnnotatedString(node, indentLevel + 1)
+            }
 
             is ListItem -> {
                 ListWrapper(
                     child = node,
                     indentLevel = indentLevel,
-                    marker = BULLET_POINT,
-                    addToListNodes = { node, marker ->
-
-                    },
+                    marker = node.getMarkerText(),
                     getText = { node, level ->
                         buildAnnotatedString(
                             parent = node,
@@ -89,14 +90,11 @@ fun AnnotatedString.Builder.buildAnnotatedString(parent: Node, indentLevel: Int 
     }
 }
 
-private const val BULLET_POINT = "•"
-
 @Composable
 internal fun AnnotatedString.Builder.ListWrapper(
     child: ListItem,
     indentLevel: Int,
     marker: String,
-    addToListNodes: (ListBlock, String) -> Unit,
     getText: @Composable AnnotatedString.Builder.(Node, Int) -> Unit,
 ) {
     appendLine()
@@ -105,9 +103,8 @@ internal fun AnnotatedString.Builder.ListWrapper(
     // Checking if there is an ordered list
     if (marker.toIntOrNull() != null) {
         val listNode = child.parent as OrderedList
-        addToListNodes(listNode, marker.toIntOrNull()?.inc()?.toString() ?: BULLET_POINT)
         append(marker)
-        append(listNode.delimiter)
+        append(listNode.markerDelimiter)
     } else {
         append(marker)
     }

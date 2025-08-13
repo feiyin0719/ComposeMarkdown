@@ -32,8 +32,13 @@ class MainActivity : ComponentActivity() {
                             This is a simple markdown example.
                             ## Subheading
                             
-                            - Item 1
-                            - Item 2
+                            1. Item 1
+                            2. Item 2
+                            3. Item 3
+                            
+                            - Item A
+                            - Item B
+                            - Item C
                             
                             **Bold Text**
                             
