@@ -4,12 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.widget.BasicText
+import androidx.compose.ui.unit.sp
+import com.iffly.compose.markdown.parser.ParserFactory
+import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
+import com.iffly.compose.markdown.style.TypographyStyle
+import org.commonmark.node.Heading
 import org.commonmark.node.Node
 import org.commonmark.node.Paragraph
-import org.commonmark.node.Text
 
 @Composable
 fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
@@ -17,6 +23,7 @@ fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
         MarkdownNode(root, modifier = modifier)
     }
 }
+
 
 @Composable
 fun ColumnScope.MarkdownNode(
@@ -27,10 +34,11 @@ fun ColumnScope.MarkdownNode(
     while (node != null) {
         when (node) {
             is Paragraph -> {
-                BasicText(
-                    text = buildAnnotatedString(node),
-                    modifier = modifier,
-                )
+                MarkdownText(node, modifier = modifier)
+            }
+
+            is Heading -> {
+                MarkdownText(node, modifier = modifier)
             }
 
             else -> {
@@ -42,15 +50,27 @@ fun ColumnScope.MarkdownNode(
     }
 }
 
-fun buildAnnotatedString(parent: Node): String {
-    var node = parent.firstChild
-    val stringBuilder = StringBuilder()
-    while (node != null) {
-        when (node) {
-            is Text -> stringBuilder.append(node.literal ?: "")
-            else -> stringBuilder.append(buildAnnotatedString(node))
-        }
-        node = node.next
+
+@Preview
+@Composable
+private fun MarkdownContentPreview() {
+    val testText = """
+        # Sample Markdown Content
+
+        This is a **bold text** and this is *italic text*.
+
+        - Item 1
+        - Item 2
+        - Item 3
+    """.trimIndent()
+    val node = ParserFactory().build().parse(testText)
+    CompositionLocalProvider(
+        LocalTypographyStyleProvider provides TypographyStyle(
+            body = SpanStyle(
+                fontSize = 20.sp
+            )
+        )
+    ) {
+        MarkdownContent(node)
     }
-    return stringBuilder.toString()
 }
