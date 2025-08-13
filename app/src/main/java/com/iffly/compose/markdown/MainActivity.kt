@@ -29,9 +29,7 @@ class MainActivity : ComponentActivity() {
                         MarkdownView(
                             content = """
                             # Hello World
-                            
                             This is a simple markdown example.
-                            
                             ## Subheading
                             
                             - Item 1

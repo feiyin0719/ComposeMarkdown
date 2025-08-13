@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.style
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -57,8 +58,8 @@ data class TypographyStyle(
 
 val DefaultTypographyStyle = TypographyStyle()
 
-fun Int.toHeadStyle(typographyStyle: TypographyStyle): SpanStyle {
-    return typographyStyle.head[this] ?: typographyStyle.body
-}
-
 val LocalTypographyStyleProvider = staticCompositionLocalOf<TypographyStyle?> { null }
+
+@Composable
+fun currentTypographyStyle(): TypographyStyle =
+    LocalTypographyStyleProvider.current ?: DefaultTypographyStyle
