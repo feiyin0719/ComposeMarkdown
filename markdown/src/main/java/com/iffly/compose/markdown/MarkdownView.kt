@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.parser.ParserFactory
 import com.iffly.compose.markdown.render.MarkdownContent
+import com.iffly.compose.markdown.util.MarkdownPreview
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.node.Node
@@ -68,7 +69,7 @@ fun MarkdownView(
     }
 }
 
-@Preview
+@MarkdownPreview
 @Composable
 private fun MarkdownViewPreview() {
     MarkdownView(

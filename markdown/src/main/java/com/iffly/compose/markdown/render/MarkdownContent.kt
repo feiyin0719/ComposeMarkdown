@@ -45,7 +45,6 @@ fun ColumnScope.MarkdownNode(
             is Paragraph -> {
                 MarkdownText(node, modifier = modifier)
             }
-
             is Heading -> {
                 MarkdownText(node, modifier = modifier)
             }
@@ -72,7 +71,10 @@ private fun MarkdownContentPreview() {
     val testText = """
         # Sample Markdown Content
 
-        This is a **bold text** and this is *italic text*.
+        This is a **bold text** and this is *italic text*.[baidu](https://www.baidu.com)
+        
+        [baidu](https://www.baidu.com)
+        
         ## Subheading
         
         ### h3 Heading

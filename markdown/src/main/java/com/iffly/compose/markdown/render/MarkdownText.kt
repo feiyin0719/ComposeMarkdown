@@ -3,8 +3,10 @@ package com.iffly.compose.markdown.render
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.util.getMarkerText
@@ -14,6 +16,7 @@ import org.commonmark.internal.util.Parsing
 import org.commonmark.node.BulletList
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
+import org.commonmark.node.Link
 import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
@@ -25,7 +28,6 @@ import kotlin.text.Typography.nbsp
 
 @Composable
 fun MarkdownText(parent: Node, modifier: Modifier = Modifier, indentLevel: Int = 0) {
-
     BasicText(
         text = markdownText(parent, indentLevel),
         modifier = modifier,
@@ -51,22 +53,27 @@ fun AnnotatedString.Builder.buildAnnotatedString(parent: Node, indentLevel: Int 
             is Paragraph -> {
                 buildAnnotatedString(node, indentLevel)
             }
-
             is Emphasis -> withStyle(typographyStyle.emphasis) {
                 buildAnnotatedString(node, indentLevel)
             }
-
             is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
                 buildAnnotatedString(node, indentLevel)
             }
-
+            is Link -> {
+                val linkAnnotation = LinkAnnotation.Url(
+                    url = node.destination,
+                    styles = typographyStyle.link
+                )
+                withLink(linkAnnotation) {
+                    buildAnnotatedString(node, indentLevel)
+                }
+            }
             is BulletList -> {
                 buildAnnotatedString(node, indentLevel + 1)
             }
             is OrderedList -> {
                 buildAnnotatedString(node, indentLevel + 1)
             }
-
             is ListItem -> {
                 ListWrapper(
                     child = node,
@@ -80,7 +87,6 @@ fun AnnotatedString.Builder.buildAnnotatedString(parent: Node, indentLevel: Int 
                     },
                 )
             }
-
             else -> {
                 // Handle other node types if necessary
                 // For now, we just skip them

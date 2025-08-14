@@ -2,10 +2,13 @@ package com.iffly.compose.markdown.style
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 
 data class TypographyStyle(
@@ -21,6 +24,24 @@ data class TypographyStyle(
     val code: SpanStyle = SpanStyle(
         fontFamily = FontFamily.Monospace,
         fontSize = 14.sp,
+    ),
+    val link: TextLinkStyles = TextLinkStyles(
+        style = SpanStyle(
+            color = Color(0xFF1976D2), // Blue color for normal links
+            textDecoration = TextDecoration.Underline
+        ),
+        hoveredStyle = SpanStyle(
+            color = Color(0xFF1565C0), // Darker blue for hover
+            textDecoration = TextDecoration.Underline
+        ),
+        focusedStyle = SpanStyle(
+            color = Color(0xFF0D47A1), // Even darker blue for focus
+            textDecoration = TextDecoration.Underline
+        ),
+        pressedStyle = SpanStyle(
+            color = Color(0xFF0D47A1), // Same as focused for pressed
+            textDecoration = TextDecoration.Underline
+        ),
     ),
     val head: Map<Int, SpanStyle> = mapOf(
         1 to SpanStyle(
