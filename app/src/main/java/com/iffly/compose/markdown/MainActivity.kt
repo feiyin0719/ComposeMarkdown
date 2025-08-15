@@ -42,9 +42,11 @@ class MainActivity : ComponentActivity() {
                             
                             **Bold Text**
                             
-                            *Italic Text*
+                            *Italic Text*![Image](https://raw.githubusercontent.com/feiyin0719/AFreeSvg/dev/test.jpg)
                             
                             [Link to Google](https://www.google.com)
+                            
+                            
                         """.trimIndent(),
                             modifier = Modifier.padding(innerPadding),
                         )

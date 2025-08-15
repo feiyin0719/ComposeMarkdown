@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 appcompat = "1.7.1"
 material = "1.12.0"
 commonMark = "0.25.1"
+coil = "2.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonMark" }
 commonmark-ext-gfm-tables = { group = "org.commonmark", name = "commonmark-ext-gfm-tables", version.ref = "commonMark" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
