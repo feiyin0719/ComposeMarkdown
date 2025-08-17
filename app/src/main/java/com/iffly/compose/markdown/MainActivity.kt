@@ -45,6 +45,12 @@ class MainActivity : ComponentActivity() {
                             *Italic Text*![Image](https://raw.githubusercontent.com/feiyin0719/AFreeSvg/dev/test.jpg)
                             
                             [Link to Google](https://www.google.com)
+                                                        
+                            | Name | Age | City |
+                            |------|-----|------|
+                            | John | 25 | New York |
+                            | Jane | 30 | **San Francisco** |
+                            | Bob | *22* | [Chicago](https://chicago.com) |
                             
                             
                         """.trimIndent(),

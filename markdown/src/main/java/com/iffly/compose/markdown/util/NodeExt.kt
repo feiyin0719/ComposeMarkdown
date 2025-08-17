@@ -10,6 +10,8 @@ import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.StrongEmphasis
+import org.commonmark.ext.gfm.tables.TableCell
+import org.commonmark.ext.gfm.tables.TableHead
 
 @Composable
 fun Node.getSpanStyle(): SpanStyle {
@@ -18,8 +20,21 @@ fun Node.getSpanStyle(): SpanStyle {
         is Heading -> this.headStyle()
         is Emphasis -> typographyStyle.emphasis
         is StrongEmphasis -> typographyStyle.strongEmphasis
+        is TableCell -> {
+            // Check if this cell is in a table header
+            if (isInTableHeader()) typographyStyle.tableHeader else typographyStyle.body
+        }
         else -> typographyStyle.body
     }
+}
+
+private fun Node.isInTableHeader(): Boolean {
+    var parent = this.parent
+    while (parent != null) {
+        if (parent is TableHead) return true
+        parent = parent.parent
+    }
+    return false
 }
 
 @Composable

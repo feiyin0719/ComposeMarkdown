@@ -17,7 +17,6 @@ import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getSpanStyle
 import com.iffly.compose.markdown.widget.BasicText
-import com.iffly.compose.markdown.widget.MarkdownImage
 import org.commonmark.internal.util.Parsing
 import org.commonmark.node.BulletList
 import org.commonmark.node.Emphasis

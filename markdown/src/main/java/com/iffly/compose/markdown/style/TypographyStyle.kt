@@ -43,6 +43,10 @@ data class TypographyStyle(
             textDecoration = TextDecoration.Underline
         ),
     ),
+    val tableHeader: SpanStyle = SpanStyle(
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Default,
+    ),
     val head: Map<Int, SpanStyle> = mapOf(
         1 to SpanStyle(
             fontSize = 32.sp,

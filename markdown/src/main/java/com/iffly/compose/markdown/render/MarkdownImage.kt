@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.widget
+package com.iffly.compose.markdown.render
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import org.commonmark.node.Image
 
@@ -25,8 +26,8 @@ fun MarkdownImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(url)
             .crossfade(true)
-            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
             .build(),
         contentDescription = altText,
         contentScale = ContentScale.Fit,

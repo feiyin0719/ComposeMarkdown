@@ -17,13 +17,13 @@ import com.iffly.compose.markdown.parser.ParserFactory
 import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
-import com.iffly.compose.markdown.widget.MarkdownImage
 import org.commonmark.node.BulletList
 import org.commonmark.node.Heading
 import org.commonmark.node.Image
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
+import org.commonmark.ext.gfm.tables.TableBlock
 
 @Composable
 fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
@@ -59,6 +59,9 @@ fun ColumnScope.MarkdownNode(
             is Image -> {
                 MarkdownImage(node, modifier = modifier)
             }
+            is TableBlock -> {
+                MarkdownTable(node, modifier = modifier)
+            }
             else -> {
                 // Handle other node types if necessary
                 // For now, we just skip them
@@ -93,6 +96,12 @@ private fun MarkdownContentPreview() {
         1. Ordered Item 1
         2. Ordered Item 2
         3. *Ordered Item 3*
+        
+        | Name | Age | City |
+        |------|-----|------|
+        | John | 25 | New York |
+        | Jane | 30 | **San Francisco** |
+        | Bob | *22* | [Chicago](https://chicago.com) |
         
         ![Image](https://office.visualstudio.com/2003b897-e349-46b6-a733-61b32410d686/_apis/git/repositories/09de2423-725a-49cf-acff-a50529f2917f/pullRequests/4297383/attachments/image.png)
     """.trimIndent()
