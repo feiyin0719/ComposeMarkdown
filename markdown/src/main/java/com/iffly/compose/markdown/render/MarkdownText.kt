@@ -19,6 +19,7 @@ import com.iffly.compose.markdown.util.getSpanStyle
 import com.iffly.compose.markdown.widget.BasicText
 import org.commonmark.internal.util.Parsing
 import org.commonmark.node.BulletList
+import org.commonmark.node.Code
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
 import org.commonmark.node.Image
@@ -131,7 +132,12 @@ fun AnnotatedString.Builder.BuildAnnotatedString(
                     },
                 )
             }
-
+            is Code -> {
+                val codeText = node.literal
+                withStyle(typographyStyle.code) {
+                    append(codeText)
+                }
+            }
             is Image -> {
                 val imageNode = node
                 val imageId = "image_${imageNode.hashCode()}"

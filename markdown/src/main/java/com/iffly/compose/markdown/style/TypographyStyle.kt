@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.style
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 
+@Stable
 data class TypographyStyle(
     val body: SpanStyle = SpanStyle(),
     val strongEmphasis: SpanStyle = SpanStyle(
@@ -24,6 +26,8 @@ data class TypographyStyle(
     val code: SpanStyle = SpanStyle(
         fontFamily = FontFamily.Monospace,
         fontSize = 14.sp,
+        color = Color(0xFF37474F), // 深灰色文字
+        background = Color(0xFFF5F5F5), // 浅灰色背景
     ),
     val link: TextLinkStyles = TextLinkStyles(
         style = SpanStyle(

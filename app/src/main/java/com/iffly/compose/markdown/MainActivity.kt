@@ -5,13 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.ui.theme.ComposeMarkdownTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,15 +25,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComposeMarkdownTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .verticalScroll(rememberScrollState())
+
+                    ) {
                         Greeting(
                             name = "Android",
-                            modifier = Modifier.padding(innerPadding)
+                            modifier = Modifier
                         )
                         MarkdownView(
                             content = """
                             # Hello World
-                            This is a simple markdown example.
+                            This is a simple markdown example.```val greeting = "Hello, World!"```
                             ## Subheading
                             
                             1. Item 1
@@ -46,15 +55,34 @@ class MainActivity : ComponentActivity() {
                             
                             [Link to Google](https://www.google.com)
                                                         
-                            | Name | Age | City |
-                            |------|-----|------|
-                            | John | 25 | New York |
-                            | Jane | 30 | **San Francisco** |
-                            | Bob | *22* | [Chicago](https://chicago.com) |
+                            | :Name | Age | City |
+                            :---    |   ---   |   ---|---|
+                            | John  | 30  | New York | oooo|
                             
+                             ```kotlin
+                            fun main() {
+                                println("Hello, World!")
+                                val list = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+                                list.forEach { println(it) }
+                            }
+                            ```
+                            
+                            ```javascript
+                            function greet(name) {
+                                console.log(`Hello, ${'$'}{name}!`);
+                            }
+                            
+                            greet('World');
+                            ```
+                            This is an indented code block:
+        
+                                // This is an indented code block
+                                val x = 10
+                                val y = 20
+                                println("Sum: ${'$'}{x + y}")
                             
                         """.trimIndent(),
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier.padding(PaddingValues(horizontal = 12.dp)),
                         )
                     }
 

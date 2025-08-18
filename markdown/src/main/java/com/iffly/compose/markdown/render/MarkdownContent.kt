@@ -17,13 +17,15 @@ import com.iffly.compose.markdown.parser.ParserFactory
 import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
+import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.node.BulletList
+import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.Heading
 import org.commonmark.node.Image
+import org.commonmark.node.IndentedCodeBlock
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
-import org.commonmark.ext.gfm.tables.TableBlock
 
 @Composable
 fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
@@ -62,6 +64,12 @@ fun ColumnScope.MarkdownNode(
             is TableBlock -> {
                 MarkdownTable(node, modifier = modifier)
             }
+            is FencedCodeBlock -> {
+                MarkdownCodeBlock(node, modifier = modifier)
+            }
+            is IndentedCodeBlock -> {
+                MarkdownIndentedCodeBlock(node, modifier = modifier)
+            }
             else -> {
                 // Handle other node types if necessary
                 // For now, we just skip them
@@ -96,6 +104,29 @@ private fun MarkdownContentPreview() {
         1. Ordered Item 1
         2. Ordered Item 2
         3. *Ordered Item 3*
+        
+        ```kotlin
+        fun main() {
+            println("Hello, World!")
+            val list = listOf(1, 2, 3)
+            list.forEach { println(it) }
+        }
+        ```
+        
+        ```javascript
+        function greet(name) {
+            console.log(`Hello, ${'$'}{name}!`);
+        }
+        
+        greet('World');
+        ```
+        
+        This is an indented code block:
+        
+            // This is an indented code block
+            val x = 10
+            val y = 20
+            println("Sum: ${'$'}{x + y}")
         
         | Name | Age | City |
         |------|-----|------|
