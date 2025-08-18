@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.ext.gfm.tables.TableBody
@@ -109,17 +113,69 @@ private fun TableDataRow(
     }
 }
 
+private fun DrawScope.tableCellBorder(
+    strokeWidth: Dp,
+    borderColor: Color,
+    isLastRow: Boolean = false,
+    isLastCol: Boolean = false
+) {
+    val strokeWidthPx = strokeWidth.toPx()
+    val halfStrokeWidth = strokeWidthPx / 2
+    val y = size.height - halfStrokeWidth
+    val x = size.width - halfStrokeWidth
+
+    // Draw bottom border
+    if (!isLastRow) {
+        drawLine(
+            color = borderColor,
+            start = Offset(0f, y),
+            end = Offset(x, y),
+            strokeWidth = strokeWidthPx
+        )
+    }
+
+    // Draw right border
+    if (!isLastCol) {
+        drawLine(
+            color = borderColor,
+            start = Offset(x, 0f),
+            end = Offset(x, y),
+            strokeWidth = strokeWidthPx
+        )
+    }
+}
+
+private fun Modifier.tableCellBorder(
+    strokeWidth: Dp,
+    borderColor: Color,
+    isLastRow: Boolean = false,
+    isLastCol: Boolean = false
+): Modifier {
+    return this.drawBehind {
+        tableCellBorder(
+            strokeWidth = strokeWidth,
+            borderColor = borderColor,
+            isLastRow = isLastRow,
+            isLastCol = isLastCol
+        )
+    }
+}
+
 @Composable
 private fun TableHeaderCell(
     cell: TableCell,
     borderColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val isLastCol = cell.isLastCol()
+    val isLastRow = cell.isLastRow()
     Box(
         modifier = modifier
-            .border(
-                width = 1.dp,
-                color = borderColor
+            .tableCellBorder(
+                strokeWidth = 1.dp,
+                borderColor = borderColor,
+                isLastRow = isLastRow,
+                isLastCol = isLastCol
             )
             .padding(8.dp)
     ) {
@@ -136,11 +192,15 @@ private fun TableDataCell(
     borderColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val isLastCol = cell.isLastCol()
+    val isLastRow = cell.isLastRow()
     Box(
         modifier = modifier
-            .border(
-                width = 1.dp,
-                color = borderColor
+            .tableCellBorder(
+                strokeWidth = 1.dp,
+                borderColor = borderColor,
+                isLastRow = isLastRow,
+                isLastCol = isLastCol
             )
             .padding(8.dp)
     ) {
@@ -149,4 +209,12 @@ private fun TableDataCell(
             modifier = Modifier
         )
     }
+}
+
+private fun TableCell.isLastCol(): Boolean {
+    return this.next == null
+}
+
+private fun TableCell.isLastRow(): Boolean {
+    return this.parent?.parent?.parent?.lastChild == this.parent?.parent
 }
