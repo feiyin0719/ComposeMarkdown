@@ -1,220 +1,137 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.widget.table.Table
+import com.iffly.compose.markdown.widget.table.TableBorder
+import com.iffly.compose.markdown.widget.table.TableBorderMode
 import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.ext.gfm.tables.TableBody
-import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.ext.gfm.tables.TableHead
 import org.commonmark.ext.gfm.tables.TableRow
+import org.commonmark.node.Node
 
 @Composable
 fun MarkdownTable(
     tableBlock: TableBlock,
     modifier: Modifier = Modifier
 ) {
+    val cells = tableBlock.cells()
+    val columnsCount = cells.firstOrNull()?.size ?: 0
+    if (columnsCount == 0 || cells.isEmpty()) return
     val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-
-    Column(
+    val widthWeights = if (columnsCount <= 2) List(columnsCount) { 1f } else null
+    val cellModifier = if (columnsCount <= 2) {
+        Modifier.wrapContentSize()
+    } else {
+        Modifier
+            .fillMaxHeight()
+            .wrapContentWidth()
+            .widthIn(max = 167.dp)
+    }
+    val tableModifier = if (columnsCount <= 2) {
+        Modifier.fillMaxWidth()
+    } else {
+        Modifier
+    }
+    val boxModifier = if (columnsCount <= 2) {
+        Modifier
+    } else {
+        Modifier.horizontalScroll(rememberScrollState())
+    }
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, borderColor)
+            .then(boxModifier)
     ) {
-        var node = tableBlock.firstChild
-        while (node != null) {
-            when (node) {
-                is TableHead -> {
-                    TableHeadRow(node, borderColor)
-                }
-                is TableBody -> {
-                    var bodyNode = node.firstChild
-                    while (bodyNode != null) {
-                        if (bodyNode is TableRow) {
-                            TableDataRow(bodyNode, borderColor)
+        Table(
+            modifier = modifier
+                .then(tableModifier)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(8.dp)),
+            widthWeights = widthWeights,
+            cellPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            border = TableBorder.solid(
+                mode = TableBorderMode.ALL, color = borderColor, width = 1.dp
+            ),
+            cellAlignment = Alignment.TopStart
+        ) {
+            cells.firstOrNull()?.let { headers ->
+                header(modifier = Modifier.background(Color.LightGray)) {
+                    headers.forEach {
+                        cell(modifier = cellModifier) {
+                            MarkdownText(
+                                parent = it,
+                            )
                         }
-                        bodyNode = bodyNode.next
                     }
                 }
             }
-            node = node.next
-        }
-    }
-}
 
-@Composable
-private fun TableHeadRow(
-    tableHead: TableHead,
-    borderColor: Color
-) {
-    var node = tableHead.firstChild
-    while (node != null) {
-        if (node is TableRow) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                var cellNode = node.firstChild
-                while (cellNode != null) {
-                    if (cellNode is TableCell) {
-                        TableHeaderCell(
-                            cell = cellNode,
-                            borderColor = borderColor,
-                            modifier = Modifier.weight(1f)
-                        )
+            val dataRows = if (cells.size > 1) cells.subList(1, cells.size) else null
+            dataRows?.let {
+                body {
+                    it.forEach { row ->
+                        row {
+                            row.forEach { cell ->
+                                cell(modifier = cellModifier) {
+                                    MarkdownText(
+                                        parent = cell,
+                                    )
+                                }
+                            }
+                        }
                     }
-                    cellNode = cellNode.next
                 }
             }
         }
-        node = node.next
     }
+
 }
 
-@Composable
-private fun TableDataRow(
-    tableRow: TableRow,
-    borderColor: Color
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        var cellNode = tableRow.firstChild
-        while (cellNode != null) {
-            if (cellNode is TableCell) {
-                TableDataCell(
-                    cell = cellNode,
-                    borderColor = borderColor,
-                    modifier = Modifier.weight(1f)
-                )
+private fun TableBlock.cells(): List<List<Node>> {
+    var content = this.firstChild
+    return buildList {
+        while (content != null) {
+            when (content) {
+                is TableHead, is TableBody -> {
+                    var row = content.firstChild
+                    while (row != null) {
+                        if (row is TableRow) {
+                            add(row.cells())
+                        }
+                        row = row.next
+                    }
+                }
             }
-            cellNode = cellNode.next
+            content = content.next
         }
     }
 }
 
-private fun DrawScope.tableCellBorder(
-    strokeWidth: Dp,
-    borderColor: Color,
-    isLastRow: Boolean = false,
-    isLastCol: Boolean = false
-) {
-    val strokeWidthPx = strokeWidth.toPx()
-    val halfStrokeWidth = strokeWidthPx / 2
-    val y = size.height - halfStrokeWidth
-    val x = size.width - halfStrokeWidth
-
-    // Draw bottom border
-    if (!isLastRow) {
-        drawLine(
-            color = borderColor,
-            start = Offset(0f, y),
-            end = Offset(x, y),
-            strokeWidth = strokeWidthPx
-        )
+private fun TableRow.cells(): List<Node> {
+    var cell = this.firstChild
+    return buildList {
+        while (cell != null) {
+            add(cell)
+            cell = cell.next
+        }
     }
-
-    // Draw right border
-    if (!isLastCol) {
-        drawLine(
-            color = borderColor,
-            start = Offset(x, 0f),
-            end = Offset(x, y),
-            strokeWidth = strokeWidthPx
-        )
-    }
-}
-
-private fun Modifier.tableCellBorder(
-    strokeWidth: Dp,
-    borderColor: Color,
-    isLastRow: Boolean = false,
-    isLastCol: Boolean = false
-): Modifier {
-    return this.drawBehind {
-        tableCellBorder(
-            strokeWidth = strokeWidth,
-            borderColor = borderColor,
-            isLastRow = isLastRow,
-            isLastCol = isLastCol
-        )
-    }
-}
-
-@Composable
-private fun TableHeaderCell(
-    cell: TableCell,
-    borderColor: Color,
-    modifier: Modifier = Modifier
-) {
-    val isLastCol = cell.isLastCol()
-    val isLastRow = cell.isLastRow()
-    Box(
-        modifier = modifier
-            .tableCellBorder(
-                strokeWidth = 1.dp,
-                borderColor = borderColor,
-                isLastRow = isLastRow,
-                isLastCol = isLastCol
-            )
-            .padding(8.dp)
-    ) {
-        MarkdownText(
-            parent = cell,
-            modifier = Modifier
-        )
-    }
-}
-
-@Composable
-private fun TableDataCell(
-    cell: TableCell,
-    borderColor: Color,
-    modifier: Modifier = Modifier
-) {
-    val isLastCol = cell.isLastCol()
-    val isLastRow = cell.isLastRow()
-    Box(
-        modifier = modifier
-            .tableCellBorder(
-                strokeWidth = 1.dp,
-                borderColor = borderColor,
-                isLastRow = isLastRow,
-                isLastCol = isLastCol
-            )
-            .padding(8.dp)
-    ) {
-        MarkdownText(
-            parent = cell,
-            modifier = Modifier
-        )
-    }
-}
-
-private fun TableCell.isLastCol(): Boolean {
-    return this.next == null
-}
-
-private fun TableCell.isLastRow(): Boolean {
-    return this.parent?.parent?.parent?.lastChild == this.parent?.parent
 }

@@ -57,7 +57,13 @@ class MainActivity : ComponentActivity() {
                                                         
                             | :Name | Age | City |
                             :---    |   ---   |   ---|---|
-                            | John  | 30  | New York | oooo|
+                            | John czczxcxzcxzcxzcxzcxzczxczxcxzcxzcxzcxzcxzcxzcxz | 30jkhjkhbjkbnkjbjkbj,bmjbjkbkjbjknjkbjkbjkjbkj  | New York huanghou jkljklnknjkn,mdsadasdasdasdasfasfdsfdsfdsfdsfdsfsdfdsfdsfdsfsdcsczcxzcxzcxzcz |
+                            | Jane  | 25  | San Francisco |
+                            
+                            new two columns table
+                            | Name | Age |
+                            |------|-----|
+                            | John | 25  |
                             
                              ```kotlin
                             fun main() {

@@ -120,7 +120,11 @@ private fun MarkdownContentPreview() {
         
         greet('World');
         ```
-        
+        | Name | Age | City |
+        |------|-----|------|
+        | John | 25 | New York |
+        | Jane | 30 | **San Francisco** |
+        | Bob | *22* | [Chicago](https://chicago.com) |
         This is an indented code block:
         
             // This is an indented code block
@@ -128,11 +132,6 @@ private fun MarkdownContentPreview() {
             val y = 20
             println("Sum: ${'$'}{x + y}")
         
-        | Name | Age | City |
-        |------|-----|------|
-        | John | 25 | New York |
-        | Jane | 30 | **San Francisco** |
-        | Bob | *22* | [Chicago](https://chicago.com) |
         
         ![Image](https://office.visualstudio.com/2003b897-e349-46b6-a733-61b32410d686/_apis/git/repositories/09de2423-725a-49cf-acff-a50529f2917f/pullRequests/4297383/attachments/image.png)
     """.trimIndent()
@@ -144,6 +143,7 @@ private fun MarkdownContentPreview() {
             )
         )
     ) {
-        MarkdownContent(node, Modifier.height(500.dp))
+
+        MarkdownContent(node,)
     }
 }
