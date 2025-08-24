@@ -227,15 +227,17 @@ private fun measureSingleCell(
     cellData: List<MutableList<CellImpl?>>,
 ) = with(measureScope) {
     // Create constraints for this specific column width
-    val cellConstraints = if (columnWeightWidths[columnIndex] != -1) {
-        Constraints.fixedWidth(columnWeightWidths[columnIndex])
+    val columnWeightWidth = columnWeightWidths.getOrNull(columnIndex) ?: -1
+    val isFixedWidth = columnWeightWidth != -1
+    val cellConstraints = if (isFixedWidth) {
+        Constraints.fixedWidth(columnWeightWidth)
     } else {
         constraints
     }
 
     // Only apply padding and content-related modifiers, not background modifiers
     val placeable = subcompose("cell_${rowIndex}_$columnIndex") {
-        CellBox(cellPadding, cell.modifier, cell.content)
+        CellBox(cellPadding, cell.modifier, alignment = cell.alignment, cell.content)
     }[0].measure(cellConstraints)
 
     // Update data structures
@@ -430,10 +432,13 @@ private fun Placeable.PlacementScope.placeCellBackground(
 private fun CellBox(
     cellPadding: PaddingValues,
     modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.CenterStart,
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = modifier.padding(cellPadding),
+        modifier = modifier
+            .padding(cellPadding),
+        contentAlignment = alignment,
     ) {
         content()
     }

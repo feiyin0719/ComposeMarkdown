@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
@@ -42,7 +43,7 @@ fun MarkdownTable(
     val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     val widthWeights = if (columnsCount <= 2) List(columnsCount) { 1f } else null
     val cellModifier = if (columnsCount <= 2) {
-        Modifier.wrapContentSize()
+        Modifier.fillMaxSize()
     } else {
         Modifier
             .fillMaxHeight()

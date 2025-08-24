@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,10 +45,7 @@ fun TableSample() {
             .padding(16.dp)
             .verticalScroll(state = rememberScrollState())
     ) {
-        val twoCellModifier = Modifier
-            .weight(1f)
-            .wrapContentWidth()
-            .wrapContentHeight()
+        val twoCellModifier = Modifier.fillMaxSize()
         Text(
             text = "基础表格示例",
             style = MaterialTheme.typography.headlineSmall,
@@ -63,15 +60,19 @@ fun TableSample() {
                 color = Color.Gray,
                 width = 1.dp
             ),
-            widthWeights = listOf(1f, 2f)
+            widthWeights = listOf(1f, 2f),
+            cellAlignment = Alignment.TopStart
         ) {
             header {
-                cell(modifier = twoCellModifier) { Text("名称", fontWeight = FontWeight.Bold) }
+                cell(
+                    modifier = twoCellModifier.background(Color.Red),
+                    cellBackground = Modifier.background(Color.Green)
+                ) { Text("名称", fontWeight = FontWeight.Bold) }
                 cell(modifier = twoCellModifier) { Text("数量", fontWeight = FontWeight.Bold) }
             }
             body {
                 row {
-                    cell(modifier = twoCellModifier) { Text("项目1") }
+                    cell(modifier = twoCellModifier) { Text("项目1ljkhjkhjkjkhjknkjnjkhkjhjkhj") }
                     cell(modifier = twoCellModifier) { Text("10") }
                 }
                 row {
@@ -88,8 +89,7 @@ fun TableSample() {
         )
 
         val cellModifier = Modifier
-            .wrapContentWidth()
-            .wrapContentHeight()
+            .wrapContentSize()
             .widthIn(max = 170.dp)
 
         // 使用Modifier自定义样式的示例
@@ -103,7 +103,7 @@ fun TableSample() {
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),
-                cellAlignment = Alignment.TopCenter,
+                cellAlignment = Alignment.Center,
                 border = TableBorder.solid(
                     mode = TableBorderMode.ALL,
                     color = Color.Gray,
