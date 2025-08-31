@@ -21,18 +21,98 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A table component that uses SubComposeLayout
+ * This is a custom implementation to provide a flexible table layout
+ * with support for headers, rows, cell alignment, padding, borders, and shapes.
+ * It supports both weight-based and content-based column widths.
+ * - For weight-based widths, provide a list of weights for each column. And please ensure the table width is not infinite.
+ * - For content-based widths, omit the weights and the table will size columns based on content.
+ * For improve performance and requirement, the cells are measured in a single pass, so the content width will not scaled to fit the table width.
+ * Usage example:
+ * weight-based widths
+ * ```kotlin
+ * Table(
+ *    modifier = Modifier.fillMaxWidth().padding(16.dp)
+ *                     .clip(RoundedCornerShape(8.dp))
+ *                     .border(1.dp, CopilotTheme.fluentColors.stroke.stroke2, RoundedCornerShape(8.dp)),
+ *    cellPadding = PaddingValues(8.dp),
+ *    cellAlignment = Alignment.CenterStart,
+ *    border = TableBorder.solid(color = Color.Gray, width = 1.dp),
+ *    widthWeights = listOf(1f, 2f, 1f),
+ *   ) {
+ *      header( modifier = Modifier.background(Color.LightGray) ) {
+ *          cell { Text("Header 1", fontWeight = FontWeight.Bold) }
+ *          cell { Text("Header 2", fontWeight = FontWeight.Bold) }
+ *          cell { Text("Header 3", fontWeight = FontWeight.Bold) }
+ *      }
+ *      body {
+ *          row {
+ *              cell { Text("Row 1 Col 1") }
+ *              cell { Text("Row 1 Col 2") }
+ *              cell { Text("Row 1 Col 3") }
+ *          }
+ *          row( modifier = Modifier.background(Color(0xFFF0F0F0)){
+ *              cell { Text("Row 2 Col 1") }
+ *              cell { Text("Row 2 Col 2") }
+ *              cell { Text("Row 2 Col 3") }
+ *          }
+ *      }
+ *   }
+ *   ```
+ *  content-based widths
+ *  ```kotlin
+ * Table(
+ *    modifier = Modifier.wrapContentSize().padding(16.dp)
+ *                     .clip(RoundedCornerShape(8.dp))
+ *                     .border(1.dp, CopilotTheme.fluentColors.stroke.stroke2, RoundedCornerShape(8.dp)),
+ *    cellPadding = PaddingValues(8.dp),
+ *    cellAlignment = Alignment.CenterStart,
+ *    border = TableBorder.solid(color = Color.Gray, width = 1.dp),
+ *   ) {
+ *      header( modifier = Modifier.background(Color.LightGray) ) {
+ *          cell { Text("Header 1", fontWeight = FontWeight.Bold) }
+ *          cell { Text("Header 2", fontWeight = FontWeight.Bold) }
+ *          cell { Text("Header 3", fontWeight = FontWeight.Bold) }
+ *      }
+ *      body {
+ *          row {
+ *              cell { Text("Row 1 Col 1") }
+ *              cell { Text("Row 1 Col 2") }
+ *              cell { Text("Row 1 Col 3") }
+ *          }
+ *          row( modifier = Modifier.background(Color(0xFFF0F0F0)){
+ *              cell { Text("Row 2 Col 1") }
+ *              cell { Text("Row 2 Col 2") }
+ *              cell { Text("Row 2 Col 3") }
+ *          }
+ *      }
+ *   }
+ *  ```
+ *
+ * @param modifier Modifier to be applied to the table
+ * @param cellPadding Padding to be applied to each cell
+ * @param cellAlignment Default alignment for cells in the table
+ * @param border Border style for the table
+ * @param shape Optional shape to clip the table
+ * @param widthWeights Optional list of weights for each column to determine their widths, if null or empty, content-based widths are used
+ * When use the weight-based widths, the cell width will be exactly the calculated width,
+ * it will ignore the cell content width config, and please set the `fillMaxSize` for cell content.
+ * @param content Lambda to define the table structure using TableScope
+ * @see TableScope
+ * @see BodyScope
+ * @see RowScope
+ * @see TableBorder
  */
 @Composable
 fun Table(
     modifier: Modifier = Modifier,
-    cellPadding: PaddingValues = PaddingValues(8.dp),
+    cellPadding: PaddingValues = PaddingValues(),
     cellAlignment: Alignment = Alignment.CenterStart,
-    border: TableBorder = TableBorder.Companion.solid(),
+    border: TableBorder = TableBorder.solid(mode = TableBorderMode.NONE),
     shape: Shape? = null,
     widthWeights: List<Float>? = null,
     content: TableScope.() -> Unit,
@@ -92,6 +172,8 @@ private data class TableMeasureResult(
     val cellData: List<List<CellImpl?>>,
     val totalWidth: Int,
     val totalHeight: Int,
+    val borderWidth: Int = 0,
+    val borderHeight: Int = 0,
 )
 
 /**
@@ -105,7 +187,7 @@ private fun measureTable(
     constraints: Constraints,
     border: TableBorder,
     widthWeights: List<Float>?,
-): TableMeasureResult? = with(measureScope) {
+): TableMeasureResult? {
     // Combine header and body rows into a single list
     val allRows = tableBuilder.rows()
     val columnCount = allRows.maxOfOrNull { it.cells.size } ?: 0
@@ -123,7 +205,8 @@ private fun measureTable(
     val rowHeights = MutableList(allRows.size) { 0 }
     val cellPlaceableMap = List(allRows.size) { MutableList<Placeable?>(columnCount) { null } }
     val cellData = List(allRows.size) { MutableList<CellImpl?>(columnCount) { null } }
-
+    val borderWith = calculateBorderOffsetX(border, density)
+    val borderHeight = calculateBorderOffsetY(border, density)
     // Measure all cells and update dimensions
     measureAllCells(
         measureScope = measureScope,
@@ -138,12 +221,11 @@ private fun measureTable(
         cellData = cellData,
     )
 
-    val borderWith = calculateBorderOffsetX(border, density)
-    val borderHeight = calculateBorderOffsetY(border, density)
-
     // Calculate layout dimensions
     val totalWidth = columnWidths.sum() + borderWith * (columnCount - 1)
     val totalHeight = rowHeights.sum() + borderHeight * (allRows.size - 1)
+    // adjust size based on constraints
+    val (adjustedTotalWidth, adjustedTotalHeight) = adjustedSize(constraints, totalWidth, totalHeight)
 
     return TableMeasureResult(
         allRows = allRows,
@@ -152,9 +234,29 @@ private fun measureTable(
         rowHeights = rowHeights,
         cellPlaceableMap = cellPlaceableMap,
         cellData = cellData,
-        totalWidth = totalWidth,
-        totalHeight = totalHeight,
+        totalWidth = adjustedTotalWidth,
+        totalHeight = adjustedTotalHeight,
+        borderWidth = borderWith,
+        borderHeight = borderHeight,
     )
+}
+
+private fun adjustedSize(
+    constraints: Constraints,
+    totalWidth: Int,
+    totalHeight: Int,
+): Pair<Int, Int> {
+    val adjustedTotalWidth = if (constraints.hasBoundedWidth) {
+        min(constraints.maxWidth, totalWidth)
+    } else {
+        totalWidth
+    }
+    val adjustedTotalHeight = if (constraints.hasBoundedHeight) {
+        min(constraints.maxHeight, totalHeight)
+    } else {
+        totalHeight
+    }
+    return Pair(adjustedTotalWidth, adjustedTotalHeight)
 }
 
 private fun getColumnWeightWidths(
@@ -188,24 +290,22 @@ private fun measureAllCells(
     rowHeights: MutableList<Int>,
     cellPlaceableMap: List<MutableList<Placeable?>>,
     cellData: List<MutableList<CellImpl?>>,
-) = with(measureScope) {
-    allRows.forEachIndexed { rowIndex, row ->
-        row.cells.forEachIndexed { columnIndex, cell ->
-            if (columnIndex < columnCount) {
-                measureSingleCell(
-                    measureScope = measureScope,
-                    rowIndex = rowIndex,
-                    columnIndex = columnIndex,
-                    cell = cell,
-                    columnWeightWidths = columnWeightWidths,
-                    cellPadding = cellPadding,
-                    constraints = constraints,
-                    columnWidths = columnWidths,
-                    rowHeights = rowHeights,
-                    cellPlaceableMap = cellPlaceableMap,
-                    cellData = cellData,
-                )
-            }
+) = allRows.forEachIndexed { rowIndex, row ->
+    row.cells.forEachIndexed { columnIndex, cell ->
+        if (columnIndex < columnCount) {
+            measureSingleCell(
+                measureScope = measureScope,
+                rowIndex = rowIndex,
+                columnIndex = columnIndex,
+                cell = cell,
+                columnWeightWidths = columnWeightWidths,
+                cellPadding = cellPadding,
+                constraints = constraints,
+                columnWidths = columnWidths,
+                rowHeights = rowHeights,
+                cellPlaceableMap = cellPlaceableMap,
+                cellData = cellData,
+            )
         }
     }
 }
@@ -227,17 +327,15 @@ private fun measureSingleCell(
     cellData: List<MutableList<CellImpl?>>,
 ) = with(measureScope) {
     // Create constraints for this specific column width
-    val columnWeightWidth = columnWeightWidths.getOrNull(columnIndex) ?: -1
-    val isFixedWidth = columnWeightWidth != -1
-    val cellConstraints = if (isFixedWidth) {
-        Constraints.fixedWidth(columnWeightWidth)
+    val cellConstraints = if (columnWeightWidths[columnIndex] != -1) {
+        Constraints.fixedWidth(columnWeightWidths[columnIndex])
     } else {
         constraints
     }
 
     // Only apply padding and content-related modifiers, not background modifiers
     val placeable = subcompose("cell_${rowIndex}_$columnIndex") {
-        CellBox(cellPadding, cell.modifier, alignment = cell.alignment, cell.content)
+        CellBox(cellPadding, cell.modifier, contentAlignment = cell.alignment, cell.content)
     }[0].measure(cellConstraints)
 
     // Update data structures
@@ -245,6 +343,63 @@ private fun measureSingleCell(
     cellData[rowIndex][columnIndex] = cell
     rowHeights[rowIndex] = max(rowHeights[rowIndex], placeable.height)
     columnWidths[columnIndex] = max(columnWidths[columnIndex], placeable.width)
+}
+
+/**
+ * Layout all measured components in their final positions
+ */
+private fun layoutTable(
+    measureScope: SubcomposeMeasureScope,
+    measureResult: TableMeasureResult?,
+    border: TableBorder,
+    density: Density,
+) = with(measureScope) {
+    if (measureResult == null) {
+        return@with layout(0, 0) {}
+    }
+
+    val borderWith = measureResult.borderWidth
+    val borderHeight = measureResult.borderHeight
+    layout(measureResult.totalWidth, measureResult.totalHeight) {
+        var yOffset = 0
+
+        measureResult.allRows.forEachIndexed { rowIndex, row ->
+            if (yOffset >= measureResult.totalHeight) {
+                return@forEachIndexed
+            }
+            val rowHeight = measureResult.rowHeights[rowIndex]
+            // Place row background if exists
+            placeRowBackground(
+                measureScope = measureScope,
+                rowIndex = rowIndex,
+                row = row,
+                totalWidth = measureResult.totalWidth,
+                rowHeight = rowHeight,
+                yOffset = yOffset,
+                density = density,
+            )
+
+            // Place cells with alignment calculation
+            placeCellsInRow(
+                measureScope = measureScope,
+                measureResult = measureResult,
+                rowIndex = rowIndex,
+                yOffset = yOffset,
+                borderWith = borderWith,
+                density = density,
+            )
+
+            yOffset += rowHeight + borderHeight
+        }
+
+        // Draw borders if needed
+        placeTableBorders(
+            measureScope = measureScope,
+            border = border,
+            measureResult = measureResult,
+            density = density,
+        )
+    }
 }
 
 /**
@@ -285,6 +440,9 @@ private fun Placeable.PlacementScope.placeCellsInRow(
 ) {
     var xOffset = 0
     for (columnIndex in 0 until measureResult.columnCount) {
+        if (xOffset >= measureResult.totalWidth) {
+            break
+        }
         val placeable = measureResult.cellPlaceableMap[rowIndex][columnIndex]
         val cell = measureResult.cellData[rowIndex][columnIndex]
 
@@ -323,6 +481,8 @@ private fun Placeable.PlacementScope.placeCellsInRow(
     }
 }
 
+private const val BORDER_COMPOSE = "border"
+
 /**
  * Place table borders if needed
  */
@@ -333,7 +493,7 @@ private fun Placeable.PlacementScope.placeTableBorders(
     density: Density,
 ) {
     if (border.mode != TableBorderMode.NONE) {
-        val borderCanvas = measureScope.subcompose("border") {
+        val borderCanvas = measureScope.subcompose(BORDER_COMPOSE) {
             TableBorderCanvas(
                 border = border,
                 columnWidths = measureResult.columnWidths,
@@ -342,62 +502,6 @@ private fun Placeable.PlacementScope.placeTableBorders(
             )
         }[0].measure(Constraints.fixed(measureResult.totalWidth, measureResult.totalHeight))
         borderCanvas.place(0, 0)
-    }
-}
-
-/**
- * Layout all measured components in their final positions
- */
-private fun layoutTable(
-    measureScope: SubcomposeMeasureScope,
-    measureResult: TableMeasureResult?,
-    border: TableBorder,
-    density: Density,
-) = with(measureScope) {
-    if (measureResult == null) {
-        return@with layout(0, 0) {}
-    }
-
-    val borderWith = calculateBorderOffsetX(border, density)
-    val borderHeight = calculateBorderOffsetY(border, density)
-
-    layout(measureResult.totalWidth, measureResult.totalHeight) {
-        var yOffset = 0
-
-        measureResult.allRows.forEachIndexed { rowIndex, row ->
-            val rowHeight = measureResult.rowHeights[rowIndex]
-
-            // Place row background if exists
-            placeRowBackground(
-                measureScope = measureScope,
-                rowIndex = rowIndex,
-                row = row,
-                totalWidth = measureResult.totalWidth,
-                rowHeight = rowHeight,
-                yOffset = yOffset,
-                density = density,
-            )
-
-            // Place cells with alignment calculation
-            placeCellsInRow(
-                measureScope = measureScope,
-                measureResult = measureResult,
-                rowIndex = rowIndex,
-                yOffset = yOffset,
-                borderWith = borderWith,
-                density = density,
-            )
-
-            yOffset += rowHeight + borderHeight
-        }
-
-        // Draw borders if needed
-        placeTableBorders(
-            measureScope = measureScope,
-            border = border,
-            measureResult = measureResult,
-            density = density,
-        )
     }
 }
 
@@ -432,13 +536,12 @@ private fun Placeable.PlacementScope.placeCellBackground(
 private fun CellBox(
     cellPadding: PaddingValues,
     modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.CenterStart,
+    contentAlignment: Alignment = Alignment.CenterStart,
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .padding(cellPadding),
-        contentAlignment = alignment,
+        modifier = modifier.padding(cellPadding),
+        contentAlignment = contentAlignment,
     ) {
         content()
     }
