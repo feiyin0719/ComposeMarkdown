@@ -2,11 +2,12 @@ package com.iffly.compose.markdown.render
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -18,13 +19,11 @@ import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
 import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.node.BulletList
 import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.Heading
-import org.commonmark.node.Image
 import org.commonmark.node.IndentedCodeBlock
+import org.commonmark.node.ListBlock
 import org.commonmark.node.Node
-import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
 
 @Composable
@@ -39,7 +38,7 @@ fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun ColumnScope.MarkdownNode(
+fun MarkdownNode(
     parent: Node,
     modifier: Modifier = Modifier,
 ) {
@@ -52,14 +51,8 @@ fun ColumnScope.MarkdownNode(
             is Heading -> {
                 MarkdownText(node, modifier = modifier)
             }
-            is BulletList -> {
-                MarkdownText(node, modifier = modifier, indentLevel = 1)
-            }
-            is OrderedList -> {
-                MarkdownText(node, modifier = modifier, indentLevel = 1)
-            }
-            is Image -> {
-                MarkdownImage(node, modifier = modifier)
+            is ListBlock -> {
+                MarkdownText(node, modifier = modifier)
             }
             is TableBlock -> {
                 MarkdownTable(node, modifier = modifier)
@@ -102,6 +95,8 @@ private fun MarkdownContentPreview() {
         - Item 3
         
         1. Ordered Item 1
+           1. Nested Ordered Item 1
+           2. Nested Ordered Item 2
         2. Ordered Item 2
         3. *Ordered Item 3*
         
@@ -125,6 +120,7 @@ private fun MarkdownContentPreview() {
         | John | 25 | New York |
         | Jane | 30 | **San Francisco** |
         | Bob | *22* | [Chicago](https://chicago.com) |
+        
         This is an indented code block:
         
             // This is an indented code block
@@ -143,7 +139,12 @@ private fun MarkdownContentPreview() {
             )
         )
     ) {
-
-        MarkdownContent(node,)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+        ) {
+            MarkdownContent(node)
+        }
     }
 }

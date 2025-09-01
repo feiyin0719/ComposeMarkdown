@@ -22,7 +22,7 @@ fun Node.getSpanStyle(): SpanStyle {
         is StrongEmphasis -> typographyStyle.strongEmphasis
         is TableCell -> {
             // Check if this cell is in a table header
-            if (isInTableHeader()) typographyStyle.tableHeader else typographyStyle.body
+            if (isInTableHeader()) typographyStyle.tableHeader else typographyStyle.tableCell
         }
         else -> typographyStyle.body
     }

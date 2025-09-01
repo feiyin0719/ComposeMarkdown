@@ -10,6 +10,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
@@ -34,12 +35,18 @@ import kotlin.text.Typography.nbsp
 
 
 @Composable
-fun MarkdownText(parent: Node, modifier: Modifier = Modifier, indentLevel: Int = 0) {
+fun MarkdownText(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null,
+    indentLevel: Int = 1
+) {
     val (text, inlineContent) = markdownText(parent, indentLevel)
     BasicText(
         text = text,
         inlineContent = inlineContent,
         modifier = modifier,
+        textAlign = textAlign,
     )
 }
 
@@ -85,7 +92,7 @@ internal fun AnnotatedString.Builder.ListWrapper(
 @Composable
 fun AnnotatedString.Builder.BuildAnnotatedString(
     parent: Node,
-    indentLevel: Int = 0,
+    indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, InlineTextContent>
 ) {
     val typographyStyle = currentTypographyStyle()

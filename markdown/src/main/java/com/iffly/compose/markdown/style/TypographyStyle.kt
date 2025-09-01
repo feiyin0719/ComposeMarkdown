@@ -51,6 +51,9 @@ data class TypographyStyle(
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Default,
     ),
+    val tableCell: SpanStyle = SpanStyle(
+        fontFamily = FontFamily.Default,
+    ),
     val head: Map<Int, SpanStyle> = mapOf(
         1 to SpanStyle(
             fontSize = 32.sp,

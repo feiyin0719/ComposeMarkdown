@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.widget.table.BodyScope
 import com.iffly.compose.markdown.widget.table.RowScope
@@ -28,9 +28,9 @@ import com.iffly.compose.markdown.widget.table.TableBorderMode
 import com.iffly.compose.markdown.widget.table.TableScope
 import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.ext.gfm.tables.TableBody
+import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.ext.gfm.tables.TableHead
 import org.commonmark.ext.gfm.tables.TableRow
-import org.commonmark.node.Node
 
 @Composable
 fun MarkdownTable(
@@ -87,19 +87,19 @@ fun MarkdownTable(
     }
 }
 
-private fun TableScope.Header(headerCells: List<Node>, modifier: Modifier) {
+private fun TableScope.Header(headerCells: List<TableCell>, modifier: Modifier) {
     header(modifier = Modifier.background(Color.LightGray)) {
         Cells(headerCells, modifier)
     }
 }
 
-private fun TableScope.Body(rows: List<List<Node>>, modifier: Modifier) {
+private fun TableScope.Body(rows: List<List<TableCell>>, modifier: Modifier) {
     body {
         Rows(rows, modifier)
     }
 }
 
-private fun BodyScope.Rows(cells: List<List<Node>>, modifier: Modifier) {
+private fun BodyScope.Rows(cells: List<List<TableCell>>, modifier: Modifier) {
     cells.forEach { rowCells ->
         row {
             Cells(rowCells, modifier)
@@ -107,14 +107,31 @@ private fun BodyScope.Rows(cells: List<List<Node>>, modifier: Modifier) {
     }
 }
 
-private fun RowScope.Cells(nodes: List<Node>, modifier: Modifier) {
+private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier) {
     nodes.forEach { node ->
-        cell(modifier = modifier) {
-            MarkdownText(parent = node)
+        cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
+            MarkdownText(parent = node, textAlign = node.alignment.toTextAlign())
         }
     }
 }
-private fun TableBlock.cells(): List<List<Node>> {
+
+private fun TableCell.Alignment?.toTableAlignment(): Alignment {
+    return when (this) {
+        TableCell.Alignment.CENTER -> Alignment.TopCenter
+        TableCell.Alignment.RIGHT -> Alignment.TopEnd
+        else -> Alignment.TopStart
+    }
+}
+
+private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
+    return when (this) {
+        TableCell.Alignment.CENTER -> TextAlign.Center
+        TableCell.Alignment.RIGHT -> TextAlign.Right
+        else -> null
+    }
+}
+
+private fun TableBlock.cells(): List<List<TableCell>> {
     var content = this.firstChild
     return buildList {
         while (content != null) {
@@ -134,11 +151,13 @@ private fun TableBlock.cells(): List<List<Node>> {
     }
 }
 
-private fun TableRow.cells(): List<Node> {
+private fun TableRow.cells(): List<TableCell> {
     var cell = this.firstChild
     return buildList {
         while (cell != null) {
-            add(cell)
+            if (cell is TableCell) {
+                add(cell)
+            }
             cell = cell.next
         }
     }
