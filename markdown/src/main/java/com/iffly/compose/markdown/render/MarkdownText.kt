@@ -18,11 +18,13 @@ import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getSpanStyle
 import com.iffly.compose.markdown.widget.BasicText
+import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.internal.util.Parsing
 import org.commonmark.node.BulletList
 import org.commonmark.node.Code
 import org.commonmark.node.Emphasis
 import org.commonmark.node.HardLineBreak
+import org.commonmark.node.Heading
 import org.commonmark.node.Image
 import org.commonmark.node.Link
 import org.commonmark.node.ListItem
@@ -34,20 +36,71 @@ import org.commonmark.node.Text
 import kotlin.text.Typography.nbsp
 
 
+object ParagraphRenderer : IBlockRenderer<Paragraph> {
+    @Composable
+    override fun Invoke(
+        node: Paragraph,
+        modifier: Modifier
+    ) {
+        MarkdownText(parent = node, modifier = modifier)
+    }
+}
+
+object HeadingRenderer : IBlockRenderer<Heading> {
+    @Composable
+    override fun Invoke(
+        node: Heading,
+        modifier: Modifier
+    ) {
+        MarkdownText(parent = node, modifier = modifier)
+    }
+}
+
+object OrderedListRenderer : IBlockRenderer<OrderedList> {
+    @Composable
+    override fun Invoke(
+        node: OrderedList,
+        modifier: Modifier
+    ) {
+        MarkdownText(parent = node, modifier = modifier)
+    }
+}
+
+object BulletListRenderer : IBlockRenderer<BulletList> {
+    @Composable
+    override fun Invoke(
+        node: BulletList,
+        modifier: Modifier
+    ) {
+        MarkdownText(parent = node, modifier = modifier)
+    }
+}
+
 @Composable
 fun MarkdownText(
     parent: Node,
     modifier: Modifier = Modifier,
-    textAlign: TextAlign? = null,
-    indentLevel: Int = 1
 ) {
-    val (text, inlineContent) = markdownText(parent, indentLevel)
+    val (text, inlineContent) = markdownText(parent, 1)
+    val textAlign = if (parent is TableCell) {
+        parent.alignment.toTextAlign()
+    } else {
+        null
+    }
     BasicText(
         text = text,
         inlineContent = inlineContent,
         modifier = modifier,
         textAlign = textAlign,
     )
+}
+
+private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
+    return when (this) {
+        TableCell.Alignment.CENTER -> TextAlign.Center
+        TableCell.Alignment.RIGHT -> TextAlign.Right
+        else -> null
+    }
 }
 
 @Composable

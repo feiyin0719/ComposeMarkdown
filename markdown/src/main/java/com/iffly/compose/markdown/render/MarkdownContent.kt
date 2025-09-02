@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.render
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +19,8 @@ import com.iffly.compose.markdown.parser.ParserFactory
 import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
-import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.node.FencedCodeBlock
-import org.commonmark.node.Heading
-import org.commonmark.node.IndentedCodeBlock
-import org.commonmark.node.ListBlock
+import org.commonmark.node.Block
 import org.commonmark.node.Node
-import org.commonmark.node.Paragraph
 
 @Composable
 fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
@@ -43,29 +39,18 @@ fun MarkdownNode(
     modifier: Modifier = Modifier,
 ) {
     var node = parent.firstChild
+    val blockRenderers = currentBlockRenderers()
     while (node != null) {
-        when (node) {
-            is Paragraph -> {
-                MarkdownText(node, modifier = modifier)
-            }
-            is Heading -> {
-                MarkdownText(node, modifier = modifier)
-            }
-            is ListBlock -> {
-                MarkdownText(node, modifier = modifier)
-            }
-            is TableBlock -> {
-                MarkdownTable(node, modifier = modifier)
-            }
-            is FencedCodeBlock -> {
-                MarkdownCodeBlock(node, modifier = modifier)
-            }
-            is IndentedCodeBlock -> {
-                MarkdownIndentedCodeBlock(node, modifier = modifier)
-            }
-            else -> {
-                // Handle other node types if necessary
-                // For now, we just skip them
+        if (node is Block) {
+            val renderer = blockRenderers[node::class.java]
+            if (renderer != null) {
+                renderer.Invoke(node, modifier)
+            } else {
+                // Fallback to rendering children if no renderer is found
+                Log.i(
+                    "MarkdownNode",
+                    "No renderer found for ${node::class.java.simpleName}, rendering children."
+                )
             }
         }
         Spacer(Modifier.height(8.dp))

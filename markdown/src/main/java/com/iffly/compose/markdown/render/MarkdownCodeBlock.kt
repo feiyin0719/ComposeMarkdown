@@ -14,14 +14,43 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.widget.BasicText
+import org.commonmark.node.Block
 import org.commonmark.node.FencedCodeBlock
+import org.commonmark.node.IndentedCodeBlock
+
+object FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
+    @Composable
+    override fun Invoke(
+        node: FencedCodeBlock,
+        modifier: Modifier
+    ) {
+        MarkdownCodeBlock(node = node, modifier = modifier)
+    }
+
+}
+
+object IndentedCodeBlockRenderer : IBlockRenderer<IndentedCodeBlock> {
+    @Composable
+    override fun Invoke(
+        node: IndentedCodeBlock,
+        modifier: Modifier
+    ) {
+        MarkdownCodeBlock(node = node, modifier = modifier)
+    }
+
+}
 
 @Composable
 fun MarkdownCodeBlock(
-    node: FencedCodeBlock,
+    node: Block,
     modifier: Modifier = Modifier
 ) {
-    val codeText = node.literal
+    if (node !is FencedCodeBlock && node !is IndentedCodeBlock) return
+    val codeText = when (node) {
+        is FencedCodeBlock -> node.literal
+        is IndentedCodeBlock -> node.literal
+        else -> ""
+    }
     val typographyStyle = currentTypographyStyle()
     val styledText = buildCodeText(codeText)
 

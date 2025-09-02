@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.widget.table.BodyScope
 import com.iffly.compose.markdown.widget.table.RowScope
@@ -31,6 +30,17 @@ import org.commonmark.ext.gfm.tables.TableBody
 import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.ext.gfm.tables.TableHead
 import org.commonmark.ext.gfm.tables.TableRow
+
+object TableRenderer : IBlockRenderer<TableBlock> {
+    @Composable
+    override fun Invoke(
+        node: TableBlock,
+        modifier: Modifier
+    ) {
+        MarkdownTable(tableBlock = node, modifier = modifier)
+    }
+
+}
 
 @Composable
 fun MarkdownTable(
@@ -110,7 +120,7 @@ private fun BodyScope.Rows(cells: List<List<TableCell>>, modifier: Modifier) {
 private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
-            MarkdownText(parent = node, textAlign = node.alignment.toTextAlign())
+            MarkdownText(parent = node, modifier = Modifier)
         }
     }
 }
@@ -120,14 +130,6 @@ private fun TableCell.Alignment?.toTableAlignment(): Alignment {
         TableCell.Alignment.CENTER -> Alignment.TopCenter
         TableCell.Alignment.RIGHT -> Alignment.TopEnd
         else -> Alignment.TopStart
-    }
-}
-
-private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
-    return when (this) {
-        TableCell.Alignment.CENTER -> TextAlign.Center
-        TableCell.Alignment.RIGHT -> TextAlign.Right
-        else -> null
     }
 }
 
