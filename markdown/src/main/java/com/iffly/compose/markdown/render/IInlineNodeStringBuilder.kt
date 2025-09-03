@@ -1,0 +1,28 @@
+package com.iffly.compose.markdown.render
+
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.ui.text.AnnotatedString
+import com.iffly.compose.markdown.style.TypographyStyle
+import org.commonmark.node.Node
+
+
+interface IInlineNodeStringBuilder<T> where T : Node {
+    fun AnnotatedString.Builder.buildInlineNodeString(
+        node: T,
+        inlineContentMap: MutableMap<String, InlineTextContent>,
+        typographyStyle: TypographyStyle,
+        indentLevel: Int,
+    )
+}
+
+fun <T : Node> IInlineNodeStringBuilder<T>.buildAnnotatedString(
+    node: T,
+    inlineContentMap: MutableMap<String, InlineTextContent>,
+    typographyStyle: TypographyStyle,
+    indentLevel: Int,
+    builder: AnnotatedString.Builder
+) {
+    with(builder) {
+        buildInlineNodeString(node, inlineContentMap, typographyStyle, indentLevel)
+    }
+}

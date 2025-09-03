@@ -1,6 +1,5 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -35,6 +34,7 @@ import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
+import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
 import kotlin.text.Typography.nbsp
@@ -86,13 +86,20 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
 ) {
     val typographyStyle = currentTypographyStyle()
-    val (text, inlineContent) = remember(parent, typographyStyle) {
+    val inlineNodeAnnotatedStringBuilders = currentInlineNodeAnnotatedStringBuilders()
+    val (text, inlineContent) = remember(
+        parent,
+        typographyStyle,
+        inlineNodeAnnotatedStringBuilders
+    ) {
         markdownText(
             parent,
             typographyStyle,
-            1
+            inlineNodeAnnotatedStringBuilders,
+            1,
         )
     }
+
     val textAlign = if (parent is TableCell) {
         parent.alignment.toTextAlign()
     } else {
@@ -117,6 +124,7 @@ private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
 fun markdownText(
     node: Node,
     typographyStyle: TypographyStyle,
+    inlineNodeStringBuilders: InlineNodeStringBuilders,
     indentLevel: Int = 0
 ): Pair<AnnotatedString, Map<String, InlineTextContent>> {
     val inlineContentMap = mutableMapOf<String, InlineTextContent>()
@@ -124,7 +132,13 @@ fun markdownText(
     val annotatedString = buildAnnotatedString {
         val style: SpanStyle = typographyStyle.getNodeStyle(node)
         withStyle(style) {
-            buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
+            buildAnnotatedString(
+                node,
+                indentLevel,
+                inlineContentMap,
+                typographyStyle,
+                inlineNodeStringBuilders,
+            )
         }
     }
 
@@ -136,7 +150,8 @@ internal fun AnnotatedString.Builder.buildListItem(
     indentLevel: Int,
     marker: String,
     inlineContentMap: MutableMap<String, InlineTextContent>,
-    typographyStyle: TypographyStyle
+    typographyStyle: TypographyStyle,
+    inlineNodeStringBuilders: InlineNodeStringBuilders
 ) {
     appendLine()
     append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
@@ -150,28 +165,63 @@ internal fun AnnotatedString.Builder.buildListItem(
         append(marker)
     }
     append("$nbsp")
-    buildAnnotatedString(child, indentLevel, inlineContentMap, typographyStyle)
+    buildAnnotatedString(
+        child,
+        indentLevel,
+        inlineContentMap,
+        typographyStyle,
+        inlineNodeStringBuilders
+    )
 }
 
 fun AnnotatedString.Builder.buildAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, InlineTextContent>,
-    typographyStyle: TypographyStyle
+    typographyStyle: TypographyStyle,
+    inlineNodeStringBuilders: InlineNodeStringBuilders
 ) {
     var node = parent.firstChild
     while (node != null) {
         when (node) {
             is Text -> append(node.literal)
-            is HardLineBreak -> appendLine()
+            is HardLineBreak, is SoftLineBreak -> appendLine()
             is Paragraph -> {
-                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
+                buildAnnotatedString(
+                    node,
+                    indentLevel,
+                    inlineContentMap,
+                    typographyStyle,
+                    inlineNodeStringBuilders
+                )
+            }
+
+            is OrderedList, is BulletList -> {
+                buildAnnotatedString(
+                    node,
+                    indentLevel + 1,
+                    inlineContentMap,
+                    typographyStyle,
+                    inlineNodeStringBuilders
+                )
             }
             is Emphasis -> withStyle(typographyStyle.emphasis) {
-                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
+                buildAnnotatedString(
+                    node,
+                    indentLevel,
+                    inlineContentMap,
+                    typographyStyle,
+                    inlineNodeStringBuilders
+                )
             }
             is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
-                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
+                buildAnnotatedString(
+                    node,
+                    indentLevel,
+                    inlineContentMap,
+                    typographyStyle,
+                    inlineNodeStringBuilders
+                )
             }
             is Link -> {
                 val linkAnnotation = LinkAnnotation.Url(
@@ -179,14 +229,14 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     styles = typographyStyle.link
                 )
                 withLink(linkAnnotation) {
-                    buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
+                    buildAnnotatedString(
+                        node,
+                        indentLevel,
+                        inlineContentMap,
+                        typographyStyle,
+                        inlineNodeStringBuilders
+                    )
                 }
-            }
-            is BulletList -> {
-                buildAnnotatedString(node, indentLevel + 1, inlineContentMap, typographyStyle)
-            }
-            is OrderedList -> {
-                buildAnnotatedString(node, indentLevel + 1, inlineContentMap, typographyStyle)
             }
             is ListItem -> {
                 buildListItem(
@@ -194,7 +244,8 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     indentLevel = indentLevel,
                     marker = node.getMarkerText(),
                     inlineContentMap = inlineContentMap,
-                    typographyStyle = typographyStyle
+                    typographyStyle = typographyStyle,
+                    inlineNodeStringBuilders,
                 )
             }
             is Code -> {
@@ -221,8 +272,16 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                 appendInlineContent(imageId, "[${imageNode.title}]")
             }
             else -> {
-                // Handle other node types if necessary
-                // For now, we just skip them
+                val customBuilder =
+                    inlineNodeStringBuilders[node::class.java]
+                customBuilder?.buildAnnotatedString(
+                    node,
+                    inlineContentMap,
+                    typographyStyle,
+                    indentLevel,
+                    this
+                )
+
             }
         }
         node = node.next
