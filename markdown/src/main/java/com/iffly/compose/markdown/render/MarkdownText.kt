@@ -1,8 +1,11 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -14,9 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
+import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.util.getMarkerText
-import com.iffly.compose.markdown.util.getSpanStyle
+import com.iffly.compose.markdown.util.getNodeStyle
 import com.iffly.compose.markdown.widget.BasicText
 import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.internal.util.Parsing
@@ -81,7 +85,14 @@ fun MarkdownText(
     parent: Node,
     modifier: Modifier = Modifier,
 ) {
-    val (text, inlineContent) = markdownText(parent, 1)
+    val typographyStyle = currentTypographyStyle()
+    val (text, inlineContent) = remember(parent, typographyStyle) {
+        markdownText(
+            parent,
+            typographyStyle,
+            1
+        )
+    }
     val textAlign = if (parent is TableCell) {
         parent.alignment.toTextAlign()
     } else {
@@ -103,29 +114,29 @@ private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
     }
 }
 
-@Composable
 fun markdownText(
     node: Node,
+    typographyStyle: TypographyStyle,
     indentLevel: Int = 0
 ): Pair<AnnotatedString, Map<String, InlineTextContent>> {
     val inlineContentMap = mutableMapOf<String, InlineTextContent>()
 
     val annotatedString = buildAnnotatedString {
-        val style: SpanStyle = node.getSpanStyle()
+        val style: SpanStyle = typographyStyle.getNodeStyle(node)
         withStyle(style) {
-            BuildAnnotatedString(node, indentLevel, inlineContentMap)
+            buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
         }
     }
 
     return Pair(annotatedString, inlineContentMap)
 }
 
-@Composable
-internal fun AnnotatedString.Builder.ListWrapper(
+internal fun AnnotatedString.Builder.buildListItem(
     child: ListItem,
     indentLevel: Int,
     marker: String,
-    getText: @Composable AnnotatedString.Builder.(Node, Int) -> Unit,
+    inlineContentMap: MutableMap<String, InlineTextContent>,
+    typographyStyle: TypographyStyle
 ) {
     appendLine()
     append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
@@ -139,29 +150,28 @@ internal fun AnnotatedString.Builder.ListWrapper(
         append(marker)
     }
     append("$nbsp")
-    getText(child, indentLevel)
+    buildAnnotatedString(child, indentLevel, inlineContentMap, typographyStyle)
 }
 
-@Composable
-fun AnnotatedString.Builder.BuildAnnotatedString(
+fun AnnotatedString.Builder.buildAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
-    inlineContentMap: MutableMap<String, InlineTextContent>
+    inlineContentMap: MutableMap<String, InlineTextContent>,
+    typographyStyle: TypographyStyle
 ) {
-    val typographyStyle = currentTypographyStyle()
     var node = parent.firstChild
     while (node != null) {
         when (node) {
             is Text -> append(node.literal)
             is HardLineBreak -> appendLine()
             is Paragraph -> {
-                BuildAnnotatedString(node, indentLevel, inlineContentMap)
+                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
             }
             is Emphasis -> withStyle(typographyStyle.emphasis) {
-                BuildAnnotatedString(node, indentLevel, inlineContentMap)
+                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
             }
             is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
-                BuildAnnotatedString(node, indentLevel, inlineContentMap)
+                buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
             }
             is Link -> {
                 val linkAnnotation = LinkAnnotation.Url(
@@ -169,27 +179,22 @@ fun AnnotatedString.Builder.BuildAnnotatedString(
                     styles = typographyStyle.link
                 )
                 withLink(linkAnnotation) {
-                    BuildAnnotatedString(node, indentLevel, inlineContentMap)
+                    buildAnnotatedString(node, indentLevel, inlineContentMap, typographyStyle)
                 }
             }
             is BulletList -> {
-                BuildAnnotatedString(node, indentLevel + 1, inlineContentMap)
+                buildAnnotatedString(node, indentLevel + 1, inlineContentMap, typographyStyle)
             }
             is OrderedList -> {
-                BuildAnnotatedString(node, indentLevel + 1, inlineContentMap)
+                buildAnnotatedString(node, indentLevel + 1, inlineContentMap, typographyStyle)
             }
             is ListItem -> {
-                ListWrapper(
+                buildListItem(
                     child = node,
                     indentLevel = indentLevel,
                     marker = node.getMarkerText(),
-                    getText = { node, level ->
-                        BuildAnnotatedString(
-                            parent = node,
-                            indentLevel = level,
-                            inlineContentMap = inlineContentMap
-                        )
-                    },
+                    inlineContentMap = inlineContentMap,
+                    typographyStyle = typographyStyle
                 )
             }
             is Code -> {
@@ -201,22 +206,18 @@ fun AnnotatedString.Builder.BuildAnnotatedString(
             is Image -> {
                 val imageNode = node
                 val imageId = "image_${imageNode.hashCode()}"
-
-                // 添加 InlineTextContent 到 map
                 inlineContentMap[imageId] = InlineTextContent(
                     placeholder = Placeholder(
                         width = 100.sp,
                         height = 100.sp,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.Top
                     )
                 ) {
                     MarkdownImage(
                         node = imageNode,
-                        modifier = Modifier
+                        modifier = Modifier.wrapContentSize()
                     )
                 }
-
-                // 在文本中插入占位符
                 appendInlineContent(imageId, "[${imageNode.title}]")
             }
             else -> {

@@ -1,8 +1,9 @@
 package com.iffly.compose.markdown.util
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.SpanStyle
-import com.iffly.compose.markdown.style.currentTypographyStyle
+import com.iffly.compose.markdown.style.TypographyStyle
+import org.commonmark.ext.gfm.tables.TableCell
+import org.commonmark.ext.gfm.tables.TableHead
 import org.commonmark.node.BulletList
 import org.commonmark.node.Emphasis
 import org.commonmark.node.Heading
@@ -10,21 +11,18 @@ import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.node.OrderedList
 import org.commonmark.node.StrongEmphasis
-import org.commonmark.ext.gfm.tables.TableCell
-import org.commonmark.ext.gfm.tables.TableHead
 
-@Composable
-fun Node.getSpanStyle(): SpanStyle {
-    val typographyStyle = currentTypographyStyle()
-    return when (this) {
-        is Heading -> this.headStyle()
-        is Emphasis -> typographyStyle.emphasis
-        is StrongEmphasis -> typographyStyle.strongEmphasis
+fun TypographyStyle.getNodeStyle(node: Node): SpanStyle {
+    return when (node) {
+        is Heading -> this.head[node.level] ?: this.body
+        is Emphasis -> this.emphasis
+        is StrongEmphasis -> this.strongEmphasis
         is TableCell -> {
             // Check if this cell is in a table header
-            if (isInTableHeader()) typographyStyle.tableHeader else typographyStyle.tableCell
+            if (node.isInTableHeader()) this.tableHeader else this.tableCell
         }
-        else -> typographyStyle.body
+
+        else -> this.body
     }
 }
 
@@ -35,12 +33,6 @@ private fun Node.isInTableHeader(): Boolean {
         parent = parent.parent
     }
     return false
-}
-
-@Composable
-fun Heading.headStyle(): SpanStyle {
-    val typographyStyle = currentTypographyStyle()
-    return typographyStyle.head[this.level] ?: typographyStyle.body
 }
 
 
