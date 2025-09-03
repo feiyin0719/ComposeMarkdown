@@ -1,7 +1,7 @@
 package com.iffly.compose.markdown.parser
 
-import org.commonmark.parser.Parser
 import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.parser.Parser
 
 class ParserFactory {
     fun build(): Parser {

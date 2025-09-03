@@ -225,7 +225,11 @@ private fun measureTable(
     val totalWidth = columnWidths.sum() + borderWith * (columnCount - 1)
     val totalHeight = rowHeights.sum() + borderHeight * (allRows.size - 1)
     // adjust size based on constraints
-    val (adjustedTotalWidth, adjustedTotalHeight) = adjustedSize(constraints, totalWidth, totalHeight)
+    val (adjustedTotalWidth, adjustedTotalHeight) = adjustedSize(
+        constraints,
+        totalWidth,
+        totalHeight
+    )
 
     return TableMeasureResult(
         allRows = allRows,

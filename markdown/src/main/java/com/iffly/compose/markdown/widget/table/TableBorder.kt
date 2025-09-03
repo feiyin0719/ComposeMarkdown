@@ -156,6 +156,7 @@ internal fun calculateBorderOffsetX(border: TableBorder, density: Density): Int 
         TableBorderMode.VERTICAL -> with(density) {
             border.width.toPx().toInt()
         }
+
         TableBorderMode.ALL -> with(density) {
             border.width.toPx().toInt()
         }
@@ -172,6 +173,7 @@ internal fun calculateBorderOffsetY(border: TableBorder, density: Density): Int 
         TableBorderMode.HORIZONTAL -> with(density) {
             border.width.toPx().toInt()
         }
+
         TableBorderMode.ALL -> with(density) {
             border.width.toPx().toInt()
         }

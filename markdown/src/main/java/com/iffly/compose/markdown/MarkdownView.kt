@@ -2,19 +2,19 @@ package com.iffly.compose.markdown
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.parser.ParserFactory
+import com.iffly.compose.markdown.render.LocalLinkClickListenerProvider
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.MarkdownPreview
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.node.Node
 
@@ -28,6 +28,7 @@ sealed class MarkdownState {
 fun MarkdownView(
     content: String,
     modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
@@ -37,34 +38,32 @@ fun MarkdownView(
     }
 
     var markdownState by remember { mutableStateOf<MarkdownState>(MarkdownState.Loading) }
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(content) {
         markdownState = MarkdownState.Loading
-
-        coroutineScope.launch {
-            try {
-                val parsedNode = withContext(MarkdownThreadPool.dispatcher) {
-                    parser.parse(content)
-                }
-                markdownState = MarkdownState.Success(parsedNode)
-            } catch (e: Exception) {
-                markdownState = MarkdownState.Error(e)
+        try {
+            val parsedNode = withContext(MarkdownThreadPool.dispatcher) {
+                parser.parse(content)
             }
+            markdownState = MarkdownState.Success(parsedNode)
+        } catch (e: Exception) {
+            markdownState = MarkdownState.Error(e)
         }
     }
 
-    when (val state = markdownState) {
-        is MarkdownState.Loading -> {
-            onLoading?.invoke()
-        }
+    CompositionLocalProvider(LocalLinkClickListenerProvider provides linkInteractionListener) {
+        when (val state = markdownState) {
+            is MarkdownState.Loading -> {
+                onLoading?.invoke()
+            }
 
-        is MarkdownState.Success -> {
-            MarkdownContent(state.node, modifier)
-        }
+            is MarkdownState.Success -> {
+                MarkdownContent(state.node, modifier)
+            }
 
-        is MarkdownState.Error -> {
-            onError?.invoke(state.exception)
+            is MarkdownState.Error -> {
+                onError?.invoke(state.exception)
+            }
         }
     }
 }

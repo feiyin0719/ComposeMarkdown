@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,14 +29,13 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .padding(innerPadding)
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState()),
 
-                    ) {
-                        Greeting(
-                            name = "Android",
-                            modifier = Modifier
-                        )
+                        ) {
                         MarkdownView(
+                            linkInteractionListener = {
+                                Log.i("MainActivity", "Clicked link: $it")
+                            },
                             content = """
                             # Hello World
                             This is a simple markdown example.```val greeting = "Hello, World!"```

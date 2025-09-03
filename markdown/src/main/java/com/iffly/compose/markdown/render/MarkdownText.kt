@@ -6,9 +6,11 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -88,6 +90,7 @@ fun MarkdownText(
 ) {
     val typographyStyle = currentTypographyStyle()
     val inlineNodeStringBuilders = currentInlineNodeStringBuilders()
+    val linkInteractionListener = currentLinkClickListener()
     val (text, inlineContent) = remember(
         parent,
         typographyStyle,
@@ -97,6 +100,7 @@ fun MarkdownText(
             parent,
             typographyStyle,
             inlineNodeStringBuilders,
+            linkInteractionListener,
             1,
         )
     }
@@ -127,6 +131,7 @@ fun markdownText(
     node: Node,
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
+    linkInteractionListener: LinkInteractionListener? = null,
     indentLevel: Int = 0
 ): Pair<AnnotatedString, Map<String, InlineTextContent>> {
     val inlineContentMap = mutableMapOf<String, InlineTextContent>()
@@ -140,6 +145,7 @@ fun markdownText(
                 inlineContentMap,
                 typographyStyle,
                 inlineNodeStringBuilders,
+                linkInteractionListener,
             )
         }
     }
@@ -152,7 +158,8 @@ fun AnnotatedString.Builder.buildAnnotatedString(
     indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, InlineTextContent>,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders
+    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    linkInteractionListener: LinkInteractionListener? = null,
 ) {
     var node = parent.firstChild
     while (node != null) {
@@ -165,7 +172,8 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     indentLevel,
                     inlineContentMap,
                     typographyStyle,
-                    inlineNodeStringBuilders
+                    inlineNodeStringBuilders,
+                    linkInteractionListener,
                 )
             }
 
@@ -175,31 +183,38 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     indentLevel + 1,
                     inlineContentMap,
                     typographyStyle,
-                    inlineNodeStringBuilders
+                    inlineNodeStringBuilders,
+                    linkInteractionListener,
                 )
             }
+
             is Emphasis -> withStyle(typographyStyle.emphasis) {
                 buildAnnotatedString(
                     node,
                     indentLevel,
                     inlineContentMap,
                     typographyStyle,
-                    inlineNodeStringBuilders
+                    inlineNodeStringBuilders,
+                    linkInteractionListener,
                 )
             }
+
             is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
                 buildAnnotatedString(
                     node,
                     indentLevel,
                     inlineContentMap,
                     typographyStyle,
-                    inlineNodeStringBuilders
+                    inlineNodeStringBuilders,
+                    linkInteractionListener,
                 )
             }
+
             is Link -> {
                 val linkAnnotation = LinkAnnotation.Url(
                     url = node.destination,
-                    styles = typographyStyle.link
+                    styles = typographyStyle.link,
+                    linkInteractionListener = linkInteractionListener,
                 )
                 withLink(linkAnnotation) {
                     buildAnnotatedString(
@@ -207,10 +222,12 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                         indentLevel,
                         inlineContentMap,
                         typographyStyle,
-                        inlineNodeStringBuilders
+                        inlineNodeStringBuilders,
+                        linkInteractionListener,
                     )
                 }
             }
+
             is ListItem -> {
                 buildListItem(
                     child = node,
@@ -219,17 +236,21 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     inlineContentMap = inlineContentMap,
                     typographyStyle = typographyStyle,
                     inlineNodeStringBuilders,
+                    linkInteractionListener,
                 )
             }
+
             is Code -> {
                 val codeText = node.literal
                 withStyle(typographyStyle.code) {
                     append(codeText)
                 }
             }
+
             is Image -> {
                 buildImage(node, inlineContentMap)
             }
+
             else -> {
                 val customBuilder =
                     inlineNodeStringBuilders[node::class.java]
@@ -238,6 +259,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     inlineContentMap,
                     typographyStyle,
                     indentLevel,
+                    linkInteractionListener,
                     this
                 )
 
@@ -253,7 +275,8 @@ fun AnnotatedString.Builder.buildListItem(
     marker: String,
     inlineContentMap: MutableMap<String, InlineTextContent>,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders
+    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    linkInteractionListener: LinkInteractionListener? = null,
 ) {
     appendLine()
     append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
@@ -272,7 +295,8 @@ fun AnnotatedString.Builder.buildListItem(
         indentLevel,
         inlineContentMap,
         typographyStyle,
-        inlineNodeStringBuilders
+        inlineNodeStringBuilders,
+        linkInteractionListener,
     )
 }
 
@@ -296,3 +320,13 @@ fun AnnotatedString.Builder.buildImage(
     }
     appendInlineContent(imageId, "[${imageNode.title}]")
 }
+
+
+val LocalLinkClickListenerProvider =
+    staticCompositionLocalOf<LinkInteractionListener?> {
+        null
+    }
+
+@Composable
+fun currentLinkClickListener(): LinkInteractionListener? =
+    LocalLinkClickListenerProvider.current
