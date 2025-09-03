@@ -3,6 +3,7 @@ package com.iffly.compose.markdown.render
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -86,16 +87,16 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
 ) {
     val typographyStyle = currentTypographyStyle()
-    val inlineNodeAnnotatedStringBuilders = currentInlineNodeAnnotatedStringBuilders()
+    val inlineNodeStringBuilders = currentInlineNodeStringBuilders()
     val (text, inlineContent) = remember(
         parent,
         typographyStyle,
-        inlineNodeAnnotatedStringBuilders
+        inlineNodeStringBuilders
     ) {
         markdownText(
             parent,
             typographyStyle,
-            inlineNodeAnnotatedStringBuilders,
+            inlineNodeStringBuilders,
             1,
         )
     }
@@ -110,6 +111,7 @@ fun MarkdownText(
         inlineContent = inlineContent,
         modifier = modifier,
         textAlign = textAlign,
+        style = typographyStyle.textStyle ?: LocalTextStyle.current
     )
 }
 
@@ -143,35 +145,6 @@ fun markdownText(
     }
 
     return Pair(annotatedString, inlineContentMap)
-}
-
-internal fun AnnotatedString.Builder.buildListItem(
-    child: ListItem,
-    indentLevel: Int,
-    marker: String,
-    inlineContentMap: MutableMap<String, InlineTextContent>,
-    typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders
-) {
-    appendLine()
-    append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
-
-    // Checking if there is an ordered list
-    if (marker.toIntOrNull() != null) {
-        val listNode = child.parent as OrderedList
-        append(marker)
-        append(listNode.markerDelimiter)
-    } else {
-        append(marker)
-    }
-    append("$nbsp")
-    buildAnnotatedString(
-        child,
-        indentLevel,
-        inlineContentMap,
-        typographyStyle,
-        inlineNodeStringBuilders
-    )
 }
 
 fun AnnotatedString.Builder.buildAnnotatedString(
@@ -255,21 +228,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                 }
             }
             is Image -> {
-                val imageNode = node
-                val imageId = "image_${imageNode.hashCode()}"
-                inlineContentMap[imageId] = InlineTextContent(
-                    placeholder = Placeholder(
-                        width = 100.sp,
-                        height = 100.sp,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.Top
-                    )
-                ) {
-                    MarkdownImage(
-                        node = imageNode,
-                        modifier = Modifier.wrapContentSize()
-                    )
-                }
-                appendInlineContent(imageId, "[${imageNode.title}]")
+                buildImage(node, inlineContentMap)
             }
             else -> {
                 val customBuilder =
@@ -286,4 +245,54 @@ fun AnnotatedString.Builder.buildAnnotatedString(
         }
         node = node.next
     }
+}
+
+fun AnnotatedString.Builder.buildListItem(
+    child: ListItem,
+    indentLevel: Int,
+    marker: String,
+    inlineContentMap: MutableMap<String, InlineTextContent>,
+    typographyStyle: TypographyStyle,
+    inlineNodeStringBuilders: InlineNodeStringBuilders
+) {
+    appendLine()
+    append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
+
+    // Checking if there is an ordered list
+    if (marker.toIntOrNull() != null) {
+        val listNode = child.parent as OrderedList
+        append(marker)
+        append(listNode.markerDelimiter)
+    } else {
+        append(marker)
+    }
+    append("$nbsp")
+    buildAnnotatedString(
+        child,
+        indentLevel,
+        inlineContentMap,
+        typographyStyle,
+        inlineNodeStringBuilders
+    )
+}
+
+fun AnnotatedString.Builder.buildImage(
+    node: Image,
+    inlineContentMap: MutableMap<String, InlineTextContent>
+) {
+    val imageNode = node
+    val imageId = "image_${imageNode.hashCode()}"
+    inlineContentMap[imageId] = InlineTextContent(
+        placeholder = Placeholder(
+            width = 100.sp,
+            height = 100.sp,
+            placeholderVerticalAlign = PlaceholderVerticalAlign.Top
+        )
+    ) {
+        MarkdownImage(
+            node = imageNode,
+            modifier = Modifier.wrapContentSize()
+        )
+    }
+    appendInlineContent(imageId, "[${imageNode.title}]")
 }

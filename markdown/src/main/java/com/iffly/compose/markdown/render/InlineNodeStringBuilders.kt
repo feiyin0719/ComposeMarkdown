@@ -35,9 +35,9 @@ class InlineNodeStringBuilders private constructor(
 private val defaultInlineNodeStringBuilders =
     InlineNodeStringBuilders.Builder().build()
 
-private val LocalInlineNodeAnnotatedStringBuildersProvider =
+private val LocalInlineNodeStringBuildersProvider =
     staticCompositionLocalOf { defaultInlineNodeStringBuilders }
 
 @Composable
-internal fun currentInlineNodeAnnotatedStringBuilders(): InlineNodeStringBuilders =
-    LocalInlineNodeAnnotatedStringBuildersProvider.current
+internal fun currentInlineNodeStringBuilders(): InlineNodeStringBuilders =
+    LocalInlineNodeStringBuildersProvider.current

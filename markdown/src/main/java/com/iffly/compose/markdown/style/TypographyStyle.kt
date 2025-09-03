@@ -6,6 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.sp
 
 @Stable
 data class TypographyStyle(
+    val textStyle: TextStyle? = null,
     val body: SpanStyle = SpanStyle(),
     val strongEmphasis: SpanStyle = SpanStyle(
         fontWeight = FontWeight.Bold,
