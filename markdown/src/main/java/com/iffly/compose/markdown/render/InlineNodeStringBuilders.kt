@@ -35,7 +35,7 @@ class InlineNodeStringBuilders private constructor(
 private val defaultInlineNodeStringBuilders =
     InlineNodeStringBuilders.Builder().build()
 
-private val LocalInlineNodeStringBuildersProvider =
+val LocalInlineNodeStringBuildersProvider =
     staticCompositionLocalOf { defaultInlineNodeStringBuilders }
 
 @Composable

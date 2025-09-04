@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.ui.theme.ComposeMarkdownTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
                             linkInteractionListener = {
                                 Log.i("MainActivity", "Clicked link: $it")
                             },
+                            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
                             content = """
                             # Hello World
                             This is a simple markdown example.```val greeting = "Hello, World!"```

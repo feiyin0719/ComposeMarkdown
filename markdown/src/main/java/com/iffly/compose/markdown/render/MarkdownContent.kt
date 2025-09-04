@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.iffly.compose.markdown.parser.ParserFactory
+import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
@@ -116,7 +116,7 @@ private fun MarkdownContentPreview() {
         
         ![Image](https://office.visualstudio.com/2003b897-e349-46b6-a733-61b32410d686/_apis/git/repositories/09de2423-725a-49cf-acff-a50529f2917f/pullRequests/4297383/attachments/image.png)
     """.trimIndent()
-    val node = ParserFactory().build().parse(testText)
+    val node = MarkdownRenderConfig.Builder().build().parser.parse(testText)
     CompositionLocalProvider(
         LocalTypographyStyleProvider provides TypographyStyle(
             body = SpanStyle(
