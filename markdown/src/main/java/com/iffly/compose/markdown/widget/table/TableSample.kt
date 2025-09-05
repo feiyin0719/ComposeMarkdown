@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * 表格组件的示例用法，展示DSL语法和Modifier支持
+ * Sample usage of table component, demonstrating DSL syntax and Modifier support
  */
 @Composable
 fun TableSample() {
@@ -47,12 +47,12 @@ fun TableSample() {
     ) {
         val twoCellModifier = Modifier.fillMaxSize()
         Text(
-            text = "基础表格示例",
+            text = "Basic Table Example",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // 使用统一内边距的DSL示例
+        // DSL example with unified padding
         Table(
             modifier = Modifier.fillMaxWidth(),
             border = TableBorder.solid(
@@ -67,23 +67,23 @@ fun TableSample() {
                 cell(
                     modifier = twoCellModifier.background(Color.Red),
                     cellBackground = Modifier.background(Color.Green)
-                ) { Text("名称", fontWeight = FontWeight.Bold) }
-                cell(modifier = twoCellModifier) { Text("数量", fontWeight = FontWeight.Bold) }
+                ) { Text("Name", fontWeight = FontWeight.Bold) }
+                cell(modifier = twoCellModifier) { Text("Quantity", fontWeight = FontWeight.Bold) }
             }
             body {
                 row {
-                    cell(modifier = twoCellModifier) { Text("项目1ljkhjkhjkjkhjknkjnjkhkjhjkhj") }
+                    cell(modifier = twoCellModifier) { Text("Item 1ljkhjkhjkjkhjknkjnjkhkjhjkhj") }
                     cell(modifier = twoCellModifier) { Text("10") }
                 }
                 row {
-                    cell(modifier = twoCellModifier) { Text("项目2") }
+                    cell(modifier = twoCellModifier) { Text("Item 2") }
                     cell(modifier = twoCellModifier) { Text("20") }
                 }
             }
         }
 
         Text(
-            text = "带样式的表格示例",
+            text = "Styled Table Example",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
         )
@@ -92,7 +92,7 @@ fun TableSample() {
             .wrapContentSize()
             .widthIn(max = 170.dp)
 
-        // 使用Modifier自定义样式的示例
+        // Example using Modifier to customize styles
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,7 +118,7 @@ fun TableSample() {
                             .padding(12.dp)
                     ) {
                         Text(
-                            "产品",
+                            "Product",
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
@@ -128,7 +128,7 @@ fun TableSample() {
                             .padding(12.dp)
                     ) {
                         Text(
-                            "价格",
+                            "Price",
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
@@ -138,7 +138,7 @@ fun TableSample() {
                             .padding(12.dp)
                     ) {
                         Text(
-                            "状态",
+                            "Status",
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
@@ -163,7 +163,7 @@ fun TableSample() {
                                 .padding(12.dp)
                                 .background(Color.Green.copy(alpha = 0.2f))
                         ) {
-                            Text("有库存", color = Color.Green)
+                            Text("In Stock", color = Color.Green)
                         }
                     }
                     row(
@@ -189,7 +189,7 @@ fun TableSample() {
                                 .padding(12.dp)
                                 .background(Color.Green.copy(alpha = 0.2f))
                         ) {
-                            Text("数量有限", color = Color.Green)
+                            Text("Limited Stock", color = Color.Green)
                         }
                     }
                 }
@@ -198,12 +198,12 @@ fun TableSample() {
 
 
         Text(
-            text = "简洁边框样式表格",
+            text = "Clean Border Style Table",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
         )
 
-        // 简洁样式的表格
+        // Clean style table
         Table(
             cellPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
@@ -214,54 +214,54 @@ fun TableSample() {
                         color = Color.Transparent
                     )
                 ) {
-                    Text("任务", fontWeight = FontWeight.Bold)
+                    Text("Task", fontWeight = FontWeight.Bold)
                 }
-                cell { Text("优先级", fontWeight = FontWeight.Bold) }
-                cell { Text("截止日期", fontWeight = FontWeight.Bold) }
+                cell { Text("Priority", fontWeight = FontWeight.Bold) }
+                cell { Text("Due Date", fontWeight = FontWeight.Bold) }
             }
             body {
                 row {
-                    cell { Text("设计评审") }
+                    cell { Text("Design Review") }
                     cell(
                         modifier = Modifier
                             .background(Color.Red.copy(alpha = 0.1f))
                             .padding(4.dp)
                     ) {
-                        Text("高", color = Color.Red, fontWeight = FontWeight.Bold)
+                        Text("High", color = Color.Red, fontWeight = FontWeight.Bold)
                     }
-                    cell { Text("今天") }
+                    cell { Text("Today") }
                 }
                 row {
-                    cell { Text("代码文档") }
+                    cell { Text("Code Documentation") }
                     cell(
                         modifier = Modifier
                             .background(Color.Yellow.copy(alpha = 0.2f))
                             .padding(4.dp)
                     ) {
-                        Text("中", color = Color.Green)
+                        Text("Medium", color = Color.Green)
                     }
-                    cell { Text("明天") }
+                    cell { Text("Tomorrow") }
                 }
                 row {
-                    cell { Text("单元测试") }
+                    cell { Text("Unit Testing") }
                     cell(
                         modifier = Modifier
                             .padding(4.dp),
                         cellBackground = Modifier
                             .background(Color.Green.copy(alpha = 0.1f))
                     ) {
-                        Text("低", color = Color.Green)
+                        Text("Low", color = Color.Green)
                     }
-                    cell { Text("下周") }
+                    cell { Text("Next Week") }
                 }
             }
         }
         Text(
-            text = "简洁边框样式表格",
+            text = "Clean Border Style Table",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
         )
-        // 展示更多对齐方式
+        // Showcase more alignment options
         Table(
             cellPadding = PaddingValues(16.dp),
             modifier = Modifier.border(1.dp, Color.Gray)
@@ -273,7 +273,7 @@ fun TableSample() {
                         .background(Color.Blue.copy(alpha = 0.1f))
 
                 ) {
-                    Text("左上对齐", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text("Top Left", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
                 cell(
                     alignment = Alignment.TopCenter,
@@ -281,7 +281,7 @@ fun TableSample() {
                         .background(Color.Blue.copy(alpha = 0.1f))
 
                 ) {
-                    Text("顶部居中", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text("Top Center", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
                 cell(
                     alignment = Alignment.TopEnd,
@@ -289,7 +289,7 @@ fun TableSample() {
                         .background(Color.Blue.copy(alpha = 0.1f))
 
                 ) {
-                    Text("右上对齐", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text("Top Right", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
             body {
@@ -298,19 +298,19 @@ fun TableSample() {
                         alignment = Alignment.CenterStart,
                         modifier = Modifier
                     ) {
-                        Text("左侧居中")
+                        Text("Center Left")
                     }
                     cell(
                         alignment = Alignment.Center,
                         modifier = Modifier
                     ) {
-                        Text("完全居中")
+                        Text("Center")
                     }
                     cell(
                         alignment = Alignment.CenterEnd,
                         modifier = Modifier
                     ) {
-                        Text("右侧居中")
+                        Text("Center Right")
                     }
                 }
                 row {
@@ -318,19 +318,19 @@ fun TableSample() {
                         alignment = Alignment.BottomStart,
                         modifier = Modifier
                     ) {
-                        Text("左下对齐", fontSize = 12.sp, color = Color.Gray)
+                        Text("Bottom Left", fontSize = 12.sp, color = Color.Gray)
                     }
                     cell(
                         alignment = Alignment.BottomCenter,
                         modifier = Modifier
                     ) {
-                        Text("底部居中", fontSize = 12.sp, color = Color.Gray)
+                        Text("Bottom Center", fontSize = 12.sp, color = Color.Gray)
                     }
                     cell(
                         alignment = Alignment.BottomEnd,
                         modifier = Modifier
                     ) {
-                        Text("右下对齐", fontSize = 12.sp, color = Color.Gray)
+                        Text("Bottom Right", fontSize = 12.sp, color = Color.Gray)
                     }
                 }
             }

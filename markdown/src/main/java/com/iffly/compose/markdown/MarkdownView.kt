@@ -11,14 +11,15 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.LinkInteractionListener
+import com.iffly.compose.markdown.config.LocalBlockRenderersProvider
+import com.iffly.compose.markdown.config.LocalInlineNodeStringBuildersProvider
+import com.iffly.compose.markdown.config.LocalLinkClickListenerProvider
+import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
-import com.iffly.compose.markdown.render.LocalBlockRenderersProvider
-import com.iffly.compose.markdown.render.LocalInlineNodeStringBuildersProvider
-import com.iffly.compose.markdown.render.LocalLinkClickListenerProvider
 import com.iffly.compose.markdown.render.MarkdownContent
-import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.util.MarkdownPreview
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.commonmark.node.Node
 
@@ -75,6 +76,7 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     linkInteractionListener: LinkInteractionListener? = null,
+    parseDispatcher: CoroutineDispatcher? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
@@ -85,7 +87,7 @@ fun MarkdownView(
     LaunchedEffect(content, parser) {
         markdownState = MarkdownState.Loading
         try {
-            val parsedNode = withContext(MarkdownThreadPool.dispatcher) {
+            val parsedNode = withContext(parseDispatcher ?: MarkdownThreadPool.dispatcher) {
                 parser.parse(content)
             }
             markdownState = MarkdownState.Success(parsedNode)

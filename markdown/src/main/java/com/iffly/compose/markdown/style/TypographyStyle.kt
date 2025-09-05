@@ -1,8 +1,6 @@
 package com.iffly.compose.markdown.style
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -28,24 +26,24 @@ data class TypographyStyle(
     val code: SpanStyle = SpanStyle(
         fontFamily = FontFamily.Monospace,
         fontSize = 14.sp,
-        color = Color(0xFF37474F), // 深灰色文字
-        background = Color(0xFFF5F5F5), // 浅灰色背景
+        color = Color(0xFF37474F),
+        background = Color(0xFFF5F5F5),
     ),
     val link: TextLinkStyles = TextLinkStyles(
         style = SpanStyle(
-            color = Color(0xFF1976D2), // Blue color for normal links
+            color = Color(0xFF1976D2),
             textDecoration = TextDecoration.Underline
         ),
         hoveredStyle = SpanStyle(
-            color = Color(0xFF1565C0), // Darker blue for hover
+            color = Color(0xFF1565C0),
             textDecoration = TextDecoration.Underline
         ),
         focusedStyle = SpanStyle(
-            color = Color(0xFF0D47A1), // Even darker blue for focus
+            color = Color(0xFF0D47A1),
             textDecoration = TextDecoration.Underline
         ),
         pressedStyle = SpanStyle(
-            color = Color(0xFF0D47A1), // Same as focused for pressed
+            color = Color(0xFF0D47A1),
             textDecoration = TextDecoration.Underline
         ),
     ),
@@ -90,10 +88,4 @@ data class TypographyStyle(
     ),
 )
 
-val DefaultTypographyStyle = TypographyStyle()
-
-val LocalTypographyStyleProvider = staticCompositionLocalOf<TypographyStyle?> { null }
-
-@Composable
-fun currentTypographyStyle(): TypographyStyle =
-    LocalTypographyStyleProvider.current ?: DefaultTypographyStyle
+val DefaultTypographyStyle by lazy { TypographyStyle() }

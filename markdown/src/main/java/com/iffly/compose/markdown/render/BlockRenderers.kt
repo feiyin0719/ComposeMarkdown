@@ -1,7 +1,5 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
 import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.node.Block
 import org.commonmark.node.BulletList
@@ -50,11 +48,4 @@ class BlockRenderers private constructor(private val renderers: Map<Class<out Bl
     }
 }
 
-private val defaultBlockRenderers = BlockRenderers.Builder().build()
-
-val LocalBlockRenderersProvider =
-    staticCompositionLocalOf { defaultBlockRenderers }
-
-@Composable
-fun currentBlockRenderers(): BlockRenderers =
-    LocalBlockRenderersProvider.current
+val defaultBlockRenderers by lazy { BlockRenderers.Builder().build() }

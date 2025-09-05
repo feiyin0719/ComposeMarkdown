@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -19,8 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
+import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
+import com.iffly.compose.markdown.config.currentLinkClickListener
+import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.style.TypographyStyle
-import com.iffly.compose.markdown.style.currentTypographyStyle
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeStyle
 import com.iffly.compose.markdown.widget.BasicText
@@ -320,13 +321,3 @@ fun AnnotatedString.Builder.buildImage(
     }
     appendInlineContent(imageId, "[${imageNode.title}]")
 }
-
-
-val LocalLinkClickListenerProvider =
-    staticCompositionLocalOf<LinkInteractionListener?> {
-        null
-    }
-
-@Composable
-fun currentLinkClickListener(): LinkInteractionListener? =
-    LocalLinkClickListenerProvider.current

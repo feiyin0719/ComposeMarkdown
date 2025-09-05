@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.style.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.widget.BasicText
 import org.commonmark.node.Block
 import org.commonmark.node.FencedCodeBlock

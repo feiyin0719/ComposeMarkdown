@@ -15,8 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import com.iffly.compose.markdown.style.LocalTypographyStyleProvider
+import com.iffly.compose.markdown.config.currentBlockRenderers
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
 import org.commonmark.node.Block

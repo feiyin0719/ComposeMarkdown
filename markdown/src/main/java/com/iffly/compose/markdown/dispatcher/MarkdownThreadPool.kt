@@ -7,15 +7,15 @@ import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * 专门用于Markdown解析的线程池管理器
- * 提供独立的线程池，避免与其他后台任务竞争资源
+ * Thread pool manager specifically for Markdown parsing
+ * Provides independent thread pool to avoid resource competition with other background tasks
  */
 object MarkdownThreadPool {
 
     private val threadCounter = AtomicInteger(0)
 
     /**
-     * 自定义线程工厂，为markdown解析线程提供有意义的名称
+     * Custom thread factory to provide meaningful names for markdown parsing threads
      */
     private val markdownThreadFactory = ThreadFactory { runnable ->
         Thread(runnable, "MarkdownParser-${threadCounter.incrementAndGet()}").apply {
@@ -25,8 +25,8 @@ object MarkdownThreadPool {
     }
 
     /**
-     * 专用的线程池执行器
-     * 使用固定大小的线程池，大小为可用处理器核心数
+     * Dedicated thread pool executor
+     * Uses fixed-size thread pool, size equals to available processor cores
      */
     private val executor = Executors.newFixedThreadPool(
         1,
@@ -34,20 +34,20 @@ object MarkdownThreadPool {
     )
 
     /**
-     * 提供给协程使用的调度器
+     * Dispatcher for coroutine usage
      */
     val dispatcher: CoroutineDispatcher = executor.asCoroutineDispatcher()
 
     /**
-     * 关闭线程池，释放资源
-     * 通常在应用退出时调用
+     * Shutdown thread pool and release resources
+     * Usually called when application exits
      */
     fun shutdown() {
         executor.shutdown()
     }
 
     /**
-     * 立即关闭线程池
+     * Immediately shutdown thread pool
      */
     fun shutdownNow() {
         executor.shutdownNow()

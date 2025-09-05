@@ -1,7 +1,5 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
 import org.commonmark.node.Node
 
 class InlineNodeStringBuilders private constructor(
@@ -32,12 +30,6 @@ class InlineNodeStringBuilders private constructor(
     }
 }
 
-private val defaultInlineNodeStringBuilders =
+val defaultInlineNodeStringBuilders by lazy {
     InlineNodeStringBuilders.Builder().build()
-
-val LocalInlineNodeStringBuildersProvider =
-    staticCompositionLocalOf { defaultInlineNodeStringBuilders }
-
-@Composable
-internal fun currentInlineNodeStringBuilders(): InlineNodeStringBuilders =
-    LocalInlineNodeStringBuildersProvider.current
+}
