@@ -39,16 +39,9 @@ fun MarkdownView(
 ) {
 
     val parser by rememberUpdatedState(markdownRenderConfig.parser)
-    val linkInteractionListener by rememberUpdatedState(linkInteractionListener)
-    val inlineNodeStringBuilders by
-    rememberUpdatedState(markdownRenderConfig.inlineNodeStringBuilders)
-    val blockRenderers by rememberUpdatedState(markdownRenderConfig.blockRenderers)
-    val typographyStyle by rememberUpdatedState(markdownRenderConfig.typographyStyle)
-
-
     var markdownState by remember { mutableStateOf<MarkdownState>(MarkdownState.Loading) }
 
-    LaunchedEffect(content) {
+    LaunchedEffect(content, parser) {
         markdownState = MarkdownState.Loading
         try {
             val parsedNode = withContext(MarkdownThreadPool.dispatcher) {
@@ -60,25 +53,47 @@ fun MarkdownView(
         }
     }
 
+
+    when (val state = markdownState) {
+        is MarkdownState.Loading -> {
+            onLoading?.invoke()
+        }
+
+        is MarkdownState.Success -> {
+            MarkdownView(
+                node = state.node,
+                markdownRenderConfig = markdownRenderConfig,
+                modifier = modifier,
+                linkInteractionListener = linkInteractionListener,
+            )
+        }
+
+        is MarkdownState.Error -> {
+            onError?.invoke(state.exception)
+        }
+    }
+
+}
+
+@Composable
+fun MarkdownView(
+    node: Node,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+) {
+    val linkInteractionListener by rememberUpdatedState(linkInteractionListener)
+    val inlineNodeStringBuilders by
+    rememberUpdatedState(markdownRenderConfig.inlineNodeStringBuilders)
+    val blockRenderers by rememberUpdatedState(markdownRenderConfig.blockRenderers)
+    val typographyStyle by rememberUpdatedState(markdownRenderConfig.typographyStyle)
     CompositionLocalProvider(
         LocalLinkClickListenerProvider provides linkInteractionListener,
         LocalInlineNodeStringBuildersProvider provides inlineNodeStringBuilders,
         LocalBlockRenderersProvider provides blockRenderers,
         LocalTypographyStyleProvider provides typographyStyle,
     ) {
-        when (val state = markdownState) {
-            is MarkdownState.Loading -> {
-                onLoading?.invoke()
-            }
-
-            is MarkdownState.Success -> {
-                MarkdownContent(state.node, modifier)
-            }
-
-            is MarkdownState.Error -> {
-                onError?.invoke(state.exception)
-            }
-        }
+        MarkdownContent(node, modifier)
     }
 }
 
