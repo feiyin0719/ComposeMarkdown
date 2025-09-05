@@ -34,6 +34,47 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     linkInteractionListener: LinkInteractionListener? = null,
+    onError: (@Composable (Throwable) -> Unit)? = null,
+) {
+
+    val parser by rememberUpdatedState(markdownRenderConfig.parser)
+    val markdownState = remember(content, parser) {
+        try {
+            MarkdownState.Success(parser.parse(content))
+        } catch (e: Exception) {
+            MarkdownState.Error(e)
+        }
+    }
+
+
+    when (val state = markdownState) {
+        is MarkdownState.Loading -> {
+            // Loading state is instantaneous here since parsing is done in remember
+            // You can implement a more complex loading state if needed
+        }
+
+        is MarkdownState.Success -> {
+            MarkdownView(
+                node = state.node,
+                markdownRenderConfig = markdownRenderConfig,
+                modifier = modifier,
+                linkInteractionListener = linkInteractionListener,
+            )
+        }
+
+        is MarkdownState.Error -> {
+            onError?.invoke(state.exception)
+        }
+    }
+
+}
+
+@Composable
+fun MarkdownView(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
