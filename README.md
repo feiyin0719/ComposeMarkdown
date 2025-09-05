@@ -1,7 +1,7 @@
 # Compose Markdown
 
-
-A powerful and highly customizable Jetpack Compose Markdown rendering library that supports rich Markdown syntax and custom styling.
+A powerful and highly customizable Jetpack Compose Markdown rendering library that supports rich
+Markdown syntax and custom styling.
 
 ## Table of Contents
 
@@ -20,6 +20,7 @@ A powerful and highly customizable Jetpack Compose Markdown rendering library th
 ## 📋 Features
 
 ### Core Features
+
 - ✅ **Standard Markdown Support** - Full support for CommonMark specification
 - ✅ **Extended Syntax** - Support for GFM (GitHub Flavored Markdown) tables
 - ✅ **Code Syntax Highlighting** - Multi-language code block syntax highlighting
@@ -27,6 +28,7 @@ A powerful and highly customizable Jetpack Compose Markdown rendering library th
 - ✅ **Responsive Design** - Perfect adaptation to different screen sizes
 
 ### Performance & Extensions
+
 - ⚡ **Async Parsing** - Background thread parsing ensures UI fluidity
 - 🎨 **Fully Customizable** - Support for custom styles, renderers and parsers
 - 🔌 **Plugin System** - Flexible plugin architecture for feature extensions
@@ -34,12 +36,12 @@ A powerful and highly customizable Jetpack Compose Markdown rendering library th
 
 ## 🔧 Tech Stack
 
-| Technology | Version | Purpose |
-|------|------|------|
-| **Jetpack Compose** | 2024.09.00+ | Modern UI framework |
-| **CommonMark** | Latest | Markdown parsing engine |
-| **Kotlin Coroutines** | 1.7+ | Asynchronous processing |
-| **Material Design 3** | Latest | Design language specification |
+| Technology            | Version     | Purpose                       |
+|-----------------------|-------------|-------------------------------|
+| **Jetpack Compose**   | 2024.09.00+ | Modern UI framework           |
+| **CommonMark**        | Latest      | Markdown parsing engine       |
+| **Kotlin Coroutines** | 1.7+        | Asynchronous processing       |
+| **Material Design 3** | Latest      | Design language specification |
 
 ## 📦 Installation
 
@@ -57,7 +59,7 @@ Add the dependency to your project's `build.gradle.kts` (Module: app):
 ```kotlin
 dependencies {
     implementation(project(":markdown"))
-    
+
     // If installing from remote repository (future version)
     // implementation("com.iffly.compose:markdown:1.0.0")
 }
@@ -96,7 +98,7 @@ fun SimpleMarkdownExample() {
         }
         ```
     """.trimIndent()
-    
+
     MarkdownView(
         content = markdownContent,
         modifier = Modifier.fillMaxSize()
@@ -120,7 +122,7 @@ fun ConfiguredMarkdownExample() {
             )
         )
         .build()
-    
+
     MarkdownView(
         content = "# Custom Style Title\n\nThis is Markdown content with custom styling.",
         markdownRenderConfig = config,
@@ -170,7 +172,10 @@ class MarkdownRenderConfig private constructor(
     class Builder {
         fun typographyStyle(style: TypographyStyle): Builder
         fun addBlockRenderer(nodeClass: Class<*>, renderer: IBlockRenderer<*>): Builder
-        fun addInlineNodeStringBuilder(nodeClass: Class<*>, builder: IInlineNodeStringBuilder<*>): Builder
+        fun addInlineNodeStringBuilder(
+            nodeClass: Class<*>,
+            builder: IInlineNodeStringBuilder<*>
+        ): Builder
         fun addPlugin(plugin: Plugin): Builder
         fun build(): MarkdownRenderConfig
     }
@@ -249,6 +254,317 @@ val linkStyles = TextLinkStyles(
 ```
 
 ## 🔧 Advanced Features
+
+### MarkdownView Usage Modes
+
+MarkdownView provides three different usage modes to adapt to different use cases:
+
+#### 1. Synchronous Parsing Version (Instant Parsing)
+
+Suitable for small content that can be parsed instantly without blocking the UI.
+
+```kotlin
+@Composable
+fun MarkdownView(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**Usage Example:**
+
+```kotlin
+@Composable
+fun SyncMarkdownExample() {
+    val shortContent = """
+        # Quick Notes
+        This is short markdown content that can be parsed instantly.
+        - Item 1
+        - Item 2
+        
+        **Bold text** and *italic text*
+    """.trimIndent()
+
+    MarkdownView(
+        content = shortContent,
+        markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+        modifier = Modifier.padding(16.dp),
+        linkInteractionListener = LinkInteractionListener { url ->
+            // Handle link clicks
+            Log.d("MarkdownView", "Link clicked: $url")
+        },
+        onError = { error ->
+            Text(
+                text = "Parsing failed: ${error.message}",
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    )
+}
+```
+
+#### 2. Asynchronous Parsing Version (Background Parsing)
+
+Recommended for large content or scenarios requiring loading/error state display.
+
+```kotlin
+@Composable
+fun MarkdownView(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+    parseDispatcher: CoroutineDispatcher? = null,
+    onLoading: (@Composable () -> Unit)? = null,
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**Usage Example:**
+
+```kotlin
+@Composable
+fun AsyncMarkdownExample() {
+    val largeContent = """
+        # Large Document
+        This is a large markdown document that may take time to parse.
+        
+        ## Features
+        
+        ${generateLargeMarkdownContent()}
+    """.trimIndent()
+
+    MarkdownView(
+        content = largeContent,
+        markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+        modifier = Modifier.fillMaxSize(),
+        linkInteractionListener = LinkInteractionListener { url ->
+            when {
+                url.startsWith("mailto:") -> {
+                    // Handle email links
+                    val email = url.removePrefix("mailto:")
+                    openEmailClient(email)
+                }
+                url.startsWith("tel:") -> {
+                    // Handle phone links
+                    val phone = url.removePrefix("tel:")
+                    openDialer(phone)
+                }
+                else -> {
+                    // Handle web links
+                    openWebBrowser(url)
+                }
+            }
+        },
+        parseDispatcher = Dispatchers.IO,
+        onLoading = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Parsing markdown content...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        onError = { error ->
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Error,
+                            contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Parse Error",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = error.message ?: "Unknown error occurred",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
+    )
+}
+```
+
+#### 3. Pre-parsed Node Version
+
+Suitable for cases where you already have parsed CommonMark Nodes.
+
+```kotlin
+@Composable
+fun MarkdownView(
+    node: Node,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+)
+```
+
+**Usage Example:**
+
+```kotlin
+@Composable
+fun PreParsedMarkdownExample() {
+    val parser = MarkdownRenderConfig.Builder().build().parser
+    val preParseNode = remember {
+        parser.parse("# Pre-parsed Content\n\nThis content was parsed outside the composable.")
+    }
+
+    MarkdownView(
+        node = preParseNode,
+        markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+        modifier = Modifier.padding(16.dp),
+        linkInteractionListener = LinkInteractionListener { url ->
+            // Handle link clicks
+        }
+    )
+}
+```
+
+### Performance Optimization Recommendations
+
+#### 1. Choose the Right Version
+
+- **Small content** (< 1KB): Use synchronous version to avoid unnecessary loading states
+- **Large content**: Use asynchronous version to ensure UI fluidity
+
+#### 2. Custom Dispatcher
+
+```kotlin
+val customDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
+MarkdownView(
+    content = largeContent,
+    parseDispatcher = customDispatcher,
+    // ... other parameters
+)
+```
+
+#### 3. Node Caching
+
+```kotlin
+val nodeCache = remember { mutableMapOf<String, Node>() }
+val cachedNode = nodeCache.getOrPut(contentKey) {
+    parser.parse(content)
+}
+
+MarkdownView(node = cachedNode, ...)
+```
+
+#### 4. Memory Management
+For very large documents, consider implementing pagination or virtual scrolling.
+
+### MarkdownPlugin Usage
+
+MarkdownPlugin is a powerful plugin system that allows you to extend Markdown parsing and rendering functionality. By implementing the `IMarkdownRenderPlugin` interface, you can add custom block-level elements, inline elements, and renderers.
+
+#### Creating Custom Plugins
+
+```kotlin
+class CustomMarkdownPlugin : IMarkdownRenderPlugin {
+    
+    // Register custom block parser factories
+    override fun blockParserFactories(): List<BlockParserFactory> {
+        return listOf(AlertBlockParserFactory())
+    }
+
+    // Register custom inline content parser factories
+    override fun inlineContentParserFactories(): List<InlineContentParserFactory> {
+        return listOf(
+            MentionInlineParser.Factory(),
+            HashtagInlineParser.Factory(),
+            BadgeInlineParser.Factory()
+        )
+    }
+
+    // Register custom block renderers
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> {
+        return mapOf(
+            AlertBlock::class.java to AlertBlockRenderer()
+        )
+    }
+
+    // Register custom inline node string builders
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> {
+        return mapOf(
+            MentionNode::class.java to MentionNodeStringBuilder(),
+            HashtagNode::class.java to HashtagNodeStringBuilder(),
+            HighlightNode::class.java to HighlightNodeStringBuilder(),
+            BadgeNode::class.java to BadgeNodeStringBuilder()
+        )
+    }
+}
+```
+
+#### Using Custom Plugins
+
+```kotlin
+@Composable
+fun PluginMarkdownExample() {
+    val markdownContent = """
+        :::info Tips
+        This is an information alert box
+        :::
+        
+        @username mentioned you!
+        
+        #hashtag makes content easier to categorize
+        
+        ==highlighted text== emphasizes key content
+        
+        !!success:Success!! status badge
+    """.trimIndent()
+    
+    val config = MarkdownRenderConfig.Builder()
+        .plugin(CustomMarkdownPlugin())
+        .build()
+    
+    MarkdownView(
+        content = markdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.padding(16.dp)
+    )
+}
+```
+
+#### Supported Extended Syntax
+
+Through `CustomMarkdownPlugin`, you can use the following extended syntax:
+
+- **Alert Blocks**: `:::info Title` `Content` `:::`
+- **User Mentions**: `@username`
+- **Hashtags**: `#hashtag`
+- **Highlighted Text**: `==highlighted content==`
+- **Badges**: `!!type:text!!`
 
 ### Custom Block Renderer
 
@@ -382,7 +698,7 @@ class AlertBlock : CustomBlock() {
  */
 class MentionNode : Node() {
     var username: String = ""
-    
+
     override fun accept(visitor: Visitor?) {
         visitor?.visit(this)
     }
@@ -394,7 +710,7 @@ class MentionNode : Node() {
  */
 class HashtagNode : Node() {
     var hashtag: String = ""
-    
+
     override fun accept(visitor: Visitor?) {
         visitor?.visit(this)
     }
@@ -406,7 +722,7 @@ class HashtagNode : Node() {
  */
 class HighlightNode : Node() {
     var highlightText: String = ""
-    
+
     override fun accept(visitor: Visitor?) {
         visitor?.visit(this)
     }
@@ -419,7 +735,7 @@ class HighlightNode : Node() {
 class BadgeNode : Node() {
     var badgeText: String = ""
     var badgeType: String = "default"
-    
+
     override fun accept(visitor: Visitor?) {
         visitor?.visit(this)
     }
@@ -443,7 +759,52 @@ val config = MarkdownRenderConfig.Builder()
 
 ### Main Interfaces
 
+#### MarkdownView
+
+Three overloads of the `MarkdownView` Composable function:
+
+- Synchronous version
+
+```kotlin
+@Composable
+fun MarkdownView(
+    content: String,
+    modifier: Modifier = Modifier,
+    markdownRenderConfig: MarkdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+    linkInteractionListener: LinkInteractionListener? = null,
+    onError: @Composable (Throwable) -> Unit = { DefaultErrorContent(it) }
+)
+```
+
+- Asynchronous version
+
+```kotlin
+@Composable
+fun MarkdownView(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+    parseDispatcher: CoroutineDispatcher? = null,
+    onLoading: @Composable (() -> Unit)? = null,
+    onError: @Composable (Throwable) -> Unit = { DefaultErrorContent(it) }
+)
+```
+
+- Pre-parsed Node version
+
+```kotlin
+@Composable
+fun MarkdownView(
+    node: Node,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    linkInteractionListener: LinkInteractionListener? = null,
+)
+```
+
 #### IBlockRenderer<T>
+
 ```kotlin
 interface IBlockRenderer<T : Node> {
     @Composable
@@ -452,6 +813,7 @@ interface IBlockRenderer<T : Node> {
 ```
 
 #### IInlineNodeStringBuilder<T>
+
 ```kotlin
 interface IInlineNodeStringBuilder<T : Node> {
     fun AnnotatedString.Builder.buildInlineNodeString(
@@ -465,15 +827,13 @@ interface IInlineNodeStringBuilder<T : Node> {
 ```
 
 #### LinkInteractionListener
-```kotlin
-fun interface LinkInteractionListener {
-    fun onLinkClicked(url: String)
-}
-```
+
+handle link click events
 
 ### Style Classes
 
 #### TypographyStyle
+
 ```kotlin
 data class TypographyStyle(
     val textStyle: TextStyle = TextStyle.Default,
@@ -488,48 +848,59 @@ data class TypographyStyle(
 )
 ```
 
+### MarkdownRenderConfig
+
+```kotlin
+class MarkdownRenderConfig private constructor(
+    val typographyStyle: TypographyStyle,
+    val blockRenderers: Map<Class<*>, IBlockRenderer<*>>,
+    val inlineNodeStringBuilders: Map<Class<*>, IInlineNodeStringBuilder<*>>,
+    val plugins: List<Plugin>,
+    val parser: Parser
+) {
+    class Builder {
+        fun typographyStyle(style: TypographyStyle): Builder
+        fun addBlockRenderer(nodeClass: Class<*>, renderer: IBlockRenderer<*>): Builder
+        fun addInlineNodeStringBuilder(
+            nodeClass: Class<*>,
+            builder: IInlineNodeStringBuilder<*>
+        ): Builder
+        fun addPlugin(plugin: Plugin): Builder
+        fun build(): MarkdownRenderConfig
+    }
+}
+```
+
+### Markdown Plugins
+
+```kotlin
+interface IMarkdownRenderPlugin {
+    fun blockParserFactories(): List<BlockParserFactory> = emptyList()
+    fun inlineContentParserFactories(): List<InlineContentParserFactory> = emptyList()
+    fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> = emptyMap()
+    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+        emptyMap()
+}
+```
+
 ## ❓ FAQ
 
 ### Q: How to handle performance issues with large Markdown documents?
-A: The library uses an asynchronous parsing mechanism that processes Markdown parsing in background threads without blocking the UI thread. For very large documents, pagination or lazy loading is recommended.
+
+A: The library uses an asynchronous parsing mechanism that processes Markdown parsing in background
+threads without blocking the UI thread. For very large documents, pagination or lazy loading is
+recommended.
 
 ### Q: What Markdown extension syntaxes are supported?
-A: Currently supports CommonMark standard syntax and GFM tables. More extension syntax support will be added in the future.
+
+A: Currently supports CommonMark standard syntax and GFM tables. More extension syntax support will
+be added in the future.
 
 ### Q: How to customize syntax highlighting for code blocks?
-A: You can implement custom syntax highlighting by creating a custom `CodeBlockRenderer` and integrating third-party syntax highlighting libraries.
 
-### Q: How to handle image loading failures?
-A: You can configure default placeholder styles in `TypographyStyle` or implement a custom image renderer.
+A: You can implement custom syntax highlighting by creating a custom `CodeBlockRenderer` and
+integrating third-party syntax highlighting libraries.
 
-## 🤝 Contributing
-
-We welcome community contributions! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
-
-### Development Process
-
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Create a Pull Request
-
-### Code Standards
-
-- Follow Kotlin official coding style
-- Add appropriate documentation comments
-- Write unit tests
-- Ensure all tests pass
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [CommonMark](https://commonmark.org/) - Markdown parsing engine
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern Android UI toolkit
-- All contributors and community members
 
 ---
 
