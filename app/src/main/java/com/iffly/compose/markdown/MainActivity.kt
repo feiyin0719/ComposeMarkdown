@@ -1,23 +1,39 @@
 package com.iffly.compose.markdown
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.samples.MarkdownExample
+import com.iffly.compose.markdown.samples.markdownExamples
 import com.iffly.compose.markdown.ui.theme.ComposeMarkdownTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,96 +42,74 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposeMarkdownTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .verticalScroll(rememberScrollState()),
-
-                        ) {
-                        MarkdownView(
-                            linkInteractionListener = {
-                                Log.i("MainActivity", "Clicked link: $it")
-                            },
-                            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
-                            content = """
-                            # Hello World
-                            This is a simple markdown example.```val greeting = "Hello, World!"```
-                            ## Subheading
-                            
-                            1. Item 1
-                               1. Item 1.1
-                               2. Item 1.2
-                            2. Item 2
-                            3. Item 3
-                            
-                            - Item A
-                            - Item B
-                            - Item C
-                            
-                            **Bold Text**
-                            
-                            *Italic Text*![Image](https://raw.githubusercontent.com/feiyin0719/AFreeSvg/dev/test.jpg)
-                            
-                            ![Image](https://raw.githubusercontent.com/feiyin0719/AFreeSvg/dev/test.jpg)
-                            
-                            [Link to Google](https://www.google.com)
-                                                        
-                            | :Name | Age | City |
-                            :---    |   :---:   |   ---:|---|
-                            | John czczxcxzcxzcxzcxzcxzczxczxcxzcxzcxzcxzcxzcxzcxz | 30jkhjkhbjkbnkjbjkbj,bmjbjkbkjbjknjkbjkbjkjbkj  | New York huanghou jkljklnknjkn,mdsadasdasdasdasfasfdsfdsfdsfdsfdsfsdfdsfdsfdsfsdcsczcxzcxzcxzcz |
-                            | Jane  | 25  | San Francisco |
-                            
-                            new two columns table
-                            | Name | Age |
-                            |------|-----|
-                            | John | 25  |
-                            
-                             ```kotlin
-                            fun main() {
-                                println("Hello, World!")
-                                val list = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-                                list.forEach { println(it) }
-                            }
-                            ```
-                            
-                            ```javascript
-                            function greet(name) {
-                                console.log(`Hello, ${'$'}{name}!`);
-                            }
-                            
-                            greet('World');
-                            ```
-                            This is an indented code block:
-        
-                                // This is an indented code block
-                                val x = 10
-                                val y = 20
-                                println("Sum: ${'$'}{x + y}")
-                            
-                        """.trimIndent(),
-                            modifier = Modifier.padding(PaddingValues(horizontal = 12.dp)),
-                        )
-                    }
-
-                }
+                MarkdownSampleApp()
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MarkdownSampleApp() {
+    var currentExample by remember { mutableStateOf<MarkdownExample?>(null) }
+
+    if (currentExample == null) {
+        ExampleListScreen(onExampleSelected = { currentExample = it })
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(currentExample!!.title) },
+                    navigationIcon = {
+                        IconButton(onClick = { currentExample = null }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            currentExample!!.content(paddingValues)
+        }
+    }
 }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GreetingPreview() {
-    ComposeMarkdownTheme {
-        Greeting("Android")
+fun ExampleListScreen(onExampleSelected: (MarkdownExample) -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Compose Markdown Examples") })
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(markdownExamples) { example ->
+                Card(
+                    onClick = { onExampleSelected(example) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = example.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = example.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 }

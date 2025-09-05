@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.commonmark.node.Node
 
-sealed class MarkdownState {
+internal sealed class MarkdownState {
     object Loading : MarkdownState()
     data class Success(val node: Node) : MarkdownState()
     data class Error(val exception: Throwable) : MarkdownState()
