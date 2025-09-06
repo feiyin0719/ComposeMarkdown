@@ -10,6 +10,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
+fun BasicStringText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = LocalTextStyle.current,
+    textAlign: TextAlign? = null,
+) {
+    Text(
+        text = text,
+        textAlign = textAlign,
+        modifier = modifier,
+        style = style,
+    )
+}
+
+@Composable
 fun BasicText(
     text: AnnotatedString,
     modifier: Modifier = Modifier,

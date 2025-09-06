@@ -14,6 +14,7 @@ import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.config.LocalBlockRenderersProvider
 import com.iffly.compose.markdown.config.LocalInlineNodeStringBuildersProvider
 import com.iffly.compose.markdown.config.LocalLinkClickListenerProvider
+import com.iffly.compose.markdown.config.LocalShowNotSupportedProvider
 import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
@@ -34,6 +35,7 @@ fun MarkdownView(
     content: String,
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
     linkInteractionListener: LinkInteractionListener? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
@@ -59,6 +61,7 @@ fun MarkdownView(
                 node = state.node,
                 markdownRenderConfig = markdownRenderConfig,
                 modifier = modifier,
+                showNotSupportedText = showNotSupportedText,
                 linkInteractionListener = linkInteractionListener,
             )
         }
@@ -75,6 +78,7 @@ fun MarkdownView(
     content: String,
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
     linkInteractionListener: LinkInteractionListener? = null,
     parseDispatcher: CoroutineDispatcher? = null,
     onLoading: (@Composable () -> Unit)? = null,
@@ -107,6 +111,7 @@ fun MarkdownView(
                 node = state.node,
                 markdownRenderConfig = markdownRenderConfig,
                 modifier = modifier,
+                showNotSupportedText = showNotSupportedText,
                 linkInteractionListener = linkInteractionListener,
             )
         }
@@ -123,6 +128,7 @@ fun MarkdownView(
     node: Node,
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
     linkInteractionListener: LinkInteractionListener? = null,
 ) {
     val linkInteractionListener by rememberUpdatedState(linkInteractionListener)
@@ -135,6 +141,7 @@ fun MarkdownView(
         LocalInlineNodeStringBuildersProvider provides inlineNodeStringBuilders,
         LocalBlockRenderersProvider provides blockRenderers,
         LocalTypographyStyleProvider provides typographyStyle,
+        LocalShowNotSupportedProvider provides showNotSupportedText,
     ) {
         MarkdownContent(node, modifier)
     }

@@ -18,8 +18,10 @@ import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentBlockRenderers
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
+import com.iffly.compose.markdown.widget.BasicStringText
 import org.commonmark.node.Block
 import org.commonmark.node.Node
 
@@ -53,6 +55,12 @@ fun MarkdownNode(
                     "MarkdownNode",
                     "No renderer found for ${node::class.java.simpleName}, rendering children."
                 )
+                val isShowNotSupported = isShowNotSupported()
+                if (isShowNotSupported) {
+                    BasicStringText(
+                        text = "Unsupported block: ${node::class.java.simpleName}",
+                    )
+                }
             }
         }
         if (typographyStyle.showSpace) {
