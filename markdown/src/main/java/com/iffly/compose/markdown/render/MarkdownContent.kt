@@ -13,11 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentBlockRenderers
+import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
 import org.commonmark.node.Block
@@ -41,6 +41,7 @@ fun MarkdownNode(
 ) {
     var node = parent.firstChild
     val blockRenderers = currentBlockRenderers()
+    val typographyStyle = currentTypographyStyle()
     while (node != null) {
         if (node is Block) {
             val renderer = blockRenderers[node::class.java]
@@ -54,7 +55,9 @@ fun MarkdownNode(
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        if (typographyStyle.showSpace) {
+            Spacer(Modifier.height(typographyStyle.spaceHeight))
+        }
         node = node.next
     }
 }
@@ -106,6 +109,8 @@ private fun MarkdownContentPreview() {
         | John | 25 | New York |
         | Jane | 30 | **San Francisco** |
         | Bob | *22* | [Chicago](https://chicago.com) |
+        
+        ---
         
         This is an indented code block:
         

@@ -9,10 +9,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Stable
 data class TypographyStyle(
+    val showSpace: Boolean = true,
+    val spaceHeight: Dp = 8.dp,
+    val breakLineHeight: Dp = 1.dp,
+    val breakLineColor: Color = Color(0xFFE0E0E0),
     val textStyle: TextStyle? = null,
     val body: SpanStyle = SpanStyle(),
     val strongEmphasis: SpanStyle = SpanStyle(

@@ -8,6 +8,7 @@ import org.commonmark.node.Heading
 import org.commonmark.node.IndentedCodeBlock
 import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
+import org.commonmark.node.ThematicBreak
 
 
 class BlockRenderers private constructor(private val renderers: Map<Class<out Block>, IBlockRenderer<out Block>>) {
@@ -21,6 +22,7 @@ class BlockRenderers private constructor(private val renderers: Map<Class<out Bl
             BulletList::class.java to BulletListRenderer,
             FencedCodeBlock::class.java to FencedCodeBlockRenderer,
             IndentedCodeBlock::class.java to IndentedCodeBlockRenderer,
+            ThematicBreak::class.java to BreakLineRenderer,
         )
 
     }
