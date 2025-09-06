@@ -12,6 +12,7 @@ appcompat = "1.7.1"
 material = "1.12.0"
 commonMark = "0.25.1"
 coil = "2.5.0"
+compose-markdown = "0.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonMark" }
 commonmark-ext-gfm-tables = { group = "org.commonmark", name = "commonmark-ext-gfm-tables", version.ref = "commonMark" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -54,14 +54,30 @@ Markdown syntax and custom styling.
 
 ### Add Dependency
 
-Add the dependency to your project's `build.gradle.kts` (Module: app):
+1. Add `jitpack.io` repository to your project:
+
+```kotlin
+repositories {
+    ...
+    maven(url = "https://jitpack.io")
+}
+```
+
+2. Add the dependency to your project's `build.gradle.kts` :
+   define library module in your `./gradle/libs.versions.toml` file:
+
+```toml
+[versions]
+compose-markdown = "0.0.1"
+[libraries]
+compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
+```
+
+add the dependency in your module `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation(project(":markdown"))
-
-    // If installing from remote repository (future version)
-    // implementation("com.iffly.compose:markdown:1.0.0")
+    implementation(libs.compose.markdown)
 }
 ```
 
@@ -481,17 +497,20 @@ MarkdownView(node = cachedNode, ...)
 ```
 
 #### 4. Memory Management
+
 For very large documents, consider implementing pagination or virtual scrolling.
 
 ### MarkdownPlugin Usage
 
-MarkdownPlugin is a powerful plugin system that allows you to extend Markdown parsing and rendering functionality. By implementing the `IMarkdownRenderPlugin` interface, you can add custom block-level elements, inline elements, and renderers.
+MarkdownPlugin is a powerful plugin system that allows you to extend Markdown parsing and rendering
+functionality. By implementing the `IMarkdownRenderPlugin` interface, you can add custom block-level
+elements, inline elements, and renderers.
 
 #### Creating Custom Plugins
 
 ```kotlin
 class CustomMarkdownPlugin : IMarkdownRenderPlugin {
-    
+
     // Register custom block parser factories
     override fun blockParserFactories(): List<BlockParserFactory> {
         return listOf(AlertBlockParserFactory())
@@ -543,11 +562,11 @@ fun PluginMarkdownExample() {
         
         !!success:Success!! status badge
     """.trimIndent()
-    
+
     val config = MarkdownRenderConfig.Builder()
         .plugin(CustomMarkdownPlugin())
         .build()
-    
+
     MarkdownView(
         content = markdownContent,
         markdownRenderConfig = config,
@@ -882,6 +901,12 @@ interface IMarkdownRenderPlugin {
         emptyMap()
 }
 ```
+
+## Future Plans
+
+- 🚀 Support load large markdown file and render progressively
+  Load and render visible blocks to improve performance and memory usage
+- 🚀 Add more built-in plugins for common use cases
 
 ## ❓ FAQ
 
