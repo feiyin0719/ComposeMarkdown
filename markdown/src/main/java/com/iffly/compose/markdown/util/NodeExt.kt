@@ -2,15 +2,15 @@ package com.iffly.compose.markdown.util
 
 import androidx.compose.ui.text.SpanStyle
 import com.iffly.compose.markdown.style.TypographyStyle
-import org.commonmark.ext.gfm.tables.TableCell
-import org.commonmark.ext.gfm.tables.TableHead
-import org.commonmark.node.BulletList
-import org.commonmark.node.Emphasis
-import org.commonmark.node.Heading
-import org.commonmark.node.ListItem
-import org.commonmark.node.Node
-import org.commonmark.node.OrderedList
-import org.commonmark.node.StrongEmphasis
+import com.vladsch.flexmark.ast.BulletList
+import com.vladsch.flexmark.ast.Emphasis
+import com.vladsch.flexmark.ast.Heading
+import com.vladsch.flexmark.ast.ListItem
+import com.vladsch.flexmark.ast.OrderedList
+import com.vladsch.flexmark.ast.StrongEmphasis
+import com.vladsch.flexmark.ext.tables.TableCell
+import com.vladsch.flexmark.ext.tables.TableHead
+import com.vladsch.flexmark.util.ast.Node
 
 fun TypographyStyle.getNodeStyle(node: Node): SpanStyle {
     return when (node) {
@@ -35,6 +35,9 @@ private fun Node.isInTableHeader(): Boolean {
     return false
 }
 
+fun Node.contentText(): String {
+    return chars.toString()
+}
 
 const val BULLET_POINT = "•"
 fun ListItem.getMarkerText(): String {
@@ -42,7 +45,7 @@ fun ListItem.getMarkerText(): String {
         is BulletList -> BULLET_POINT
         is OrderedList -> {
             var index = 1
-            var node = this.parent.firstChild
+            var node = this.parent?.firstChild
             while (node != null) {
                 if (node == this) {
                     break

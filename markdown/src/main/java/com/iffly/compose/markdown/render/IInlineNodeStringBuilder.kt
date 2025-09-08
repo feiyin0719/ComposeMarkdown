@@ -4,7 +4,7 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.style.TypographyStyle
-import org.commonmark.node.Node
+import com.vladsch.flexmark.util.ast.Node
 
 
 interface IInlineNodeStringBuilder<T> where T : Node {

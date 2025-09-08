@@ -22,7 +22,7 @@ import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.MarkdownPreview
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import org.commonmark.node.Node
+import com.vladsch.flexmark.util.ast.Node
 
 internal sealed class MarkdownState {
     object Loading : MarkdownState()

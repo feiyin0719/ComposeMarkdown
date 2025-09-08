@@ -22,8 +22,8 @@ import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
 import com.iffly.compose.markdown.widget.BasicStringText
-import org.commonmark.node.Block
-import org.commonmark.node.Node
+import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Node
 
 @Composable
 fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {

@@ -5,13 +5,14 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.style.TypographyStyle
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.node.Block
-import org.commonmark.node.Node
-import org.commonmark.parser.Parser
-import org.commonmark.parser.beta.InlineContentParserFactory
-import org.commonmark.parser.block.BlockParserFactory
-import org.commonmark.parser.delimiter.DelimiterProcessor
+import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.parser.InlineParserExtensionFactory
+import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
+import com.vladsch.flexmark.parser.delimiter.DelimiterProcessor
+import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.data.MutableDataSet
 
 class MarkdownRenderConfig {
 
@@ -50,13 +51,14 @@ class MarkdownRenderConfig {
         private val blockRendererBuilder: BlockRenderers.Builder =
             BlockRenderers.Builder()
 
-        private val blockParserFactories: MutableList<BlockParserFactory> = mutableListOf()
+        private val blockParserFactories: MutableList<CustomBlockParserFactory> = mutableListOf()
 
-        private val inlineContentParserFactories: MutableList<InlineContentParserFactory> =
+        private val inlineContentParserFactories: MutableList<InlineParserExtensionFactory> =
             mutableListOf()
 
         private val delimiterProcessors: MutableList<DelimiterProcessor> =
             mutableListOf()
+        private val options = MutableDataSet()
 
         fun typographyStyle(typographyStyle: TypographyStyle): Builder {
             this.typographyStyle = typographyStyle
@@ -84,12 +86,12 @@ class MarkdownRenderConfig {
             return this
         }
 
-        fun addBlockParserFactory(factory: BlockParserFactory): Builder {
+        fun addBlockParserFactory(factory: CustomBlockParserFactory): Builder {
             blockParserFactories.add(factory)
             return this
         }
 
-        fun addInlineContentParserFactory(factory: InlineContentParserFactory): Builder {
+        fun addInlineContentParserFactory(factory: InlineParserExtensionFactory): Builder {
             inlineContentParserFactories.add(factory)
             return this
         }
@@ -100,9 +102,13 @@ class MarkdownRenderConfig {
         }
 
         fun build(): MarkdownRenderConfig {
-            val parserBuilder = Parser.builder()
-
-            parserBuilder.extensions(listOf(TablesExtension.create()))
+            // Configure flexmark-java extensions
+            options.set(
+                Parser.EXTENSIONS, listOf(
+                    TablesExtension.create(),
+                )
+            )
+            val parserBuilder = Parser.builder(options)
 
             plugins.forEach { plugin ->
                 plugin.inlineNodeStringBuilders().forEach { (nodeClass, builder) ->
@@ -115,7 +121,7 @@ class MarkdownRenderConfig {
                     parserBuilder.customBlockParserFactory(factory)
                 }
                 plugin.inlineContentParserFactories().forEach { factory ->
-                    parserBuilder.customInlineContentParserFactory(factory)
+                    parserBuilder.customInlineParserExtensionFactory(factory)
                 }
             }
 
@@ -124,7 +130,7 @@ class MarkdownRenderConfig {
             }
 
             inlineContentParserFactories.forEach { factory ->
-                parserBuilder.customInlineContentParserFactory(factory)
+                parserBuilder.customInlineParserExtensionFactory(factory)
             }
 
             delimiterProcessors.forEach { processor ->

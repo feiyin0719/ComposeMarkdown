@@ -66,7 +66,9 @@ fun BasicSyntaxExample(paddingValues: PaddingValues) {
                 fun greetUser(name: String) {
                     println("Hello, ${'$'}name!")
                 }
-                ```
+                
+                greetUser("Compose")
+             
             """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),

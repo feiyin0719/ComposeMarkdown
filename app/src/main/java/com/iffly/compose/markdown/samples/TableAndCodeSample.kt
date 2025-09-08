@@ -22,21 +22,21 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
     ) {
         MarkdownView(
             content = """
-                # 表格和代码示例
+                # Table and Code Examples
                 
-                ## 复杂表格
+                ## Complex Table
                 
-                | 功能 | Android | iOS | Web | 描述 |
-                |------|:-------:|:---:|:---:|------|
-                | 基础渲染 | ✅ | ✅ | ✅ | 支持标准Markdown语法 |
-                | 表格支持 | ✅ | ✅ | ✅ | GFM表格扩展 |
-                | 代码高亮 | ✅ | ❌ | ✅ | 语法高亮显示 |
-                | 图片渲染 | ✅ | ✅ | ✅ | 本地和网络图片 |
-                | 自定义样式 | ✅ | ✅ | ✅ | 完全可定制 |
+                | Feature | Android | iOS | Web | Description |
+                |---------|:-------:|:---:|:---:|-------------|
+                | Basic Rendering | ✅ | ✅ | ✅ | Supports standard Markdown syntax |
+                | Table Support | ✅ | ✅ | ✅ | GFM table extension |
+                | Code Highlighting | ✅ | ❌ | ✅ | Syntax highlighting display |
+                | Image Rendering | ✅ | ✅ | ✅ | Local and network images |
+                | Custom Styling | ✅ | ✅ | ✅ | Fully customizable |
                 
-                ## 多种编程语言
+                ## Multiple Programming Languages
                 
-                ### Kotlin 代码
+                ### Kotlin Code
                 ```kotlin
                 class MarkdownRenderer {
                     fun render(content: String): ComposableNode {
@@ -55,7 +55,7 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
                 }
                 ```
                 
-                ### JavaScript 代码
+                ### JavaScript Code
                 ```javascript
                 const markdownRenderer = {
                     render(content) {
@@ -72,7 +72,7 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
                 };
                 ```
                 
-                ### Python 代码
+                ### Python Code
                 ```python
                 class MarkdownProcessor:
                     def __init__(self):
@@ -94,13 +94,13 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
                         return metadata
                 ```
                 
-                ## 简单表格
+                ## Simple Table
                 
-                | 名称 | 年龄 |
-                |------|------|
-                | 张三 | 25 |
-                | 李四 | 30 |
-                | 王五 | 28 |
+                | Name | Age |
+                |------|-----|
+                | John | 25 |
+                | Jane | 30 |
+                | Bob | 28 |
             """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp)

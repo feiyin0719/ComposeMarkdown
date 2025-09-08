@@ -2,7 +2,7 @@ package com.iffly.compose.markdown.render
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.commonmark.node.Block
+import com.vladsch.flexmark.util.ast.Block
 
 interface IBlockRenderer<T> where T : Block {
 

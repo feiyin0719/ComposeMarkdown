@@ -12,15 +12,15 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import org.commonmark.node.Image
+import com.vladsch.flexmark.ast.Image
 
 @Composable
 fun MarkdownImage(
     node: Image,
     modifier: Modifier = Modifier
 ) {
-    val url = node.destination
-    val altText = node.title ?: ""
+    val url = node.url
+    val altText = node.title.toString()
 
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)

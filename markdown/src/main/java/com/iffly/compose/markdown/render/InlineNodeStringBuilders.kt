@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.render
 
-import org.commonmark.node.Node
+import com.vladsch.flexmark.util.ast.Node
+
 
 class InlineNodeStringBuilders private constructor(
     private val annotatedStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<out Node>>

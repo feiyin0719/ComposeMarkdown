@@ -19,14 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.plugin.CustomMarkdownPlugin
-import com.iffly.compose.markdown.plugin.HighlightDelimiterProcessor
 
 @Composable
 fun CustomPluginExample(paddingValues: PaddingValues) {
-    // 创建包含自定义插件的配置
+    // Create configuration with custom plugins
     val customConfig = MarkdownRenderConfig.Builder()
         .addPlugin(CustomMarkdownPlugin())
-        .addDelimiterProcessor(HighlightDelimiterProcessor())
         .build()
 
     Column(
@@ -35,7 +33,7 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
             .padding(paddingValues)
             .verticalScroll(rememberScrollState())
     ) {
-        // 说明卡片
+        // Description card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -43,12 +41,12 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
             colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f))
         ) {
             Text(
-                text = "💡 自定义插件功能展示\n" +
-                        "• 告警块: :::info, :::warning, :::success, :::error\n" +
-                        "• 提及用户: @username\n" +
-                        "• 标签: #hashtag\n" +
-                        "• 高亮文本: ==文本==\n" +
-                        "• 徽章: !!type:text!!",
+                text = "💡 Custom Plugin Features Demo\n" +
+                        "• Alert blocks: :::info, :::warning, :::success, :::error\n" +
+                        "• User mentions: @username\n" +
+                        "• Hashtags: #hashtag\n" +
+                        "• Highlight text: ==text==\n" +
+                        "• Badges: !!type:text!!",
                 modifier = Modifier.padding(16.dp),
                 color = Color.Blue,
                 style = MaterialTheme.typography.bodyMedium
@@ -57,110 +55,110 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
 
         MarkdownView(
             content = """
-                # 自定义插件示例
+                # Custom Plugin Example
                 
-                这个示例展示了各种自定义Markdown插件的功能。
+                This example demonstrates various custom Markdown plugin features.
                 
-                ## 1. 告警块 (Alert Blocks)
+                ## 1. Alert Blocks
                 
-                ### 信息提示
+                ### Information Notice
                 :::info
-                重要信息
-                这是一个信息类型的告警块，用于显示一般性信息。
+                Important Information
+                This is an info-type alert block for displaying general information.
                 :::
                 
-                ### 警告提示
+                ### Warning Notice
                 :::warning
-                注意事项
-                这是一个警告类型的告警块，用于提醒用户注意某些事项。
+                Notice
+                This is a warning-type alert block to remind users of certain matters.
                 :::
                 
-                ### 成功提示
+                ### Success Notice
                 :::success
-                操作成功
-                这是一个成功类型的告警块，用于显示操作成功的消息。
+                Operation Successful
+                This is a success-type alert block for displaying successful operation messages.
                 :::
                 
-                ### 错误提示
+                ### Error Notice
                 :::error
-                操作失败
-                这是一个错误类型的告警块，用于显示错误信息。
+                Operation Failed
+                This is an error-type alert block for displaying error messages.
                 :::
                 
-                ## 2. 用户提及 (Mentions)
+                ## 2. User Mentions
                 
-                欢迎 @developer 和 @designer 加入我们的团队！
+                Welcome @developer and @designer to join our team!
                 
-                感谢 @admin 的帮助，以及 @user123 的反馈。
+                Thanks to @admin for the help, and @user123 for the feedback.
                 
-                ## 3. 话题标签 (Hashtags)
+                ## 3. Hashtags
                 
-                这个项目使用了 #Android #Compose #Kotlin 技术栈。
+                This project uses #Android #Compose #Kotlin technology stack.
                 
-                相关话题：#移动开发 #UI框架 #开源项目
+                Related topics: #MobileDevelopment #UIFramework #OpenSource
                 
-                ## 4. 高亮文本 (Highlight)
+                ## 4. Highlight Text
                 
-                这段文本包含 ==重要的高亮内容== 需要特别注意。
+                This text contains ==important highlighted content== that needs special attention.
                 
-                请注意 ==这个功能== 在新版本中有所改进。
+                Please note that ==this feature== has been improved in the new version.
                 
-                ## 5. 徽章 (Badges)
+                ## 5. Badges
                 
-                项目状态：!!success:已完成!! !!primary:v1.0.0!! !!warning:测试中!!
+                Project status: !!success:Completed!! !!primary:v1.0.0!! !!warning:Testing!!
                 
-                技术栈：!!info:Kotlin!! !!primary:Compose!! !!success:稳定版!!
+                Tech stack: !!info:Kotlin!! !!primary:Compose!! !!success:Stable!!
                 
-                重要提醒：!!error:已废弃!! !!danger:高风险!! !!warning:需更新!!
+                Important reminder: !!error:Deprecated!! !!danger:High Risk!! !!warning:Update Required!!
                 
-                ## 6. 混合使用示例
+                ## 6. Mixed Usage Example
                 
                 :::info
-                项目更新通知
+                Project Update Notification
                 
-                感谢 @team_lead 发布了 !!primary:v2.0.0!! 版本！
+                Thanks to @team_lead for releasing !!primary:v2.0.0!! version!
                 
-                主要改进包括：
-                - ==性能优化== #性能
-                - ==UI改进== #界面
-                - 新增功能 !!success:已完成!!
+                Main improvements include:
+                - ==Performance optimization== #Performance
+                - ==UI improvements== #Interface
+                - New features !!success:Completed!!
                 
-                相关人员：@developer @designer @tester
-                话题标签：#更新 #版本发布 #团队协作
+                Related personnel: @developer @designer @tester
+                Topic tags: #Update #Release #TeamCollaboration
                 :::
                 
-                ## 7. 技术实现说明
+                ## 7. Technical Implementation
                 
-                ### Block 解析器
+                ### Block Parser
                 ```kotlin
                 class AlertBlockParser : AbstractBlockParser() {
-                    // 解析 :::type 内容 ::: 格式的告警块
+                    // Parse :::type content ::: format alert blocks
                 }
                 ```
                 
-                ### Inline 解析器
+                ### Inline Parser
                 ```kotlin
                 class MentionInlineParser : InlineContentParser {
-                    // 解析 @username 格式的用户提及
+                    // Parse @username format user mentions
                 }
                 ```
                 
-                ### 自定义渲染器
+                ### Custom Renderer
                 ```kotlin
                 class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                     @Composable
                     override fun Invoke(node: AlertBlock, modifier: Modifier) {
-                        // 自定义Compose UI渲染逻辑
+                        // Custom Compose UI rendering logic
                     }
                 }
                 ```
                 
-                这些插件展示了如何扩展Markdown语法，添加应用专属的功能。
+                These plugins demonstrate how to extend Markdown syntax and add application-specific features.
             """.trimIndent(),
             markdownRenderConfig = customConfig,
             modifier = Modifier.padding(16.dp),
             linkInteractionListener = { linkAnnotation ->
-                Log.d("CustomPlugin", "点击链接: $linkAnnotation")
+                Log.d("CustomPlugin", "Link clicked: $linkAnnotation")
             }
         )
     }

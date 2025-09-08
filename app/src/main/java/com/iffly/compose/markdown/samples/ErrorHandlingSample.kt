@@ -23,24 +23,24 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 
 @Composable
 fun ErrorHandlingExample(paddingValues: PaddingValues) {
-    // 故意创建一个可能出错的场景
+    // Intentionally create a scenario that might cause errors
     val invalidContent = """
-        # 错误处理示例
+        # Error Handling Example
         
-        这个示例展示正常内容和错误处理：
+        This example demonstrates normal content and error handling:
         
-        ## 正常内容
-        这部分内容应该正常显示。
+        ## Normal Content
+        This part of the content should display normally.
         
-        **粗体** 和 *斜体* 文本。
+        **Bold** and *italic* text.
         
-        ## 潜在问题
-        在实际应用中，可能遇到：
-        - 网络请求失败
-        - 文件读取错误  
-        - 解析异常
+        ## Potential Issues
+        In real applications, you might encounter:
+        - Network request failures
+        - File reading errors
+        - Parsing exceptions
         
-        库提供了优雅的错误处理机制。
+        The library provides elegant error handling mechanisms.
     """.trimIndent()
 
     Column(
@@ -56,7 +56,7 @@ fun ErrorHandlingExample(paddingValues: PaddingValues) {
             colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f))
         ) {
             Text(
-                text = "💡 提示：这个示例展示了错误处理机制",
+                text = "💡 Tip: This example demonstrates the error handling mechanism",
                 modifier = Modifier.padding(16.dp),
                 color = Color.Blue
             )
@@ -75,13 +75,13 @@ fun ErrorHandlingExample(paddingValues: PaddingValues) {
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "⚠️ Markdown 解析失败",
+                            text = "⚠️ Markdown parsing failed",
                             color = Color.Red,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "错误信息: ${throwable.message}",
+                            text = "Error message: ${throwable.message}",
                             color = Color.Red,
                             style = MaterialTheme.typography.bodySmall
                         )

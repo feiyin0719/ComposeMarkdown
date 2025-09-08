@@ -25,11 +25,11 @@ import com.iffly.compose.markdown.widget.table.Table
 import com.iffly.compose.markdown.widget.table.TableBorder
 import com.iffly.compose.markdown.widget.table.TableBorderMode
 import com.iffly.compose.markdown.widget.table.TableScope
-import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.ext.gfm.tables.TableBody
-import org.commonmark.ext.gfm.tables.TableCell
-import org.commonmark.ext.gfm.tables.TableHead
-import org.commonmark.ext.gfm.tables.TableRow
+import com.vladsch.flexmark.ext.tables.TableBlock
+import com.vladsch.flexmark.ext.tables.TableBody
+import com.vladsch.flexmark.ext.tables.TableCell
+import com.vladsch.flexmark.ext.tables.TableHead
+import com.vladsch.flexmark.ext.tables.TableRow
 
 object TableRenderer : IBlockRenderer<TableBlock> {
     @Composable

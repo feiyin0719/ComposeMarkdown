@@ -22,25 +22,26 @@ import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
 import com.iffly.compose.markdown.config.currentLinkClickListener
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeStyle
 import com.iffly.compose.markdown.widget.BasicText
-import org.commonmark.ext.gfm.tables.TableCell
-import org.commonmark.internal.util.Parsing
-import org.commonmark.node.BulletList
-import org.commonmark.node.Code
-import org.commonmark.node.Emphasis
-import org.commonmark.node.HardLineBreak
-import org.commonmark.node.Heading
-import org.commonmark.node.Image
-import org.commonmark.node.Link
-import org.commonmark.node.ListItem
-import org.commonmark.node.Node
-import org.commonmark.node.OrderedList
-import org.commonmark.node.Paragraph
-import org.commonmark.node.SoftLineBreak
-import org.commonmark.node.StrongEmphasis
-import org.commonmark.node.Text
+import com.vladsch.flexmark.ext.tables.TableCell
+import com.vladsch.flexmark.ast.BulletList
+import com.vladsch.flexmark.ast.Code
+import com.vladsch.flexmark.ast.Emphasis
+import com.vladsch.flexmark.ast.HardLineBreak
+import com.vladsch.flexmark.ast.Heading
+import com.vladsch.flexmark.ast.Image
+import com.vladsch.flexmark.ast.Link
+import com.vladsch.flexmark.ast.ListItem
+import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.ast.OrderedList
+import com.vladsch.flexmark.ast.Paragraph
+import com.vladsch.flexmark.ast.SoftLineBreak
+import com.vladsch.flexmark.ast.StrongEmphasis
+import com.vladsch.flexmark.ast.Text
+import com.vladsch.flexmark.ast.util.Parsing
 import kotlin.text.Typography.nbsp
 
 
@@ -165,7 +166,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
     var node = parent.firstChild
     while (node != null) {
         when (node) {
-            is Text -> append(node.literal)
+            is Text -> append(node.contentText())
             is HardLineBreak, is SoftLineBreak -> appendLine()
             is Paragraph -> {
                 buildAnnotatedString(
@@ -213,7 +214,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
 
             is Link -> {
                 val linkAnnotation = LinkAnnotation.Url(
-                    url = node.destination,
+                    url = node.url.toString(),
                     styles = typographyStyle.link,
                     linkInteractionListener = linkInteractionListener,
                 )
@@ -242,7 +243,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
             }
 
             is Code -> {
-                val codeText = node.literal
+                val codeText = node.contentText()
                 withStyle(typographyStyle.code) {
                     append(codeText)
                 }
@@ -280,13 +281,13 @@ fun AnnotatedString.Builder.buildListItem(
     linkInteractionListener: LinkInteractionListener? = null,
 ) {
     appendLine()
-    append("$nbsp".repeat(Parsing.CODE_BLOCK_INDENT * indentLevel))
+    append("$nbsp".repeat( indentLevel))
 
     // Checking if there is an ordered list
     if (marker.toIntOrNull() != null) {
         val listNode = child.parent as OrderedList
         append(marker)
-        append(listNode.markerDelimiter)
+        append(listNode.delimiter)
     } else {
         append(marker)
     }

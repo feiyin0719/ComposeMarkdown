@@ -1,14 +1,14 @@
 package com.iffly.compose.markdown.render
 
-import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.node.Block
-import org.commonmark.node.BulletList
-import org.commonmark.node.FencedCodeBlock
-import org.commonmark.node.Heading
-import org.commonmark.node.IndentedCodeBlock
-import org.commonmark.node.OrderedList
-import org.commonmark.node.Paragraph
-import org.commonmark.node.ThematicBreak
+import com.vladsch.flexmark.ast.BulletList
+import com.vladsch.flexmark.ast.FencedCodeBlock
+import com.vladsch.flexmark.ast.Heading
+import com.vladsch.flexmark.ast.IndentedCodeBlock
+import com.vladsch.flexmark.ast.OrderedList
+import com.vladsch.flexmark.ast.Paragraph
+import com.vladsch.flexmark.ast.ThematicBreak
+import com.vladsch.flexmark.ext.tables.TableBlock
+import com.vladsch.flexmark.util.ast.Block
 
 
 class BlockRenderers private constructor(private val renderers: Map<Class<out Block>, IBlockRenderer<out Block>>) {

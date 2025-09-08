@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.widget.HorizontalLine
-import org.commonmark.node.ThematicBreak
+import com.vladsch.flexmark.ast.ThematicBreak
 
 object BreakLineRenderer : IBlockRenderer<ThematicBreak> {
     @Composable

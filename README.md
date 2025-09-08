@@ -510,37 +510,31 @@ elements, inline elements, and renderers.
 
 ```kotlin
 class CustomMarkdownPlugin : IMarkdownRenderPlugin {
-
+    
     // Register custom block parser factories
-    override fun blockParserFactories(): List<BlockParserFactory> {
-        return listOf(AlertBlockParserFactory())
-    }
+    override fun blockParserFactories(): List<CustomBlockParserFactory> =
+        listOf(AlertBlockParserFactory())
 
     // Register custom inline content parser factories
-    override fun inlineContentParserFactories(): List<InlineContentParserFactory> {
-        return listOf(
-            MentionInlineParser.Factory(),
-            HashtagInlineParser.Factory(),
-            BadgeInlineParser.Factory()
-        )
-    }
+    override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = listOf(
+        MentionInlineParserFactory(),
+        HashtagInlineParserFactory(),
+        BadgeInlineParserFactory(),
+        HighlightInlineParserFactory()
+    )
 
     // Register custom block renderers
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> {
-        return mapOf(
-            AlertBlock::class.java to AlertBlockRenderer()
-        )
-    }
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
+        mapOf(AlertBlock::class.java to AlertBlockRenderer())
 
     // Register custom inline node string builders
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> {
-        return mapOf(
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+        mapOf(
             MentionNode::class.java to MentionNodeStringBuilder(),
             HashtagNode::class.java to HashtagNodeStringBuilder(),
             HighlightNode::class.java to HighlightNodeStringBuilder(),
             BadgeNode::class.java to BadgeNodeStringBuilder()
         )
-    }
 }
 ```
 
@@ -593,38 +587,32 @@ Create custom block-level element renderers:
 class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
     @Composable
     override fun Invoke(node: AlertBlock, modifier: Modifier) {
-        val (backgroundColor, contentColor, icon) = when (node.alertType) {
-            AlertBlock.TYPE_INFO -> Triple(
-                Color(0xFFE3F2FD),
-                Color(0xFF1976D2),
-                Icons.Default.Info
-            )
+        val (icon, containerColor, contentColor) = when (node.alertType) {
+            AlertBlock.TYPE_INFO -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
             AlertBlock.TYPE_WARNING -> Triple(
-                Color(0xFFFFF3E0),
-                Color(0xFFE65100),
-                Icons.Default.Warning
+                Icons.Default.Warning,
+                Color(0xFFFFF8E1),
+                Color(0xFFF57C00)
             )
             AlertBlock.TYPE_SUCCESS -> Triple(
+                Icons.Default.CheckCircle,
                 Color(0xFFE8F5E8),
-                Color(0xFF2E7D32),
-                Icons.Default.CheckCircle
+                Color(0xFF2E7D32)
             )
             AlertBlock.TYPE_ERROR -> Triple(
+                Icons.Default.Delete,
                 Color(0xFFFFEBEE),
-                Color(0xFFC62828),
-                Icons.Default.Error
+                Color(0xFFD32F2F)
             )
-            else -> Triple(
-                Color(0xFFF5F5F5),
-                Color(0xFF424242),
-                Icons.Default.Info
-            )
+            else -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
         }
-
+        
         Card(
-            modifier = modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = backgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = containerColor),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -638,9 +626,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                     tint = contentColor,
                     modifier = Modifier.size(24.dp)
                 )
-
                 Spacer(modifier = Modifier.width(12.dp))
-
                 Column {
                     val nodeTitle = node.title
                     if (!nodeTitle.isNullOrBlank()) {
@@ -652,14 +638,8 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-
-                    if (node.content.isNotBlank()) {
-                        Text(
-                            text = node.content,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = contentColor.copy(alpha = 0.8f)
-                        )
-                    }
+                    // Use MarkdownText to render child nodes
+                    MarkdownText(node)
                 }
             }
         }
@@ -673,20 +653,20 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
 class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: MentionNode,
-        inlineContentMap: MutableMap<String, InlineTextContent>,
+        inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
-        withStyle(
+        pushStyle(
             SpanStyle(
                 color = Color(0xFF1976D2),
-                fontWeight = FontWeight.Medium,
-                background = Color(0xFFE3F2FD)
+                textDecoration = TextDecoration.Underline,
+                fontWeight = FontWeight.Medium
             )
-        ) {
-            append("@${node.username}")
-        }
+        )
+        append("@${node.username}")
+        pop()
     }
 }
 ```
@@ -696,12 +676,16 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
 ```kotlin
 /**
  * Alert block node
- * Syntax: :::type[title] content :::
+ * Syntax: :::type title
+ * content
+ * :::
  */
-class AlertBlock : CustomBlock() {
+class AlertBlock : Block() {
     var alertType: String = TYPE_INFO
     var title: String? = null
-    var content: String = ""
+    // Content is stored as child nodes, not as a string property
+
+    override fun getSegments(): Array<BasedSequence> = emptyArray()
 
     companion object {
         const val TYPE_INFO = "info"
@@ -715,24 +699,18 @@ class AlertBlock : CustomBlock() {
  * Mention node
  * Syntax: @username
  */
-class MentionNode : Node() {
-    var username: String = ""
-
-    override fun accept(visitor: Visitor?) {
-        visitor?.visit(this)
-    }
+class MentionNode(private val seq: BasedSequence) : Node() {
+    var username: String = seq.subSequence(1, seq.length).toString()
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
 /**
  * Hashtag node
  * Syntax: #hashtag
  */
-class HashtagNode : Node() {
-    var hashtag: String = ""
-
-    override fun accept(visitor: Visitor?) {
-        visitor?.visit(this)
-    }
+class HashtagNode(private val seq: BasedSequence) : Node() {
+    var hashtag: String = seq.subSequence(1, seq.length).toString()
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
 /**
@@ -741,23 +719,15 @@ class HashtagNode : Node() {
  */
 class HighlightNode : Node() {
     var highlightText: String = ""
-
-    override fun accept(visitor: Visitor?) {
-        visitor?.visit(this)
-    }
+    override fun getSegments(): Array<BasedSequence> = emptyArray()
 }
 
 /**
  * Badge node
- * Syntax: !!badge:text!!
+ * Syntax: !!type:text!!
  */
-class BadgeNode : Node() {
-    var badgeText: String = ""
-    var badgeType: String = "default"
-
-    override fun accept(visitor: Visitor?) {
-        visitor?.visit(this)
-    }
+class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) : Node() {
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 ```
 
@@ -894,8 +864,8 @@ class MarkdownRenderConfig private constructor(
 
 ```kotlin
 interface IMarkdownRenderPlugin {
-    fun blockParserFactories(): List<BlockParserFactory> = emptyList()
-    fun inlineContentParserFactories(): List<InlineContentParserFactory> = emptyList()
+    fun blockParserFactories(): List<CustomBlockParserFactory> = emptyList()
+    fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = emptyList()
     fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> = emptyMap()
     fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
         emptyMap()

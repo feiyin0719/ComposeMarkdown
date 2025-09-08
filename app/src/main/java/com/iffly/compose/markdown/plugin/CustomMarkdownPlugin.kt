@@ -29,41 +29,40 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.IMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.style.TypographyStyle
-import org.commonmark.node.Block
-import org.commonmark.node.CustomBlock
-import org.commonmark.node.Node
-import org.commonmark.node.Text
-import org.commonmark.node.Visitor
-import org.commonmark.parser.SourceLine
-import org.commonmark.parser.beta.InlineContentParser
-import org.commonmark.parser.beta.InlineContentParserFactory
-import org.commonmark.parser.beta.InlineParserState
-import org.commonmark.parser.beta.ParsedInline
-import org.commonmark.parser.block.AbstractBlockParser
-import org.commonmark.parser.block.AbstractBlockParserFactory
-import org.commonmark.parser.block.BlockContinue
-import org.commonmark.parser.block.BlockParserFactory
-import org.commonmark.parser.block.BlockStart
-import org.commonmark.parser.block.MatchedBlockParser
-import org.commonmark.parser.block.ParserState
-import org.commonmark.parser.delimiter.DelimiterProcessor
-import org.commonmark.parser.delimiter.DelimiterRun
+import com.vladsch.flexmark.parser.InlineParser
+import com.vladsch.flexmark.parser.InlineParserExtension
+import com.vladsch.flexmark.parser.InlineParserExtensionFactory
+import com.vladsch.flexmark.parser.LightInlineParser
+import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.parser.block.AbstractBlockParser
+import com.vladsch.flexmark.parser.block.AbstractBlockParserFactory
+import com.vladsch.flexmark.parser.block.BlockContinue
+import com.vladsch.flexmark.parser.block.BlockParserFactory
+import com.vladsch.flexmark.parser.block.BlockStart
+import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
+import com.vladsch.flexmark.parser.block.MatchedBlockParser
+import com.vladsch.flexmark.parser.block.ParserState
+import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.data.DataHolder
+import com.vladsch.flexmark.util.data.MutableDataHolder
+import com.vladsch.flexmark.util.sequence.BasedSequence
 
-/**
- * 自定义告警块
- * 语法: :::type 内容 :::
- * 支持类型: info, warning, success, error
- */
-class AlertBlock : CustomBlock() {
+// --- Alert Block using CustomBlock ---
+class AlertBlock : Block() {
     var alertType: String = TYPE_INFO
     var title: String? = null
-    var content: String = ""
+    // Remove the original content string, now use child nodes to store content
+
+    override fun getSegments(): Array<BasedSequence> = emptyArray()
 
     companion object {
         const val TYPE_INFO = "info"
@@ -73,353 +72,288 @@ class AlertBlock : CustomBlock() {
     }
 }
 
-/**
- * 自定义提及节点
- * 语法: @username
- */
-class MentionNode : Node() {
-    var username: String = ""
-    override fun accept(visitor: Visitor?) {
-        TODO("Not yet implemented")
-    }
+// --- Inline custom nodes extend CustomNode ---
+class MentionNode(private val seq: BasedSequence) : Node() {
+    var username: String = seq.subSequence(1, seq.length).toString()
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
-/**
- * 自定义标签节点
- * 语法: #hashtag
- */
-class HashtagNode : Node() {
-    var hashtag: String = ""
-    override fun accept(visitor: Visitor?) {
-        TODO("Not yet implemented")
-    }
+class HashtagNode(private val seq: BasedSequence) : Node() {
+    var hashtag: String = seq.subSequence(1, seq.length).toString()
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
-/**
- * 自定义高亮文本节点
- * 语法: ==高亮文本==
- */
 class HighlightNode : Node() {
     var highlightText: String = ""
-    override fun accept(visitor: Visitor?) {
-        TODO("Not yet implemented")
-    }
+    override fun getSegments(): Array<BasedSequence> = emptyArray()
 }
 
-/**
- * 自定义徽章节点
- * 语法: !!badge:text!!
- */
-class BadgeNode : Node() {
-    var badgeText: String = ""
-    var badgeType: String = "default"
-    override fun accept(visitor: Visitor?) {
-        TODO("Not yet implemented")
-    }
+class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) :
+    Node() {
+    override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
-/**
- * 告警块解析器
- */
-class AlertBlockParser : AbstractBlockParser() {
-    private val block = AlertBlock()
+// --- Block Parser ---
+class AlertBlockParser(private val block: AlertBlock) : AbstractBlockParser() {
     private var finished = false
+    private val contentLines = mutableListOf<String>()
 
     override fun getBlock(): Block = block
-    override fun isContainer(): Boolean = false
-    override fun canContain(childBlock: Block): Boolean = false
 
-    override fun tryContinue(parserState: ParserState): BlockContinue? {
-        if (finished) {
-            return BlockContinue.finished()
-        }
-
-        val nextNonSpace = parserState.nextNonSpaceIndex
-        val line = parserState.line.content
-
-        // 检查是否遇到结束标记 ":::"
-        if (nextNonSpace + 2 < line.length) {
-            val marker = line.subSequence(nextNonSpace, nextNonSpace + 3)
-            if (marker == ":::") {
-                finished = true
-                return BlockContinue.finished()
-            }
-        }
-
-        return BlockContinue.atIndex(parserState.index)
-    }
-
-    override fun addLine(line: SourceLine) {
-        val content = line.content.toString()
-        if (block.content.isEmpty()) {
-            block.content = content
-        } else {
-            block.content += "\n" + content
-        }
-    }
-
-    override fun closeBlock() {
-        // 解析标题（如果有的话）
-        val content = block.content
-        val lines = content.split('\n')
-        if (lines.isNotEmpty()) {
-            val firstLine = lines[0].trim()
-            if (firstLine.isNotEmpty()) {
-                block.title = firstLine
-                if (lines.size > 1) {
-                    block.content = lines.drop(1).joinToString("\n")
-                } else {
-                    block.content = ""
-                }
-            }
-        }
-        super.closeBlock()
-    }
-}
-
-/**
- * 告警块解析器工厂
- */
-class AlertBlockParserFactory : AbstractBlockParserFactory() {
-    override fun tryStart(state: ParserState, matchedBlockParser: MatchedBlockParser): BlockStart? {
+    override fun tryContinue(state: ParserState): BlockContinue? {
+        if (finished) return BlockContinue.none()
+        val line = state.line
         val nextNonSpace = state.nextNonSpaceIndex
-        val line = state.line.content
-
-        // 检查是否以 ":::" 开头的告警块
-        if (state.indent < 4 && nextNonSpace + 2 < line.length) {
-            val marker = line.subSequence(nextNonSpace, nextNonSpace + 3)
-            if (marker == ":::") {
-                val restOfLine = line.subSequence(nextNonSpace + 3, line.length).toString().trim()
-                val alertType = when {
-                    restOfLine.startsWith("info") -> AlertBlock.TYPE_INFO
-                    restOfLine.startsWith("warning") -> AlertBlock.TYPE_WARNING
-                    restOfLine.startsWith("success") -> AlertBlock.TYPE_SUCCESS
-                    restOfLine.startsWith("error") -> AlertBlock.TYPE_ERROR
-                    else -> AlertBlock.TYPE_INFO
-                }
-
-                val parser = AlertBlockParser()
-                (parser.getBlock() as AlertBlock).alertType = alertType
-
-                return BlockStart.of(parser).atIndex(nextNonSpace + 3 + alertType.length)
+        // Check if it's the end marker
+        if (nextNonSpace + 3 <= line.length) {
+            if (line.subSequence(nextNonSpace, nextNonSpace + 3).toString() == ":::") {
+                finished = true
+                // Consume this line to prevent other parsers from processing it
+                return BlockContinue.atIndex(line.length)
             }
         }
-        return BlockStart.none()
+        return BlockContinue.atIndex(state.index)
+    }
+
+    override fun addLine(state: ParserState, line: BasedSequence) {
+        // Only add content when not finished
+        if (!finished) {
+            contentLines.add(line.toString())
+        }
+    }
+
+    override fun closeBlock(state: ParserState) {
+        if (contentLines.isNotEmpty()) {
+            // First line as title
+            val firstLine = contentLines[0].trim()
+
+            block.title = firstLine
+            // Remaining lines as content, need inline parsing
+            val remainingContent = if (contentLines.size > 1) {
+                contentLines.drop(1).joinToString("\n")
+            } else {
+                ""
+            }
+
+            if (remainingContent.isNotEmpty()) {
+                // Parse content as child nodes
+                parseContentAsChildren(state, remainingContent)
+            }
+
+        }
+    }
+
+    private fun parseContentAsChildren(state: ParserState, content: String) {
+        // Directly use basic Parser to parse content
+        val inlineParser = state.inlineParser
+        inlineParser.parse(BasedSequence.of(content), block)
     }
 }
 
-/**
- * 提及解析器
- */
-class MentionInlineParser : InlineContentParser {
+class AlertBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension {
+    override fun apply(options: DataHolder): BlockParserFactory =
+        object : AbstractBlockParserFactory(options) {
+            override fun tryStart(
+                state: ParserState,
+                matchedBlockParser: MatchedBlockParser
+            ): BlockStart? {
+                val nextNonSpace = state.nextNonSpaceIndex
+                val line = state.line
+                // Fix boundary check: ensure there are enough characters to check ":::"
+                if (state.indent < 4 && nextNonSpace + 3 <= line.length) {
+                    val marker = line.subSequence(nextNonSpace, nextNonSpace + 3).toString()
+                    if (marker == ":::") {
+                        val rest = line.subSequence(nextNonSpace + 3, line.length).toString().trim()
+                        val alertType = when {
+                            rest.startsWith("info") -> AlertBlock.TYPE_INFO
+                            rest.startsWith("warning") -> AlertBlock.TYPE_WARNING
+                            rest.startsWith("success") -> AlertBlock.TYPE_SUCCESS
+                            rest.startsWith("error") -> AlertBlock.TYPE_ERROR
+                            else -> AlertBlock.TYPE_INFO
+                        }
+                        val alertBlock = AlertBlock().apply { this.alertType = alertType }
+                        val parser = AlertBlockParser(alertBlock)
+                        // Fix index calculation: skip the entire start line
+                        return BlockStart.of(parser).atIndex(line.length)
+                    }
+                }
+                return BlockStart.none()
+            }
+        }
+
+    override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun affectsGlobalScope(): Boolean = false
+    override fun parserOptions(options: MutableDataHolder) {}
+    override fun extend(parserBuilder: Parser.Builder) {
+        parserBuilder.customBlockParserFactory(this)
+    }
+}
+
+// --- Inline Parser Extensions ---
+private fun isCjk(char: Char): Boolean = char.code in 0x4e00..0x9fff
+
+abstract class BaseInlineExt : InlineParserExtension {
+    override fun finalizeDocument(inlineParser: InlineParser) {}
+    override fun finalizeBlock(inlineParser: InlineParser) {}
+}
+
+class MentionInlineParserExtension : BaseInlineExt() {
     companion object {
         private val USERNAME_PATTERN = Regex("^[a-zA-Z0-9_-]{2,20}$")
     }
 
-    override fun tryParse(inlineParserState: InlineParserState): ParsedInline? {
-        val scanner = inlineParserState.scanner()
-        scanner.next() // 跳过 '@'
-
-        val textStart = scanner.position()
-
-        // 扫描用户名字符
-        while (scanner.hasNext()) {
-            val char = scanner.peek()
-            if (!char.isLetterOrDigit() && char != '_' && char != '-') {
-                break
-            }
-            scanner.next()
-        }
-
-        val textSource = scanner.getSource(textStart, scanner.position())
-        val username = textSource.content
-
-        if (USERNAME_PATTERN.matches(username)) {
-            val mentionNode = MentionNode().apply {
-                this.username = username
-                sourceSpans = textSource.sourceSpans
-            }
-            return ParsedInline.of(mentionNode, scanner.position())
-        }
-
-        return ParsedInline.none()
-    }
-
-    class Factory : InlineContentParserFactory {
-        override fun getTriggerCharacters(): Set<Char> = setOf('@')
-        override fun create(): InlineContentParser = MentionInlineParser()
+    override fun parse(inlineParser: LightInlineParser): Boolean {
+        if (inlineParser.peek() != '@') return false
+        val start = inlineParser.index
+        val input = inlineParser.input
+        var i = start + 1
+        while (i < input.length && (input[i].isLetterOrDigit() || input[i] == '_' || input[i] == '-')) i++
+        if (i == start + 1) return false
+        val seq = input.subSequence(start, i)
+        val username = seq.subSequence(1, seq.length).toString()
+        if (!USERNAME_PATTERN.matches(username)) return false
+        inlineParser.appendNode(MentionNode(seq))
+        inlineParser.index = i
+        return true
     }
 }
 
-/**
- * 标签解析器
- */
-class HashtagInlineParser : InlineContentParser {
+class MentionInlineParserFactory : InlineParserExtensionFactory {
+    override fun getCharacters(): CharSequence = "@"
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
+        MentionInlineParserExtension()
+
+    override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun affectsGlobalScope(): Boolean = false
+}
+
+class HashtagInlineParserExtension : BaseInlineExt() {
     companion object {
-        private val HASHTAG_PATTERN = Regex("^[a-zA-Z0-9_\\u4e00-\\u9fff]{1,30}$")
+        private val HASHTAG_PATTERN = Regex("^[a-zA-Z0-9_\u4e00-\u9fff]{1,30}$")
     }
 
-    override fun tryParse(inlineParserState: InlineParserState): ParsedInline? {
-        val scanner = inlineParserState.scanner()
-        scanner.next() // 跳过 '#'
+    override fun parse(inlineParser: LightInlineParser): Boolean {
+        if (inlineParser.peek() != '#') return false
+        val start = inlineParser.index
+        val input = inlineParser.input
+        var i = start + 1
+        while (i < input.length) {
+            val ch = input[i]
+            if (!(ch.isLetterOrDigit() || ch == '_' || isCjk(ch))) break
+            i++
+        }
+        if (i == start + 1) return false
+        val seq = input.subSequence(start, i)
+        val hashtag = seq.subSequence(1, seq.length).toString()
+        if (!HASHTAG_PATTERN.matches(hashtag)) return false
+        inlineParser.appendNode(HashtagNode(seq))
+        inlineParser.index = i
+        return true
+    }
+}
 
-        val textStart = scanner.position()
+class HashtagInlineParserFactory : InlineParserExtensionFactory {
+    override fun getCharacters(): CharSequence = "#"
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
+        HashtagInlineParserExtension()
 
-        // 扫描标签字符（支持中文）
-        while (scanner.hasNext()) {
-            val char = scanner.peek()
-            if (!char.isLetterOrDigit() && char != '_' && !isCJK(char)) {
+    override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun affectsGlobalScope(): Boolean = false
+}
+
+class BadgeInlineParserExtension : BaseInlineExt() {
+    override fun parse(inlineParser: LightInlineParser): Boolean {
+        if (inlineParser.peek() != '!') return false
+        val input = inlineParser.input
+        val start = inlineParser.index
+        if (start + 1 >= input.length || input[start + 1] != '!') return false
+        var i = start + 2
+        var found = false
+        while (i < input.length - 1) {
+            if (input[i] == '!' && input[i + 1] == '!') {
+                found = true; break
+            }
+            i++
+        }
+        if (!found) return false
+        val contentStart = start + 2
+        val contentEnd = i
+        val seq = input.subSequence(start, i + 2)
+        val raw = input.subSequence(contentStart, contentEnd).toString()
+        val parts = raw.split(":", limit = 2)
+        val (type, text) = if (parts.size == 2) parts[0] to parts[1] else "default" to parts[0]
+        inlineParser.appendNode(BadgeNode(seq, type, text))
+        inlineParser.index = i + 2
+        return true
+    }
+}
+
+class BadgeInlineParserFactory : InlineParserExtensionFactory {
+    override fun getCharacters(): CharSequence = "!"
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
+        BadgeInlineParserExtension()
+
+    override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun affectsGlobalScope(): Boolean = false
+}
+
+// --- Highlight Inline Parser Extension ---
+class HighlightInlineParserExtension : BaseInlineExt() {
+    override fun parse(inlineParser: LightInlineParser): Boolean {
+        if (inlineParser.peek() != '=') return false
+        val start = inlineParser.index
+        val input = inlineParser.input
+
+        // Check if we have at least "==x=="
+        if (start + 3 >= input.length) return false
+        if (input[start + 1] != '=') return false
+
+        // Find the closing ==
+        var i = start + 2
+        var found = false
+        while (i < input.length - 1) {
+            if (input[i] == '=' && input[i + 1] == '=') {
+                found = true
                 break
             }
-            scanner.next()
+            i++
         }
 
-        val textSource = scanner.getSource(textStart, scanner.position())
-        val hashtag = textSource.content
+        if (!found || i == start + 2) return false // Empty content not allowed
 
-        if (HASHTAG_PATTERN.matches(hashtag)) {
-            val hashtagNode = HashtagNode().apply {
-                this.hashtag = hashtag
-                setSourceSpans(textSource.sourceSpans)
-            }
-            return ParsedInline.of(hashtagNode, scanner.position())
-        }
+        val contentStart = start + 2
+        val contentEnd = i
+        val text = input.subSequence(contentStart, contentEnd).toString()
 
-        return ParsedInline.none()
-    }
+        val highlightNode = HighlightNode()
+        highlightNode.highlightText = text
 
-    private fun isCJK(char: Char): Boolean {
-        return char.code in 0x4e00..0x9fff
-    }
-
-    class Factory : InlineContentParserFactory {
-        override fun getTriggerCharacters(): Set<Char> = setOf('#')
-        override fun create(): InlineContentParser = HashtagInlineParser()
+        inlineParser.appendNode(highlightNode)
+        inlineParser.index = i + 2
+        return true
     }
 }
 
-/**
- * 高亮文本分隔符处理器
- */
-class HighlightDelimiterProcessor : DelimiterProcessor {
-    override fun getOpeningCharacter(): Char = '='
-    override fun getClosingCharacter(): Char = '='
-    override fun getMinLength(): Int = 2
-    override fun process(openingRun: DelimiterRun, closingRun: DelimiterRun): Int {
-        if (openingRun.length() >= 2 && closingRun.length() >= 2) {
-            val highlightNode = HighlightNode()
+class HighlightInlineParserFactory : InlineParserExtensionFactory {
+    override fun getCharacters(): CharSequence = "="
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
+        HighlightInlineParserExtension()
 
-            // 提取高亮文本内容
-            var node = openingRun.opener?.next
-            val content = StringBuilder()
-            while (node != null && node != closingRun.closer) {
-                if (node is Text) {
-                    content.append(node.literal)
-                }
-                node = node.next
-            }
-
-            highlightNode.highlightText = content.toString()
-
-            // 替换原有节点
-            val textNode = Text(content.toString())
-            highlightNode.appendChild(textNode)
-
-            openingRun.opener?.insertAfter(highlightNode)
-
-            // 移除处理过的节点
-            node = openingRun.opener?.next
-            while (node != null && node != closingRun.closer?.next) {
-                val next = node.next
-                if (node != highlightNode) {
-                    node.unlink()
-                }
-                node = next
-            }
-
-            return 2
-        }
-        return 0
-    }
+    override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+    override fun affectsGlobalScope(): Boolean = false
 }
 
-/**
- * 徽章解析器
- */
-class BadgeInlineParser : InlineContentParser {
-    override fun tryParse(inlineParserState: InlineParserState): ParsedInline? {
-        val scanner = inlineParserState.scanner()
-
-        // 检查开始标记 "!!"
-        if (scanner.peek() != '!') {
-            return ParsedInline.none()
-        }
-
-        scanner.next() // 跳过第一个 '!'
-
-        if (!scanner.hasNext() || scanner.peek() != '!') {
-            return ParsedInline.none()
-        }
-
-        scanner.next() // 跳过第二个 '!'
-
-        val textStart = scanner.position()
-        val content = StringBuilder()
-
-        // 查找结束标记 "!!"
-        while (scanner.hasNext()) {
-            val char = scanner.peek()
-            if (char == '!' && scanner.hasNext()) {
-                scanner.next() // 移动到下一个字符
-                if (scanner.hasNext() && scanner.peek() == '!') {
-                    // 找到结束标记
-                    val textSource = scanner.getSource(textStart, scanner.position())
-                    scanner.next() // 跳过第二个 '!'
-
-                    // 解析徽章内容 (badge:text 或者 type:text)
-                    val contentStr = content.toString()
-                    val parts = contentStr.split(":", limit = 2)
-                    val badgeType = if (parts.size > 1) parts[0] else "default"
-                    val badgeText = if (parts.size > 1) parts[1] else parts[0]
-
-                    val badgeNode = BadgeNode().apply {
-                        this.badgeText = badgeText
-                        this.badgeType = badgeType
-                        sourceSpans = textSource.sourceSpans
-                    }
-
-                    return ParsedInline.of(badgeNode, scanner.position())
-                } else {
-                    content.append('!')
-                }
-            } else {
-                content.append(char)
-                scanner.next()
-            }
-        }
-
-        return ParsedInline.none()
-    }
-
-    class Factory : InlineContentParserFactory {
-        override fun getTriggerCharacters(): Set<Char> = setOf('!')
-        override fun create(): InlineContentParser = BadgeInlineParser()
-    }
-}
-
-/**
- * 告警块渲染器
- */
+// --- Renderers & Builders ----------------
 class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
     @Composable
     override fun Invoke(node: AlertBlock, modifier: Modifier) {
         val (icon, containerColor, contentColor) = when (node.alertType) {
-            AlertBlock.TYPE_INFO -> Triple(
-                Icons.Default.Info,
-                Color(0xFFE3F2FD),
-                Color(0xFF1976D2)
-            )
-
+            AlertBlock.TYPE_INFO -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
             AlertBlock.TYPE_WARNING -> Triple(
                 Icons.Default.Warning,
                 Color(0xFFFFF8E1),
@@ -438,13 +372,8 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                 Color(0xFFD32F2F)
             )
 
-            else -> Triple(
-                Icons.Default.Info,
-                Color(0xFFE3F2FD),
-                Color(0xFF1976D2)
-            )
+            else -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
         }
-
         Card(
             modifier = modifier
                 .fillMaxWidth()
@@ -464,9 +393,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                     tint = contentColor,
                     modifier = Modifier.size(24.dp)
                 )
-
                 Spacer(modifier = Modifier.width(12.dp))
-
                 Column {
                     val nodeTitle = node.title
                     if (!nodeTitle.isNullOrBlank()) {
@@ -478,23 +405,13 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-
-                    if (node.content.isNotBlank()) {
-                        Text(
-                            text = node.content,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = contentColor.copy(alpha = 0.8f)
-                        )
-                    }
+                    MarkdownText(node)
                 }
             }
         }
     }
 }
 
-/**
- * 提及节点字符串构建器
- */
 class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: MentionNode,
@@ -503,22 +420,18 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
-        pushStyle(
+        withStyle(
             SpanStyle(
                 color = Color(0xFF1976D2),
-                fontWeight = FontWeight.Medium,
-                textDecoration = TextDecoration.None,
-                background = Color(0xFFE3F2FD)
+                textDecoration = TextDecoration.Underline,
+                fontWeight = FontWeight.Medium
             )
-        )
-        append("@${node.username}")
-        pop()
+        ) {
+            append("@${node.username}")
+        }
     }
 }
 
-/**
- * 标签节点字符串构建器
- */
 class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HashtagNode,
@@ -527,22 +440,12 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
-        pushStyle(
-            SpanStyle(
-                color = Color(0xFF7B1FA2),
-                fontWeight = FontWeight.Medium,
-                textDecoration = TextDecoration.None,
-                background = Color(0xFFF3E5F5)
-            )
-        )
-        append("#${node.hashtag}")
-        pop()
+        withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)) {
+            append("#${node.hashtag}")
+        }
     }
 }
 
-/**
- * 高亮节点字符串构建器
- */
 class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HighlightNode,
@@ -551,21 +454,18 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
-        pushStyle(
+        withStyle(
             SpanStyle(
                 background = Color(0xFFFFEB3B),
                 color = Color(0xFF212121),
                 fontWeight = FontWeight.Medium
             )
-        )
-        append(node.highlightText)
-        pop()
+        ) {
+            append(node.highlightText)
+        }
     }
 }
 
-/**
- * 徽章节点字符串构建器
- */
 class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: BadgeNode,
@@ -574,7 +474,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
-        val (bgColor, textColor) = when (node.badgeType.lowercase()) {
+        val (bg, fg) = when (node.badgeType.lowercase()) {
             "primary" -> Color(0xFF1976D2) to Color.White
             "success" -> Color(0xFF2E7D32) to Color.White
             "warning" -> Color(0xFFF57C00) to Color.White
@@ -582,50 +482,40 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
             "info" -> Color(0xFF0288D1) to Color.White
             else -> Color(0xFF616161) to Color.White
         }
-
-        pushStyle(
+        withStyle(
             SpanStyle(
-                background = bgColor,
-                color = textColor,
+                background = bg,
+                color = fg,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 fontFamily = FontFamily.Default
             )
-        )
-        append(" ${node.badgeText} ")
-        pop()
+        ) {
+            append(" " + node.badgeText + " ")
+        }
     }
 }
 
-/**
- * 自定义Markdown插件
- */
+// --- Plugin ----------------
 class CustomMarkdownPlugin : IMarkdownRenderPlugin {
+    override fun blockParserFactories(): List<CustomBlockParserFactory> =
+        listOf(AlertBlockParserFactory())
 
-    override fun blockParserFactories(): List<BlockParserFactory> {
-        return listOf(AlertBlockParserFactory())
-    }
+    override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = listOf(
+        MentionInlineParserFactory(),
+        HashtagInlineParserFactory(),
+        BadgeInlineParserFactory(),
+        HighlightInlineParserFactory()
+    )
 
-    override fun inlineContentParserFactories(): List<InlineContentParserFactory> {
-        return listOf(
-            MentionInlineParser.Factory(),
-            HashtagInlineParser.Factory(),
-            BadgeInlineParser.Factory()
-        )
-    }
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
+        mapOf(AlertBlock::class.java to AlertBlockRenderer())
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> {
-        return mapOf(
-            AlertBlock::class.java to AlertBlockRenderer()
-        )
-    }
-
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> {
-        return mapOf(
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+        mapOf(
             MentionNode::class.java to MentionNodeStringBuilder(),
             HashtagNode::class.java to HashtagNodeStringBuilder(),
             HighlightNode::class.java to HighlightNodeStringBuilder(),
             BadgeNode::class.java to BadgeNodeStringBuilder()
         )
-    }
 }

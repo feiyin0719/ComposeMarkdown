@@ -75,26 +75,26 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
         ) {
             MarkdownView(
                 content = """
-                    # 暗黑主题示例
+                    # Dark Theme Example
                     
-                    这个示例展示了专为暗黑模式设计的Markdown样式。
+                    This example demonstrates Markdown styles specifically designed for dark mode.
                     
-                    ## 特色功能
+                    ## Key Features
                     
-                    **蓝色粗体文本** 在暗背景下更易阅读
+                    **Blue bold text** is easier to read on dark backgrounds
                     
-                    *紫色斜体文本* 提供了优雅的强调效果
+                    *Purple italic text* provides elegant emphasis effects
                     
-                    `绿色代码文本` 在深色背景上清晰可见
+                    `Green code text` is clearly visible on dark backgrounds
                     
-                    ### 三级标题使用紫色
+                    ### Level 3 headings use purple
                     
-                    暗黑主题不仅仅是颜色的反转，而是为夜间阅读专门优化的配色方案。
+                    Dark theme is not just color inversion, but a color scheme specifically optimized for nighttime reading.
                     
-                    ## 代码块示例
+                    ## Code Block Example
                     
                     ```kotlin
-                    // 暗黑主题下的代码显示
+                    // Code display under dark theme
                     val darkTheme = TypographyStyle(
                         body = SpanStyle(color = Color.White),
                         code = SpanStyle(
@@ -104,12 +104,12 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
                     )
                     ```
                     
-                    ## 优势
+                    ## Advantages
                     
-                    - 🌙 减少眼部疲劳
-                    - 🔋 节省电池电量（OLED屏幕）
-                    - 🎨 现代化设计风格
-                    - 📱 符合系统主题
+                    - 🌙 Reduces eye strain
+                    - 🔋 Saves battery life (OLED screens)
+                    - 🎨 Modern design style
+                    - 📱 Matches system theme
                 """.trimIndent(),
                 markdownRenderConfig = config,
                 modifier = Modifier.padding(16.dp)

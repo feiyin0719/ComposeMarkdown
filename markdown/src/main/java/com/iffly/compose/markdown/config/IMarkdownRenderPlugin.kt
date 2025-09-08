@@ -2,16 +2,16 @@ package com.iffly.compose.markdown.config
 
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import org.commonmark.node.Block
-import org.commonmark.node.Node
-import org.commonmark.parser.beta.InlineContentParserFactory
-import org.commonmark.parser.block.BlockParserFactory
+import com.vladsch.flexmark.parser.InlineParserExtensionFactory
+import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
+import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Node
 
 interface IMarkdownRenderPlugin {
 
-    fun blockParserFactories(): List<BlockParserFactory>
+    fun blockParserFactories(): List<CustomBlockParserFactory>
 
-    fun inlineContentParserFactories(): List<InlineContentParserFactory>
+    fun inlineContentParserFactories(): List<InlineParserExtensionFactory>
 
     fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>>
 

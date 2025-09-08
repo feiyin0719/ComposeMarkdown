@@ -14,9 +14,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.widget.BasicText
-import org.commonmark.node.Block
-import org.commonmark.node.FencedCodeBlock
-import org.commonmark.node.IndentedCodeBlock
+import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.ast.FencedCodeBlock
+import com.vladsch.flexmark.ast.IndentedCodeBlock
 
 object FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
     @Composable
@@ -46,11 +46,7 @@ fun MarkdownCodeBlock(
     modifier: Modifier = Modifier
 ) {
     if (node !is FencedCodeBlock && node !is IndentedCodeBlock) return
-    val codeText = when (node) {
-        is FencedCodeBlock -> node.literal
-        is IndentedCodeBlock -> node.literal
-        else -> ""
-    }
+    val codeText = node.contentChars.toString()
     val typographyStyle = currentTypographyStyle()
     val styledText = buildCodeText(codeText)
 
