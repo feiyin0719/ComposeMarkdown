@@ -60,6 +60,26 @@ data class TypographyStyle(
     val tableCell: SpanStyle = SpanStyle(
         fontFamily = FontFamily.Default,
     ),
+    val tableBorderColor: Color = Color.Gray,
+    val tableTitleBackgroundColor: Color = Color.LightGray,
+    val tableHeaderBackgroundColor: Color = Color.White,
+    val tableRowHeaderBackgroundColor: Color = Color.White,
+    val tableCopyStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = FontFamily.Monospace,
+        color = Color.Black,
+    ),
+    val codeTitleBackgroundColor: Color = Color.LightGray,
+    val codeTitleStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = FontFamily.Monospace,
+        color = Color.Black,
+    ),
+    val codeCopyStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = FontFamily.Monospace,
+        color = Color.Blue,
+    ),
     val head: Map<Int, SpanStyle> = mapOf(
         1 to SpanStyle(
             fontSize = 32.sp,

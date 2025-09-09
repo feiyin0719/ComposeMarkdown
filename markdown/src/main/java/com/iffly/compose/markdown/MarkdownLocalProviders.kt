@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.config.LocalBlockRenderersProvider
+import com.iffly.compose.markdown.config.LocalHtmlRenderProvider
 import com.iffly.compose.markdown.config.LocalInlineNodeStringBuildersProvider
 import com.iffly.compose.markdown.config.LocalLinkClickListenerProvider
 import com.iffly.compose.markdown.config.LocalShowNotSupportedProvider
@@ -24,12 +25,14 @@ internal fun MarkdownLocalProviders(
     rememberUpdatedState(markdownRenderConfig.inlineNodeStringBuilders)
     val blockRenderers by rememberUpdatedState(markdownRenderConfig.blockRenderers)
     val typographyStyle by rememberUpdatedState(markdownRenderConfig.typographyStyle)
+    val htmlRenderer by rememberUpdatedState(markdownRenderConfig.htmlRenderer)
     CompositionLocalProvider(
         LocalInlineNodeStringBuildersProvider provides inlineNodeStringBuilders,
         LocalBlockRenderersProvider provides blockRenderers,
         LocalTypographyStyleProvider provides typographyStyle,
         LocalShowNotSupportedProvider provides showNotSupportedText,
         LocalLinkClickListenerProvider provides linkInteractionListener,
+        LocalHtmlRenderProvider provides htmlRenderer,
     ) {
         content()
     }

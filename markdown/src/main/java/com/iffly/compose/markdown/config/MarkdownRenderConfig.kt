@@ -6,6 +6,7 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
@@ -28,16 +29,21 @@ class MarkdownRenderConfig {
     var parser: Parser
         private set
 
+    var htmlRenderer: HtmlRenderer
+        private set
+
     private constructor(
         typographyStyle: TypographyStyle?,
         inlineNodeStringBuilders: InlineNodeStringBuilders,
         blockRenderers: BlockRenderers,
-        parser: Parser
+        parser: Parser,
+        htmlRenderer: HtmlRenderer,
     ) {
         this.typographyStyle = typographyStyle ?: TypographyStyle()
         this.inlineNodeStringBuilders = inlineNodeStringBuilders
         this.blockRenderers = blockRenderers
         this.parser = parser
+        this.htmlRenderer = htmlRenderer
     }
 
     class Builder {
@@ -109,6 +115,7 @@ class MarkdownRenderConfig {
                 )
             )
             val parserBuilder = Parser.builder(options)
+            val htmlRendererBuilder = HtmlRenderer.builder(options)
 
             plugins.forEach { plugin ->
                 plugin.inlineNodeStringBuilders().forEach { (nodeClass, builder) ->
@@ -141,7 +148,8 @@ class MarkdownRenderConfig {
                 typographyStyle,
                 inlineNodeStringBuilder.build(),
                 blockRendererBuilder.build(),
-                parserBuilder.build()
+                parserBuilder.build(),
+                htmlRendererBuilder.build()
             )
         }
     }
