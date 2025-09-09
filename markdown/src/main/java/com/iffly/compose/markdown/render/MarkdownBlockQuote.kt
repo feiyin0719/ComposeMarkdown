@@ -20,42 +20,48 @@ import com.vladsch.flexmark.ast.BlockQuote
 object BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
     @Composable
     override fun Invoke(
-        node: BlockQuote,
-        modifier: Modifier
+        node: BlockQuote, modifier: Modifier
     ) {
-        val typographyStyle = currentTypographyStyle()
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-        ) {
-            // Left border
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(
-                        color = typographyStyle.blockQuoteBorderColor,
-                        shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
-                    )
-                    .padding(vertical = 8.dp)
-            )
+        MarkdownBlockQuote(modifier, node)
+    }
+}
 
-            // Content
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(
-                        color = typographyStyle.blockQuoteContentBackgroundColor,
-                        shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
-                    )
-                    .padding(12.dp)
-            ) {
-                var child = node.firstChild
-                while (child != null) {
-                    MarkdownBlock(child, Modifier)
-                    child = child.next
-                }
+@Composable
+private fun MarkdownBlockQuote(
+    modifier: Modifier, node: BlockQuote
+) {
+    val typographyStyle = currentTypographyStyle()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Max)
+    ) {
+        // Left border
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(
+                    color = typographyStyle.blockQuoteBorderColor,
+                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
+                )
+                .padding(vertical = 8.dp)
+        )
+
+        // Content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .background(
+                    color = typographyStyle.blockQuoteContentBackgroundColor,
+                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+                )
+                .padding(12.dp)
+        ) {
+            var child = node.firstChild
+            while (child != null) {
+                MarkdownBlock(child, Modifier)
+                child = child.next
             }
         }
     }
