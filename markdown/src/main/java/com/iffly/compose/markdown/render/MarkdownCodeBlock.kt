@@ -14,9 +14,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.widget.BasicText
-import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.IndentedCodeBlock
+import com.vladsch.flexmark.util.ast.Block
 
 object FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
     @Composable

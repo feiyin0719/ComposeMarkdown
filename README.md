@@ -36,10 +36,10 @@ Markdown syntax and custom styling.
 
 ## 🔧 Tech Stack
 
-| Technology            | Version     | Purpose                       |
-|-----------------------|-------------|-------------------------------|
-| **Jetpack Compose**   | 2024.09.00+ | Modern UI framework           |
-| **CommonMark**        | Latest      | Markdown parsing engine       |
+| Technology       | Version     | Purpose                       |
+|------------------|-------------|-------------------------------|
+| **Jetpack Compose** | 2024.09.00+ | Modern UI framework           |
+| **Flexmark**     | 0.64.8      | Markdown parsing engine       |
 | **Kotlin Coroutines** | 1.7+        | Asynchronous processing       |
 | **Material Design 3** | Latest      | Design language specification |
 
@@ -433,7 +433,7 @@ fun AsyncMarkdownExample() {
 
 #### 3. Pre-parsed Node Version
 
-Suitable for cases where you already have parsed CommonMark Nodes.
+Suitable for cases where you already have parsed Nodes.
 
 ```kotlin
 @Composable
@@ -792,6 +792,89 @@ fun MarkdownView(
 )
 ```
 
+#### LazyMarkdownView
+
+The `LazyMarkdownView` is designed for efficiently rendering large Markdown files by loading and displaying content in chunks as the user scrolls. This component is perfect for documents that are too large to load entirely into memory at once.
+
+**Key Features:**
+- 📄 **Chunk-based Loading** - Loads Markdown content progressively as needed
+- ⚡ **Memory Efficient** - Only keeps visible and nearby chunks in memory
+- 🎯 **Smart Prefetching** - Prefetches content based on scroll direction
+- 🔄 **Background Parsing** - Parses content on background threads
+- 📱 **Smooth Scrolling** - Built-in LazyColumn with optimized prefetching
+
+```kotlin
+@Composable
+fun LazyMarkdownView(
+    file: File,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    linkInteractionListener: LinkInteractionListener? = null,
+    chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
+    nestedPrefetchItemCount: Int = 3,
+)
+```
+
+**Parameters:**
+- `file` - The Markdown file to be displayed
+- `markdownRenderConfig` - Configuration for rendering the Markdown
+- `modifier` - Modifier to be applied to the LazyColumn
+- `showNotSupportedText` - Whether to show text for unsupported elements
+- `linkInteractionListener` - Listener for link interactions
+- `chunkLoaderConfig` - Configuration for the chunk loader (see ChunkLoaderConfig below)
+- `nestedPrefetchItemCount` - Number of items to prefetch for smoother scrolling
+
+**Usage Example:**
+
+```kotlin
+@Composable
+fun LargeMarkdownDocument() {
+    val markdownFile = File("/path/to/large-document.md")
+    val config = MarkdownRenderConfig.Builder().build()
+    
+    LazyMarkdownView(
+        file = markdownFile,
+        markdownRenderConfig = config,
+        modifier = Modifier.fillMaxSize(),
+        chunkLoaderConfig = ChunkLoaderConfig(
+            initialLines = 1000,
+            incrementalLines = 500,
+            chunkSize = 5
+        )
+    )
+}
+```
+
+**When to Use LazyMarkdownView:**
+- Large Markdown files (>10MB or >10000 lines)
+- Documents with many images or complex content
+- Mobile devices with limited memory
+- When you need responsive scrolling performance
+
+#### ChunkLoaderConfig
+
+Configuration class for controlling how `LazyMarkdownView` loads and caches content:
+
+```kotlin
+data class ChunkLoaderConfig(
+    val initialLines: Int = 1000,           // Initial number of lines to load
+    val incrementalLines: Int = 500,        // Lines to load when expanding
+    val maxCachedChunks: Int = 1000,        // Maximum chunks to keep in memory
+    val maxCachedFileLines: Int = 2000,     // Maximum file lines to cache
+    val chunkSize: Int = 5,                 // Number of blocks per chunk
+    val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,  // Background parsing
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO           // File I/O operations
+)
+```
+
+**Configuration Tips:**
+- Increase `initialLines` for faster initial loading of small-medium files
+- Increase `incrementalLines` for smoother expansion when scrolling
+- Decrease `chunkSize` for more granular loading and better memory usage
+- Use `MarkdownThreadPool.dispatcher` for `parserDispatcher` to avoid blocking UI
+- Adjust `maxCachedChunks`, `maxCachedFileLines` based on available memory
+
 #### IBlockRenderer<T>
 
 ```kotlin
@@ -874,8 +957,8 @@ interface IMarkdownRenderPlugin {
 
 ## Future Plans
 
-- 🚀 Support load large markdown file and render progressively
-  Load and render visible blocks to improve performance and memory usage
+~~- 🚀 Support load large markdown file and render progressively
+  Load and render visible blocks to improve performance and memory usage~~
 - 🚀 Add more built-in plugins for common use cases
 
 ## ❓ FAQ

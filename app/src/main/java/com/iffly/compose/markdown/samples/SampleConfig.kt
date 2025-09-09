@@ -62,5 +62,12 @@ val markdownExamples = listOf(
         description = "Demonstrates Markdown rendering effects in dark mode"
     ) { paddingValues ->
         DarkThemeExample(paddingValues)
+    },
+
+    MarkdownExample(
+        title = "LazyMarkdownView Example",
+        description = "Demonstrates LazyMarkdownView for large content with optimized performance"
+    ) { paddingValues ->
+        LazyMarkdownExample(paddingValues)
     }
 )

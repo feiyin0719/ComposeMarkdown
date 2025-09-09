@@ -2,7 +2,6 @@ package com.iffly.compose.markdown
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,25 +10,32 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.LinkInteractionListener
-import com.iffly.compose.markdown.config.LocalBlockRenderersProvider
-import com.iffly.compose.markdown.config.LocalInlineNodeStringBuildersProvider
-import com.iffly.compose.markdown.config.LocalLinkClickListenerProvider
-import com.iffly.compose.markdown.config.LocalShowNotSupportedProvider
-import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.MarkdownPreview
+import com.vladsch.flexmark.util.ast.Document
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import com.vladsch.flexmark.util.ast.Node
 
 internal sealed class MarkdownState {
     object Loading : MarkdownState()
-    data class Success(val node: Node) : MarkdownState()
+    data class Success(val node: Document) : MarkdownState()
     data class Error(val exception: Throwable) : MarkdownState()
 }
 
+/**
+ * A Composable function that renders Markdown content.
+ * This version parses the Markdown content synchronously within a remember block.
+ * Use this for small to medium-sized content where parsing time is negligible.
+ * For larger content, consider using the other overload that supports asynchronous parsing.
+ * @param content The Markdown content as a String.
+ * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param modifier Modifier to be applied to the Markdown view.
+ * @param showNotSupportedText Whether to show text for unsupported elements.
+ * @param linkInteractionListener Listener for link interactions.
+ * @param onError Composable to display in case of an error during parsing.
+ */
 @Composable
 fun MarkdownView(
     content: String,
@@ -73,6 +79,19 @@ fun MarkdownView(
 
 }
 
+/**
+ * A Composable function that renders Markdown content.
+ * This version parses the Markdown content asynchronously using a coroutine.
+ * Use this for larger content where parsing time may be significant.
+ * @param content The Markdown content as a String.
+ * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param modifier Modifier to be applied to the Markdown view.
+ * @param showNotSupportedText Whether to show text for unsupported elements.
+ * @param linkInteractionListener Listener for link interactions.
+ * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
+ * @param onLoading Composable to display while loading.
+ * @param onError Composable to display in case of an error during parsing.
+ */
 @Composable
 fun MarkdownView(
     content: String,
@@ -123,26 +142,24 @@ fun MarkdownView(
 
 }
 
+/**
+ * A Composable function that renders a parsed Markdown AST node.
+ * @param node The root AST node of the parsed Markdown content.
+ * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param modifier Modifier to be applied to the Markdown view.
+ * @param showNotSupportedText Whether to show text for unsupported elements.
+ * @param linkInteractionListener Listener for link interactions.
+ *
+ */
 @Composable
 fun MarkdownView(
-    node: Node,
+    node: Document,
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     linkInteractionListener: LinkInteractionListener? = null,
 ) {
-    val linkInteractionListener by rememberUpdatedState(linkInteractionListener)
-    val inlineNodeStringBuilders by
-    rememberUpdatedState(markdownRenderConfig.inlineNodeStringBuilders)
-    val blockRenderers by rememberUpdatedState(markdownRenderConfig.blockRenderers)
-    val typographyStyle by rememberUpdatedState(markdownRenderConfig.typographyStyle)
-    CompositionLocalProvider(
-        LocalLinkClickListenerProvider provides linkInteractionListener,
-        LocalInlineNodeStringBuildersProvider provides inlineNodeStringBuilders,
-        LocalBlockRenderersProvider provides blockRenderers,
-        LocalTypographyStyleProvider provides typographyStyle,
-        LocalShowNotSupportedProvider provides showNotSupportedText,
-    ) {
+    MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, linkInteractionListener) {
         MarkdownContent(node, modifier)
     }
 }

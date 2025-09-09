@@ -3,14 +3,11 @@ package com.iffly.compose.markdown.samples
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,16 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 
 @Composable
 fun AsyncLoadingExample(paddingValues: PaddingValues) {
     var content by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        // Simulate asynchronous loading
-        delay(2000)
         content = """
             # Async Loading Complete!
             
@@ -50,45 +43,29 @@ fun AsyncLoadingExample(paddingValues: PaddingValues) {
             
             **Tip**: Async parsing doesn't block the UI thread, providing better user experience.
         """.trimIndent()
-        isLoading = false
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .verticalScroll(state = rememberScrollState())
     ) {
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+        MarkdownView(
+            content = content,
+            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+            parseDispatcher = Dispatchers.Default,
+            modifier = Modifier
+                .padding(16.dp),
+            onLoading = {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Loading Markdown content...")
                 }
             }
-        } else {
-            MarkdownView(
-                content = content,
-                markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
-                parseDispatcher = Dispatchers.IO,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                onLoading = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            )
-        }
+        )
     }
+
 }

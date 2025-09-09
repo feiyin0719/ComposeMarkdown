@@ -21,12 +21,12 @@ import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
 import com.iffly.compose.markdown.config.currentLinkClickListener
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeStyle
 import com.iffly.compose.markdown.widget.BasicText
-import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
@@ -35,13 +35,13 @@ import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.ListItem
-import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
-import com.vladsch.flexmark.ast.util.Parsing
+import com.vladsch.flexmark.ext.tables.TableCell
+import com.vladsch.flexmark.util.ast.Node
 import kotlin.text.Typography.nbsp
 
 
@@ -93,10 +93,12 @@ fun MarkdownText(
     val typographyStyle = currentTypographyStyle()
     val inlineNodeStringBuilders = currentInlineNodeStringBuilders()
     val linkInteractionListener = currentLinkClickListener()
+    val isShowNotSupported = isShowNotSupported()
     val (text, inlineContent) = remember(
         parent,
         typographyStyle,
-        inlineNodeStringBuilders
+        inlineNodeStringBuilders,
+        isShowNotSupported,
     ) {
         markdownText(
             parent,
@@ -104,6 +106,7 @@ fun MarkdownText(
             inlineNodeStringBuilders,
             linkInteractionListener,
             1,
+            isShowNotSupported,
         )
     }
 
@@ -134,7 +137,8 @@ fun markdownText(
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
     linkInteractionListener: LinkInteractionListener? = null,
-    indentLevel: Int = 0
+    indentLevel: Int = 0,
+    isShowNotSupported: Boolean,
 ): Pair<AnnotatedString, Map<String, InlineTextContent>> {
     val inlineContentMap = mutableMapOf<String, InlineTextContent>()
 
@@ -148,6 +152,7 @@ fun markdownText(
                 typographyStyle,
                 inlineNodeStringBuilders,
                 linkInteractionListener,
+                isShowNotSupported,
             )
         }
     }
@@ -162,6 +167,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
     linkInteractionListener: LinkInteractionListener? = null,
+    isShowNotSupported: Boolean,
 ) {
     var node = parent.firstChild
     while (node != null) {
@@ -176,6 +182,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     typographyStyle,
                     inlineNodeStringBuilders,
                     linkInteractionListener,
+                    isShowNotSupported,
                 )
             }
 
@@ -187,6 +194,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     typographyStyle,
                     inlineNodeStringBuilders,
                     linkInteractionListener,
+                    isShowNotSupported,
                 )
             }
 
@@ -198,6 +206,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     typographyStyle,
                     inlineNodeStringBuilders,
                     linkInteractionListener,
+                    isShowNotSupported,
                 )
             }
 
@@ -209,6 +218,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     typographyStyle,
                     inlineNodeStringBuilders,
                     linkInteractionListener,
+                    isShowNotSupported,
                 )
             }
 
@@ -226,6 +236,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                         typographyStyle,
                         inlineNodeStringBuilders,
                         linkInteractionListener,
+                        isShowNotSupported,
                     )
                 }
             }
@@ -239,6 +250,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     typographyStyle = typographyStyle,
                     inlineNodeStringBuilders,
                     linkInteractionListener,
+                    isShowNotSupported,
                 )
             }
 
@@ -263,7 +275,13 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     indentLevel,
                     linkInteractionListener,
                     this
-                )
+                ) ?: run {
+                    if (isShowNotSupported) {
+                        append("[Unsupported: ${node::class.java.simpleName}]")
+                    } else {
+                        append(node.contentText())
+                    }
+                }
 
             }
         }
@@ -279,9 +297,10 @@ fun AnnotatedString.Builder.buildListItem(
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
     linkInteractionListener: LinkInteractionListener? = null,
+    isShowNotSupported: Boolean,
 ) {
     appendLine()
-    append("$nbsp".repeat( indentLevel))
+    append("$nbsp".repeat(indentLevel))
 
     // Checking if there is an ordered list
     if (marker.toIntOrNull() != null) {
@@ -299,6 +318,7 @@ fun AnnotatedString.Builder.buildListItem(
         typographyStyle,
         inlineNodeStringBuilders,
         linkInteractionListener,
+        isShowNotSupported,
     )
 }
 

@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -21,52 +21,57 @@ import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
+import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.widget.BasicStringText
 import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun MarkdownContent(root: Node, modifier: Modifier = Modifier) {
+fun MarkdownContent(root: Document, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Top,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.wrapContentSize()
     ) {
-        MarkdownNode(root, modifier = Modifier.fillMaxWidth())
+        var node = root.firstChild
+
+        while (node != null) {
+            MarkdownBlock(node, Modifier)
+            node = node.next
+        }
     }
 }
 
 
 @Composable
-fun MarkdownNode(
-    parent: Node,
-    modifier: Modifier = Modifier,
+fun MarkdownBlock(
+    node: Node,
+    modifier: Modifier,
 ) {
-    var node = parent.firstChild
     val blockRenderers = currentBlockRenderers()
     val typographyStyle = currentTypographyStyle()
-    while (node != null) {
-        if (node is Block) {
-            val renderer = blockRenderers[node::class.java]
-            if (renderer != null) {
-                renderer.Invoke(node, modifier)
-            } else {
-                // Fallback to rendering children if no renderer is found
-                Log.i(
-                    "MarkdownNode",
-                    "No renderer found for ${node::class.java.simpleName}, rendering children."
+    if (node is Block) {
+        val renderer = blockRenderers[node::class.java]
+        if (renderer != null) {
+            renderer.Invoke(node, modifier)
+        } else {
+            // Fallback to rendering children if no renderer is found
+            Log.i(
+                "MarkdownNode",
+                "No renderer found for ${node::class.java.simpleName}, rendering children."
+            )
+            val isShowNotSupported = isShowNotSupported()
+            if (isShowNotSupported) {
+                BasicStringText(
+                    text = "Unsupported block: ${node::class.java.simpleName}",
                 )
-                val isShowNotSupported = isShowNotSupported()
-                if (isShowNotSupported) {
-                    BasicStringText(
-                        text = "Unsupported block: ${node::class.java.simpleName}",
-                    )
-                }
+            } else {
+                BasicStringText(node.contentText())
             }
         }
-        if (typographyStyle.showSpace) {
-            Spacer(Modifier.height(typographyStyle.spaceHeight))
-        }
-        node = node.next
+    }
+    if (typographyStyle.showSpace) {
+        Spacer(Modifier.height(typographyStyle.spaceHeight))
     }
 }
 
