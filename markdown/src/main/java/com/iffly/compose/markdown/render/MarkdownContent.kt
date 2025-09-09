@@ -92,6 +92,15 @@ private fun MarkdownContentPreview() {
 
         ---
         
+        > This is a blockquote example.
+        > It can span multiple lines and contain **bold** and *italic* text.
+        > 
+        > It can also contain nested content like lists:
+        > - Item 1
+        > - Item 2
+        
+        Regular paragraph after blockquote.
+        
         - **Item 1**
         - Item 2
         - Item 3

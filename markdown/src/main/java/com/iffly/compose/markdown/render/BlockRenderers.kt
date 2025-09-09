@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.render
 
+import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.Heading
@@ -23,6 +24,7 @@ class BlockRenderers private constructor(private val renderers: Map<Class<out Bl
             FencedCodeBlock::class.java to FencedCodeBlockRenderer,
             IndentedCodeBlock::class.java to IndentedCodeBlockRenderer,
             ThematicBreak::class.java to BreakLineRenderer,
+            BlockQuote::class.java to BlockQuoteRenderer,
         )
 
     }

@@ -80,6 +80,8 @@ data class TypographyStyle(
         fontFamily = FontFamily.Monospace,
         color = Color.Blue,
     ),
+    val blockQuoteContentBackgroundColor: Color = Color.LightGray,
+    val blockQuoteBorderColor: Color = Color.Gray,
     val head: Map<Int, SpanStyle> = mapOf(
         1 to SpanStyle(
             fontSize = 32.sp,
