@@ -44,6 +44,13 @@ val markdownExamples = listOf(
     },
 
     MarkdownExample(
+        title = "Task List Example",
+        description = "Demonstrates GitHub-style task lists with checkboxes"
+    ) { paddingValues ->
+        TaskListExample(paddingValues)
+    },
+
+    MarkdownExample(
         title = "Image and Media Example",
         description = "Shows image rendering and media content handling"
     ) { paddingValues ->

@@ -32,9 +32,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.iffly.compose.markdown.config.IMarkdownRenderPlugin
+import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.parser.InlineParser
@@ -418,7 +419,9 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
         inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int
+        indentLevel: Int,
+        isShowNotSupported: Boolean,
+        inlineNodeStringBuilders: InlineNodeStringBuilders,
     ) {
         withStyle(
             SpanStyle(
@@ -438,7 +441,9 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
         inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int
+        indentLevel: Int,
+        isShowNotSupported: Boolean,
+        inlineNodeStringBuilders: InlineNodeStringBuilders,
     ) {
         withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)) {
             append("#${node.hashtag}")
@@ -452,7 +457,9 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
         inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int
+        indentLevel: Int,
+        isShowNotSupported: Boolean,
+        inlineNodeStringBuilders: InlineNodeStringBuilders,
     ) {
         withStyle(
             SpanStyle(
@@ -472,7 +479,9 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int
+        indentLevel: Int,
+        isShowNotSupported: Boolean,
+        inlineNodeStringBuilders: InlineNodeStringBuilders,
     ) {
         val (bg, fg) = when (node.badgeType.lowercase()) {
             "primary" -> Color(0xFF1976D2) to Color.White
@@ -497,7 +506,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
 }
 
 // --- Plugin ----------------
-class CustomMarkdownPlugin : IMarkdownRenderPlugin {
+class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
     override fun blockParserFactories(): List<CustomBlockParserFactory> =
         listOf(AlertBlockParserFactory())
 

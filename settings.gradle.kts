@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "ComposeMarkdown"
 include(":app")
 include(":markdown")
+include(":markdown-task")

@@ -172,7 +172,7 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
     isShowNotSupported: Boolean,
 ) {
     var node = parent.firstChild
-    val buildStringFun = { node: Node->
+    val buildStringFun = { node: Node ->
         buildMarkdownAnnotatedString(
             node,
             indentLevel,
@@ -184,28 +184,29 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
         )
     }
     while (node != null) {
-        when (node) {
-            is Text -> append(node.contentText())
-            is HardLineBreak, is SoftLineBreak -> appendLine()
-            is Paragraph -> {
+        when {
+            node::class.java == Text::class.java -> append(node.contentText())
+            node::class.java == HardLineBreak::class.java || node::class.java == SoftLineBreak::class.java -> appendLine()
+            node::class.java == Paragraph::class.java -> {
                 buildStringFun(node)
             }
 
-            is OrderedList, is BulletList -> {
+            node::class.java == OrderedList::class.java || node::class.java == BulletList::class.java -> {
                 buildStringFun(node)
             }
 
-            is Emphasis -> withStyle(typographyStyle.emphasis) {
+            node::class.java == Emphasis::class.java -> withStyle(typographyStyle.emphasis) {
                 buildStringFun(node)
             }
 
-            is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
+            node::class.java == StrongEmphasis::class.java -> withStyle(typographyStyle.strongEmphasis) {
                 buildStringFun(node)
             }
 
-            is Link -> {
+            node::class.java == Link::class.java -> {
+                val linkNode = node as Link
                 val linkAnnotation = LinkAnnotation.Url(
-                    url = node.url.toString(),
+                    url = linkNode.url.toString(),
                     styles = typographyStyle.link,
                     linkInteractionListener = linkInteractionListener,
                 )
@@ -214,23 +215,24 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
                 }
             }
 
-            is Strikethrough -> {
+            node::class.java == Strikethrough::class.java -> {
                 withStyle(typographyStyle.strikethrough) {
                     buildStringFun(node)
                 }
             }
 
-            is Subscript -> {
+            node::class.java == Subscript::class.java -> {
                 withStyle(typographyStyle.subscript) {
-                   buildStringFun(node)
+                    buildStringFun(node)
                 }
             }
 
-            is ListItem -> {
+            node::class.java == ListItem::class.java -> {
+                val listItemNode = node as ListItem
                 buildListItem(
-                    child = node,
+                    child = listItemNode,
                     indentLevel = indentLevel,
-                    marker = node.getMarkerText(),
+                    marker = listItemNode.getMarkerText(),
                     inlineContentMap = inlineContentMap,
                     typographyStyle = typographyStyle,
                     inlineNodeStringBuilders,
@@ -239,28 +241,33 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
                 )
             }
 
-            is Code -> {
-                val codeText = node.contentText()
+            node::class.java == Code::class.java -> {
+                val codeNode = node as Code
+                val codeText = codeNode.contentText()
                 withStyle(typographyStyle.code) {
                     append(codeText)
                 }
             }
 
-            is Image -> {
-                buildImage(node, inlineContentMap)
+            node::class.java == Image::class.java -> {
+                val imageNode = node as Image
+                buildImage(imageNode, inlineContentMap)
             }
 
             else -> {
                 val customBuilder =
                     inlineNodeStringBuilders[node::class.java]
-                customBuilder?.buildMarkdownAnnotatedString(
+                customBuilder?.buildMarkdownInlineNodeString(
                     node,
                     inlineContentMap,
                     typographyStyle,
                     indentLevel,
                     linkInteractionListener,
-                    this
-                ) ?: run {
+                    inlineNodeStringBuilders,
+                    isShowNotSupported,
+                    this,
+
+                    ) ?: run {
                     if (isShowNotSupported) {
                         append("[Unsupported: ${node::class.java.simpleName}]")
                     } else {

@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.iffly.compose.markdown"
+    namespace = "com.iffly.compose.markdown.task"
     compileSdk = 36
 
     defaultConfig {
@@ -31,31 +30,17 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
 }
 
 dependencies {
 
+    compileOnly(project(":markdown"))
+    api(libs.flexmark.ext.gfm.tasklist)
     compileOnly(libs.androidx.core.ktx)
     compileOnly(libs.androidx.appcompat)
     compileOnly(libs.material)
-    api(libs.flexmark)
-    api(libs.flexmark.ext.tables)
-    api(libs.flexmark.ext.gfm.strikethrough)
-    compileOnly(libs.androidx.activity.compose)
-    compileOnly(platform(libs.androidx.compose.bom))
-    compileOnly(libs.androidx.compose.ui)
-    compileOnly(libs.androidx.compose.ui.tooling.preview)
-    compileOnly(libs.androidx.compose.material3)
     compileOnly(libs.androidx.compose.foundation)
-    compileOnly(libs.androidx.lifecycle.runtime.ktx)
-    compileOnly(libs.coil.compose)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    compileOnly(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
