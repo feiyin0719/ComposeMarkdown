@@ -69,7 +69,11 @@ repositories {
 ```toml
 [versions]
 compose-markdown = "0.0.1"
+composeBom = "2024.09.00"
+coil = "2.5.0"
 [libraries]
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 ```
 
@@ -77,6 +81,13 @@ add the dependency in your module `build.gradle.kts`:
 
 ```kotlin
 dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.coil.compose)
     implementation(libs.compose.markdown)
 }
 ```
@@ -193,6 +204,7 @@ class MarkdownRenderConfig private constructor(
             builder: IInlineNodeStringBuilder<*>
         ): Builder
         fun addPlugin(plugin: Plugin): Builder
+        fun addExtension(extension: Extension): Builder
         fun build(): MarkdownRenderConfig
     }
 }
@@ -509,7 +521,7 @@ elements, inline elements, and renderers.
 #### Creating Custom Plugins
 
 ```kotlin
-class CustomMarkdownPlugin : IMarkdownRenderPlugin {
+class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
     
     // Register custom block parser factories
     override fun blockParserFactories(): List<CustomBlockParserFactory> =
@@ -893,7 +905,9 @@ interface IInlineNodeStringBuilder<T : Node> {
         inlineContentMap: MutableMap<String, InlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int
+        indentLevel: Int,
+        isShowNotSupported: Boolean,
+        inlineNodeStringBuilders: InlineNodeStringBuilders,
     )
 }
 ```
