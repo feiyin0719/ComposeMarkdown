@@ -101,6 +101,10 @@ private fun MarkdownContentPreview() {
         
         Regular paragraph after blockquote.
         
+        Subscript: H~2~O, Superscript: E = mc^2^
+        
+        ~~test~~
+        
         - **Item 1**
         - Item 2
         - Item 3

@@ -31,7 +31,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
     )
 }
 
-fun <T : Node> IInlineNodeStringBuilder<T>.buildAnnotatedString(
+fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownAnnotatedString(
     node: T,
     inlineContentMap: MutableMap<String, InlineTextContent>,
     typographyStyle: TypographyStyle,

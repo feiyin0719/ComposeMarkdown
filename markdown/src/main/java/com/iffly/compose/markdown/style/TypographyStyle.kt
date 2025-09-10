@@ -8,6 +8,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift.Companion.Subscript
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,14 @@ data class TypographyStyle(
         fontSize = 14.sp,
         color = Color(0xFF37474F),
         background = Color(0xFFF5F5F5),
+    ),
+    val strikethrough: SpanStyle = SpanStyle(
+        textDecoration = TextDecoration.LineThrough,
+        fontFamily = FontFamily.Default,
+    ),
+    val subscript: SpanStyle = SpanStyle(
+        fontFamily = FontFamily.Default,
+        baselineShift = Subscript
     ),
     val link: TextLinkStyles = TextLinkStyles(
         style = SpanStyle(

@@ -40,6 +40,8 @@ import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
+import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
+import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
 import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.util.ast.Node
 import kotlin.text.Typography.nbsp
@@ -145,7 +147,7 @@ fun markdownText(
     val annotatedString = buildAnnotatedString {
         val style: SpanStyle = typographyStyle.getNodeStyle(node)
         withStyle(style) {
-            buildAnnotatedString(
+            buildMarkdownAnnotatedString(
                 node,
                 indentLevel,
                 inlineContentMap,
@@ -160,7 +162,7 @@ fun markdownText(
     return Pair(annotatedString, inlineContentMap)
 }
 
-fun AnnotatedString.Builder.buildAnnotatedString(
+fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, InlineTextContent>,
@@ -170,56 +172,35 @@ fun AnnotatedString.Builder.buildAnnotatedString(
     isShowNotSupported: Boolean,
 ) {
     var node = parent.firstChild
+    val buildStringFun = { node: Node->
+        buildMarkdownAnnotatedString(
+            node,
+            indentLevel,
+            inlineContentMap,
+            typographyStyle,
+            inlineNodeStringBuilders,
+            linkInteractionListener,
+            isShowNotSupported,
+        )
+    }
     while (node != null) {
         when (node) {
             is Text -> append(node.contentText())
             is HardLineBreak, is SoftLineBreak -> appendLine()
             is Paragraph -> {
-                buildAnnotatedString(
-                    node,
-                    indentLevel,
-                    inlineContentMap,
-                    typographyStyle,
-                    inlineNodeStringBuilders,
-                    linkInteractionListener,
-                    isShowNotSupported,
-                )
+                buildStringFun(node)
             }
 
             is OrderedList, is BulletList -> {
-                buildAnnotatedString(
-                    node,
-                    indentLevel + 1,
-                    inlineContentMap,
-                    typographyStyle,
-                    inlineNodeStringBuilders,
-                    linkInteractionListener,
-                    isShowNotSupported,
-                )
+                buildStringFun(node)
             }
 
             is Emphasis -> withStyle(typographyStyle.emphasis) {
-                buildAnnotatedString(
-                    node,
-                    indentLevel,
-                    inlineContentMap,
-                    typographyStyle,
-                    inlineNodeStringBuilders,
-                    linkInteractionListener,
-                    isShowNotSupported,
-                )
+                buildStringFun(node)
             }
 
             is StrongEmphasis -> withStyle(typographyStyle.strongEmphasis) {
-                buildAnnotatedString(
-                    node,
-                    indentLevel,
-                    inlineContentMap,
-                    typographyStyle,
-                    inlineNodeStringBuilders,
-                    linkInteractionListener,
-                    isShowNotSupported,
-                )
+                buildStringFun(node)
             }
 
             is Link -> {
@@ -229,15 +210,19 @@ fun AnnotatedString.Builder.buildAnnotatedString(
                     linkInteractionListener = linkInteractionListener,
                 )
                 withLink(linkAnnotation) {
-                    buildAnnotatedString(
-                        node,
-                        indentLevel,
-                        inlineContentMap,
-                        typographyStyle,
-                        inlineNodeStringBuilders,
-                        linkInteractionListener,
-                        isShowNotSupported,
-                    )
+                    buildStringFun(node)
+                }
+            }
+
+            is Strikethrough -> {
+                withStyle(typographyStyle.strikethrough) {
+                    buildStringFun(node)
+                }
+            }
+
+            is Subscript -> {
+                withStyle(typographyStyle.subscript) {
+                   buildStringFun(node)
                 }
             }
 
@@ -268,7 +253,7 @@ fun AnnotatedString.Builder.buildAnnotatedString(
             else -> {
                 val customBuilder =
                     inlineNodeStringBuilders[node::class.java]
-                customBuilder?.buildAnnotatedString(
+                customBuilder?.buildMarkdownAnnotatedString(
                     node,
                     inlineContentMap,
                     typographyStyle,
@@ -311,7 +296,7 @@ fun AnnotatedString.Builder.buildListItem(
         append(marker)
     }
     append("$nbsp")
-    buildAnnotatedString(
+    buildMarkdownAnnotatedString(
         child,
         indentLevel,
         inlineContentMap,

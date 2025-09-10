@@ -5,6 +5,7 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.style.TypographyStyle
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension
 import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
@@ -14,6 +15,7 @@ import com.vladsch.flexmark.parser.delimiter.DelimiterProcessor
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.data.MutableDataSet
+import com.vladsch.flexmark.util.misc.Extension
 
 class MarkdownRenderConfig {
 
@@ -64,6 +66,8 @@ class MarkdownRenderConfig {
 
         private val delimiterProcessors: MutableList<DelimiterProcessor> =
             mutableListOf()
+
+        private val extensions: MutableList<Extension> = mutableListOf()
         private val options = MutableDataSet()
 
         fun typographyStyle(typographyStyle: TypographyStyle): Builder {
@@ -107,12 +111,21 @@ class MarkdownRenderConfig {
             return this
         }
 
+        fun addExtension(extension: Extension): Builder {
+            extensions.add(extension)
+            return this
+        }
+
         fun build(): MarkdownRenderConfig {
             // Configure flexmark-java extensions
+            val pluginExtensions = plugins.flatMap { it.extensions() }
             options.set(
-                Parser.EXTENSIONS, listOf(
+                Parser.EXTENSIONS,
+                listOf(
                     TablesExtension.create(),
-                )
+                    StrikethroughSubscriptExtension.create(),
+                ).plus(extensions)
+                    .plus(pluginExtensions)
             )
             val parserBuilder = Parser.builder(options)
             val htmlRendererBuilder = HtmlRenderer.builder(options)

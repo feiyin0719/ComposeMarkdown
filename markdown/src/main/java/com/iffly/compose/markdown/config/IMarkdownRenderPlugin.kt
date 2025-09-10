@@ -6,6 +6,7 @@ import com.vladsch.flexmark.parser.InlineParserExtensionFactory
 import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.misc.Extension
 
 /**
  * Interface for a Markdown render plugin.
@@ -35,5 +36,7 @@ interface IMarkdownRenderPlugin {
      * The key is the class of the inline node, and the value is the corresponding string builder.
      */
     fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>>
+
+    fun extensions(): List<Extension>
 
 }
