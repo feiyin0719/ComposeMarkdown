@@ -147,7 +147,9 @@ class MarkdownChunkLoader(
         }
 
         // Clean up cache
-        chunkCache.recycleCacheIfNeeded(scrollDirection)
+        chunkCache.recycleCacheIfNeeded(scrollDirection) {
+            nodeToChunkMap.removeChunk(it)
+        }
 
         // Update state
         updateState()
@@ -281,19 +283,23 @@ private class ChunkCache(private val maxSize: Int) {
 
     fun size(): Int = chunks.size
 
-    fun recycleCacheIfNeeded(scrollDirection: ScrollDirection) {
+    fun recycleCacheIfNeeded(
+        scrollDirection: ScrollDirection,
+        onRecycleChunk: ((MarkdownChunk) -> Unit)? = null
+    ) {
         if (chunks.size <= maxSize) return
 
         val toRemove = chunks.size - maxSize
-        repeat(toRemove) {
-            when (scrollDirection) {
+        repeat(toRemove) { num ->
+            val chunk = when (scrollDirection) {
                 ScrollDirection.UP -> chunks.removeLastOrNull()
                 ScrollDirection.DOWN -> chunks.removeFirstOrNull()
                 ScrollDirection.NONE -> {
-                    if (it % 2 == 0) chunks.removeFirstOrNull()
+                    if (num % 2 == 0) chunks.removeFirstOrNull()
                     else chunks.removeLastOrNull()
                 }
             }
+            chunk?.let { onRecycleChunk?.invoke(it) }
         }
     }
 

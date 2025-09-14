@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(project(":markdown"))
     implementation(project(":markdown-task"))
+//    implementation(libs.compose.markdown)
+//    implementation(libs.compose.markdown.task)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
