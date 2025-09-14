@@ -20,6 +20,7 @@ data class ChunkLoaderConfig(
     val incrementalLines: Int = 500,
     val maxCachedChunks: Int = 1000,
     val maxCachedFileLines: Int = 2000,
+    val minRemovedBatchSize: Int = 10,
     val chunkSize: Int = 5,
     val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -43,7 +44,7 @@ class MarkdownChunkLoader(
     private val config: ChunkLoaderConfig = ChunkLoaderConfig()
 ) {
     private var visibleLineRange: IntRange = IntRange.EMPTY
-    private val chunkCache = ChunkCache(config.maxCachedChunks)
+    private val chunkCache = ChunkCache(config.maxCachedChunks, config.minRemovedBatchSize)
     private val nodeToChunkMap = NodeToChunkMapper()
     private val fileReader = CachedMarkdownFileReader(
         fileSource,
@@ -268,7 +269,10 @@ internal data class MarkdownChunk(
 /**
  * Chunk cache manager
  */
-private class ChunkCache(private val maxSize: Int) {
+private class ChunkCache(
+    private val maxSize: Int,
+    private val minRemovedBatchSize: Int = 10
+) {
     private val chunks = mutableListOf<MarkdownChunk>()
 
     fun addChunksAtBeginning(newChunks: List<MarkdownChunk>) {
@@ -290,6 +294,7 @@ private class ChunkCache(private val maxSize: Int) {
         if (chunks.size <= maxSize) return
 
         val toRemove = chunks.size - maxSize
+        if (toRemove< minRemovedBatchSize) return
         repeat(toRemove) { num ->
             val chunk = when (scrollDirection) {
                 ScrollDirection.UP -> chunks.removeLastOrNull()
