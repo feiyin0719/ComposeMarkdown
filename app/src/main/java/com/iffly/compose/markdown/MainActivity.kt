@@ -32,13 +32,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import com.iffly.compose.markdown.samples.MarkdownExample
 import com.iffly.compose.markdown.samples.markdownExamples
 import com.iffly.compose.markdown.ui.theme.ComposeMarkdownTheme
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        val okHttpClient = OkHttpClient.Builder()
+//            .connectTimeout(30, TimeUnit.SECONDS)
+//            .readTimeout(30, TimeUnit.SECONDS)
+//            .writeTimeout(30, TimeUnit.SECONDS)
+//            .build()
+//
+//        val imageLoader = ImageLoader.Builder(this)
+//            .crossfade(true)
+//            .components {
+//                add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient }))
+//            }
+//            .build()
+//        SingletonImageLoader.setUnsafe(imageLoader)
         enableEdgeToEdge()
         setContent {
             ComposeMarkdownTheme {

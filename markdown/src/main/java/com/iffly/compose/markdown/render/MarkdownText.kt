@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
 import com.iffly.compose.markdown.config.currentLinkClickListener
@@ -322,15 +324,17 @@ fun AnnotatedString.Builder.buildImage(
     val imageId = "image_${imageNode.hashCode()}"
     inlineContentMap[imageId] = InlineTextContent(
         placeholder = Placeholder(
-            width = 100.sp,
-            height = 100.sp,
-            placeholderVerticalAlign = PlaceholderVerticalAlign.Top
+            width = 120.sp,
+            height = 120.sp,
+            placeholderVerticalAlign = PlaceholderVerticalAlign.Center
         )
     ) {
         MarkdownImage(
             node = imageNode,
-            modifier = Modifier.wrapContentSize()
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 2.dp)
         )
     }
-    appendInlineContent(imageId, "[${imageNode.title}]")
+    appendInlineContent(imageId, "[${imageNode.title ?: imageNode.text}]")
 }

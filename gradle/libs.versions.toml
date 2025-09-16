@@ -1,6 +1,6 @@
 [versions]
 agp = "8.11.1"
-kotlin = "2.0.21"
+kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -11,7 +11,7 @@ composeBom = "2024.09.00"
 appcompat = "1.7.1"
 material = "1.12.0"
 flexmark = "0.64.8"
-coil = "2.5.0"
+coil3 = "3.3.0"
 compose-markdown = "0.0.3"
 
 [libraries]
@@ -44,7 +44,8 @@ flexmark-ext-tables = { group = "com.vladsch.flexmark", name = "flexmark-ext-tab
 flexmark-ext-gfm-strikethrough = { group = "com.vladsch.flexmark", name = "flexmark-ext-gfm-strikethrough", version.ref = "flexmark" }
 flexmark-ext-gfm-tasklist = { group = "com.vladsch.flexmark", name = "flexmark-ext-gfm-tasklist", version.ref = "flexmark" }
 flexmark-ext-autolink = { group = "com.vladsch.flexmark", name = "flexmark-ext-autolink", version.ref = "flexmark" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
+coil3-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil3" }
 compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 compose-markdown-task = { group = "com.github.feiyin0719.ComposeMarkdown", name = "markdown-task", version.ref = "compose-markdown" }
 
