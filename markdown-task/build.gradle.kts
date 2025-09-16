@@ -27,8 +27,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        jvmToolchain(11)
     }
 }
 
@@ -36,11 +36,11 @@ dependencies {
 
     compileOnly(project(":markdown"))
     api(libs.flexmark.ext.gfm.tasklist)
-    compileOnly(libs.androidx.core.ktx)
-    compileOnly(libs.androidx.appcompat)
-    compileOnly(libs.material)
-    compileOnly(libs.androidx.compose.foundation)
-    compileOnly(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.compose.foundation)
+    implementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
