@@ -36,10 +36,10 @@ Markdown syntax and custom styling.
 
 ## 🔧 Tech Stack
 
-| Technology       | Version     | Purpose                       |
-|------------------|-------------|-------------------------------|
-| **Jetpack Compose** | 2024.09.00+ | Modern UI framework           |
-| **Flexmark**     | 0.64.8      | Markdown parsing engine       |
+| Technology            | Version     | Purpose                       |
+|-----------------------|-------------|-------------------------------|
+| **Jetpack Compose**   | 2024.09.00+ | Modern UI framework           |
+| **Flexmark**          | 0.64.8      | Markdown parsing engine       |
 | **Kotlin Coroutines** | 1.7+        | Asynchronous processing       |
 | **Material Design 3** | Latest      | Design language specification |
 
@@ -522,7 +522,7 @@ elements, inline elements, and renderers.
 
 ```kotlin
 class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
-    
+
     // Register custom block parser factories
     override fun blockParserFactories(): List<CustomBlockParserFactory> =
         listOf(AlertBlockParserFactory())
@@ -618,7 +618,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
             )
             else -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
         }
-        
+
         Card(
             modifier = modifier
                 .fillMaxWidth()
@@ -738,7 +738,8 @@ class HighlightNode : Node() {
  * Badge node
  * Syntax: !!type:text!!
  */
-class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) : Node() {
+class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) :
+    Node() {
     override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 ```
@@ -755,6 +756,11 @@ val config = MarkdownRenderConfig.Builder()
     .addInlineNodeStringBuilder(BadgeNode::class.java, BadgeNodeStringBuilder())
     .build()
 ```
+
+### Custom Image Loader
+
+The library uses Coil for image loading by default. You can refer to Coil's documentation to
+customize image loading behavior -- [coil](https://coil-kt.github.io/coil/image_loaders/)
 
 ## 📚 API Reference
 
@@ -806,9 +812,12 @@ fun MarkdownView(
 
 #### LazyMarkdownView
 
-The `LazyMarkdownView` is designed for efficiently rendering large Markdown files by loading and displaying content in chunks as the user scrolls. This component is perfect for documents that are too large to load entirely into memory at once.
+The `LazyMarkdownView` is designed for efficiently rendering large Markdown files by loading and
+displaying content in chunks as the user scrolls. This component is perfect for documents that are
+too large to load entirely into memory at once.
 
 **Key Features:**
+
 - 📄 **Chunk-based Loading** - Loads Markdown content progressively as needed
 - ⚡ **Memory Efficient** - Only keeps visible and nearby chunks in memory
 - 🎯 **Smart Prefetching** - Prefetches content based on scroll direction
@@ -829,6 +838,7 @@ fun LazyMarkdownView(
 ```
 
 **Parameters:**
+
 - `file` - The Markdown file to be displayed
 - `markdownRenderConfig` - Configuration for rendering the Markdown
 - `modifier` - Modifier to be applied to the LazyColumn
@@ -844,7 +854,7 @@ fun LazyMarkdownView(
 fun LargeMarkdownDocument() {
     val markdownFile = File("/path/to/large-document.md")
     val config = MarkdownRenderConfig.Builder().build()
-    
+
     LazyMarkdownView(
         file = markdownFile,
         markdownRenderConfig = config,
@@ -859,6 +869,7 @@ fun LargeMarkdownDocument() {
 ```
 
 **When to Use LazyMarkdownView:**
+
 - Large Markdown files (>10MB or >10000 lines)
 - Documents with many images or complex content
 - Mobile devices with limited memory
@@ -881,6 +892,7 @@ data class ChunkLoaderConfig(
 ```
 
 **Configuration Tips:**
+
 - Increase `initialLines` for faster initial loading of small-medium files
 - Increase `incrementalLines` for smoother expansion when scrolling
 - Decrease `chunkSize` for more granular loading and better memory usage
@@ -972,7 +984,8 @@ interface IMarkdownRenderPlugin {
 ## Future Plans
 
 ~~- 🚀 Support load large markdown file and render progressively
-  Load and render visible blocks to improve performance and memory usage~~
+Load and render visible blocks to improve performance and memory usage~~
+
 - 🚀 Add more built-in plugins for common use cases
 
 ## ❓ FAQ
