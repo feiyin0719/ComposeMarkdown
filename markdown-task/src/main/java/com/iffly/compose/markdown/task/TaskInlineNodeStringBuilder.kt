@@ -1,12 +1,12 @@
 package com.iffly.compose.markdown.task
 
-import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.InlineNodeStringBuilders
+import com.iffly.compose.markdown.render.MarkdownInlineTextContent
 import com.iffly.compose.markdown.render.buildMarkdownAnnotatedString
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
@@ -16,7 +16,7 @@ class TaskInlineNodeStringBuilder(private val taskStyle: SpanStyle) :
 
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: TaskListItem,
-        inlineContentMap: MutableMap<String, InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,

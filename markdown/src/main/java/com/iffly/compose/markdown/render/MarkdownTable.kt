@@ -25,11 +25,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -47,6 +48,7 @@ import com.vladsch.flexmark.ext.tables.TableBody
 import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.ext.tables.TableRow
+import kotlinx.coroutines.launch
 
 object TableRenderer : IBlockRenderer<TableBlock> {
     @Composable
@@ -126,9 +128,10 @@ private fun TableTitle(
     cells: List<List<TableCell>>,
     modifier: Modifier = Modifier,
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
     val typographyStyle = currentTypographyStyle()
     val htmlRenderer = currentHtmlRenderer()
+    val scope = rememberCoroutineScope()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -143,13 +146,15 @@ private fun TableTitle(
             style = typographyStyle.tableCopyStyle,
             modifier = Modifier
                 .clickable {
-                    val clipData =
-                        ClipData.newHtmlText(
-                            "",
-                            buildTableText(cells),
-                            htmlRenderer.render(tableBlock)
-                        )
-                    clipboardManager.setClip(clipData.toClipEntry())
+                    scope.launch {
+                        val clipData =
+                            ClipData.newHtmlText(
+                                "",
+                                buildTableText(cells),
+                                htmlRenderer.render(tableBlock)
+                            )
+                        clipboardManager.setClipEntry(clipData.toClipEntry())
+                    }
                 }
         )
     }
@@ -218,7 +223,8 @@ private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier) {
             MarkdownText(
                 parent = node,
                 modifier = Modifier,
-                textAlign = node.alignment.toTextAlign())
+                textAlign = node.alignment.toTextAlign()
+            )
         }
     }
 }
@@ -230,6 +236,7 @@ private fun TableCell.Alignment?.toTextAlign(): TextAlign {
         else -> TextAlign.Start
     }
 }
+
 private fun TableCell.Alignment?.toTableAlignment(): Alignment {
     return when (this) {
         TableCell.Alignment.CENTER -> Alignment.TopCenter
