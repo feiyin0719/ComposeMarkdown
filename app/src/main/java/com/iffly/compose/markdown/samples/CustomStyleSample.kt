@@ -33,7 +33,7 @@ fun CustomStyleExample(paddingValues: PaddingValues) {
             fontStyle = FontStyle.Italic,
             color = Color(0xFF9C27B0)
         ),
-        code = SpanStyle(
+        code = TextStyle(
             fontFamily = FontFamily.Monospace,
             fontSize = 14.sp,
             color = Color(0xFF37474F),

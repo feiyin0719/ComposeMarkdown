@@ -2,6 +2,7 @@ package com.iffly.compose.markdown.style
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
@@ -21,6 +22,18 @@ data class TypographyStyle(
     val breakLineHeight: Dp = 1.dp,
     val breakLineColor: Color = Color(0xFFE0E0E0),
     val textStyle: TextStyle? = null,
+    val imageParagraphStyle: ParagraphStyle = ParagraphStyle(
+        lineHeight = 300.sp,
+    ),
+    val paragraphStyle: ParagraphStyle = ParagraphStyle(
+        lineHeight = 24.sp,
+    ),
+    val orderListParagraphStyle: ParagraphStyle = ParagraphStyle(
+        lineHeight = 24.sp,
+    ),
+    val bulletListParagraphStyle: ParagraphStyle = ParagraphStyle(
+        lineHeight = 24.sp,
+    ),
     val body: SpanStyle = SpanStyle(),
     val strongEmphasis: SpanStyle = SpanStyle(
         fontWeight = FontWeight.Bold,
@@ -30,7 +43,7 @@ data class TypographyStyle(
         fontStyle = FontStyle.Italic,
         fontFamily = FontFamily.Default,
     ),
-    val code: SpanStyle = SpanStyle(
+    val code: TextStyle = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontSize = 14.sp,
         color = Color(0xFF37474F),
@@ -123,6 +136,14 @@ data class TypographyStyle(
             fontFamily = FontFamily.Default
         ),
     ),
+    val headParagraphStyle: Map<Int, ParagraphStyle> = mapOf(
+        1 to ParagraphStyle(lineHeight = 40.sp),
+        2 to ParagraphStyle(lineHeight = 36.sp),
+        3 to ParagraphStyle(lineHeight = 32.sp),
+        4 to ParagraphStyle(lineHeight = 28.sp),
+        5 to ParagraphStyle(lineHeight = 24.sp),
+        6 to ParagraphStyle(lineHeight = 20.sp),
+    )
 )
 
 val DefaultTypographyStyle by lazy { TypographyStyle() }

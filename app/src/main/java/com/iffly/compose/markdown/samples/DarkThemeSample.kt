@@ -34,7 +34,7 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
             fontStyle = FontStyle.Italic,
             color = Color(0xFFBA68C8)
         ),
-        code = SpanStyle(
+        code = TextStyle(
             fontFamily = FontFamily.Monospace,
             fontSize = 14.sp,
             color = Color(0xFF81C784),

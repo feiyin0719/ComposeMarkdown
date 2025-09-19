@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.util
 
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ast.BulletList
@@ -12,7 +13,7 @@ import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.util.ast.Node
 
-fun TypographyStyle.getNodeStyle(node: Node): SpanStyle {
+fun TypographyStyle.getNodeSpanStyle(node: Node): SpanStyle {
     return when (node) {
         is Heading -> this.head[node.level] ?: this.body
         is Emphasis -> this.emphasis
@@ -23,6 +24,15 @@ fun TypographyStyle.getNodeStyle(node: Node): SpanStyle {
         }
 
         else -> this.body
+    }
+}
+
+fun TypographyStyle.getNodeParagraphStyle(node: Node): ParagraphStyle {
+    return when (node) {
+        is Heading -> this.headParagraphStyle[node.level] ?: this.paragraphStyle
+        is BulletList -> this.bulletListParagraphStyle
+        is OrderedList -> this.orderListParagraphStyle
+        else -> this.paragraphStyle
     }
 }
 

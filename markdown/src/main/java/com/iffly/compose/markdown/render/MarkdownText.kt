@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -22,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
 import com.iffly.compose.markdown.config.currentLinkClickListener
 import com.iffly.compose.markdown.config.currentTypographyStyle
@@ -30,7 +28,8 @@ import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getMarkerText
-import com.iffly.compose.markdown.util.getNodeStyle
+import com.iffly.compose.markdown.util.getNodeParagraphStyle
+import com.iffly.compose.markdown.util.getNodeSpanStyle
 import com.iffly.compose.markdown.widget.BasicText
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Code
@@ -145,17 +144,20 @@ fun markdownText(
     val inlineContentMap = mutableMapOf<String, MarkdownInlineTextContent>()
 
     val annotatedString = buildAnnotatedString {
-        val style: SpanStyle = typographyStyle.getNodeStyle(node)
-        withStyle(style) {
-            buildMarkdownAnnotatedString(
-                node,
-                indentLevel,
-                inlineContentMap,
-                typographyStyle,
-                inlineNodeStringBuilders,
-                linkInteractionListener,
-                isShowNotSupported,
-            )
+        val style: SpanStyle = typographyStyle.getNodeSpanStyle(node)
+        val paragraphStyle = typographyStyle.getNodeParagraphStyle(node)
+        withStyle(paragraphStyle) {
+            withStyle(style) {
+                buildMarkdownAnnotatedString(
+                    node,
+                    indentLevel,
+                    inlineContentMap,
+                    typographyStyle,
+                    inlineNodeStringBuilders,
+                    linkInteractionListener,
+                    isShowNotSupported,
+                )
+            }
         }
     }
 
@@ -187,12 +189,15 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
         when {
             node::class.java == Text::class.java -> append(node.contentText())
             node::class.java == HardLineBreak::class.java || node::class.java == SoftLineBreak::class.java -> appendLine()
-            node::class.java == Paragraph::class.java -> {
-                buildStringFun(node)
-            }
+            node::class.java == Paragraph::class.java ->
+                withStyle(typographyStyle.paragraphStyle) {
+                    buildStringFun(node!!)
+                }
 
             node::class.java == OrderedList::class.java || node::class.java == BulletList::class.java -> {
-                buildStringFun(node)
+                withStyle(typographyStyle.getNodeParagraphStyle(node)) {
+                    buildStringFun(node!!)
+                }
             }
 
             node::class.java == Emphasis::class.java -> withStyle(typographyStyle.emphasis) {
@@ -244,14 +249,14 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
             node::class.java == Code::class.java -> {
                 val codeNode = node as Code
                 val codeText = codeNode.contentText()
-                withStyle(typographyStyle.code) {
+                withStyle(typographyStyle.code.toSpanStyle()) {
                     append(codeText)
                 }
             }
 
             node::class.java == Image::class.java -> {
                 val imageNode = node as Image
-                buildImage(imageNode, inlineContentMap)
+                buildImage(imageNode, typographyStyle, inlineContentMap)
             }
 
             else -> {
@@ -316,14 +321,16 @@ fun AnnotatedString.Builder.buildListItem(
 
 fun AnnotatedString.Builder.buildImage(
     node: Image,
+    typographyStyle: TypographyStyle,
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>
 ) {
     val imageNode = node
     val imageId = "image_${imageNode.hashCode()}"
+    val imageParagraphStyle = typographyStyle.imageParagraphStyle
     inlineContentMap[imageId] = MarkdownInlineTextContent(
         placeholder = Placeholder(
-            width = 300.sp,
-            height = 300.sp,
+            width = imageParagraphStyle.lineHeight,
+            height = imageParagraphStyle.lineHeight,
             placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
         ),
     ) {
@@ -337,7 +344,7 @@ fun AnnotatedString.Builder.buildImage(
         }
 
     }
-    withStyle(ParagraphStyle(lineHeight = 300.sp)) {
+    withStyle(imageParagraphStyle) {
         appendInlineContent(imageId, "[${imageNode.title ?: imageNode.text}]")
     }
 }
