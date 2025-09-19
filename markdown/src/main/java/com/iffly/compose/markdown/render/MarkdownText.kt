@@ -1,5 +1,7 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
@@ -11,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -44,7 +47,6 @@ import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
-import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.util.ast.Node
 import kotlin.text.Typography.nbsp
 
@@ -93,6 +95,7 @@ object BulletListRenderer : IBlockRenderer<BulletList> {
 fun MarkdownText(
     parent: Node,
     modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Start,
 ) {
     val typographyStyle = currentTypographyStyle()
     val inlineNodeStringBuilders = currentInlineNodeStringBuilders()
@@ -113,27 +116,22 @@ fun MarkdownText(
             isShowNotSupported,
         )
     }
-
-    val textAlign = if (parent is TableCell) {
-        parent.alignment.toTextAlign()
-    } else {
-        null
+    val inlineContentMap = remember(inlineContent) {
+        inlineContent.map {
+            it.key to InlineTextContent(
+                placeholder = it.value.placeholder,
+                children = it.value.children
+            )
+        }.toMap()
     }
+
     BasicText(
         text = text,
-        inlineContent = inlineContent,
+        inlineContent = inlineContentMap,
         modifier = modifier,
         textAlign = textAlign,
         style = typographyStyle.textStyle ?: LocalTextStyle.current
     )
-}
-
-private fun TableCell.Alignment?.toTextAlign(): TextAlign? {
-    return when (this) {
-        TableCell.Alignment.CENTER -> TextAlign.Center
-        TableCell.Alignment.RIGHT -> TextAlign.Right
-        else -> null
-    }
 }
 
 fun markdownText(
@@ -143,8 +141,8 @@ fun markdownText(
     linkInteractionListener: LinkInteractionListener? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
-): Pair<AnnotatedString, Map<String, InlineTextContent>> {
-    val inlineContentMap = mutableMapOf<String, InlineTextContent>()
+): Pair<AnnotatedString, Map<String, MarkdownInlineTextContent>> {
+    val inlineContentMap = mutableMapOf<String, MarkdownInlineTextContent>()
 
     val annotatedString = buildAnnotatedString {
         val style: SpanStyle = typographyStyle.getNodeStyle(node)
@@ -167,7 +165,7 @@ fun markdownText(
 fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
-    inlineContentMap: MutableMap<String, InlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
     linkInteractionListener: LinkInteractionListener? = null,
@@ -287,7 +285,7 @@ fun AnnotatedString.Builder.buildListItem(
     child: ListItem,
     indentLevel: Int,
     marker: String,
-    inlineContentMap: MutableMap<String, InlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     inlineNodeStringBuilders: InlineNodeStringBuilders,
     linkInteractionListener: LinkInteractionListener? = null,
@@ -318,23 +316,33 @@ fun AnnotatedString.Builder.buildListItem(
 
 fun AnnotatedString.Builder.buildImage(
     node: Image,
-    inlineContentMap: MutableMap<String, InlineTextContent>
+    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>
 ) {
     val imageNode = node
     val imageId = "image_${imageNode.hashCode()}"
-    inlineContentMap[imageId] = InlineTextContent(
+    inlineContentMap[imageId] = MarkdownInlineTextContent(
         placeholder = Placeholder(
-            width = 120.sp,
-            height = 120.sp,
-            placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-        )
+            width = 300.sp,
+            height = 300.sp,
+            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+        ),
     ) {
-        MarkdownImage(
-            node = imageNode,
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 2.dp)
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            MarkdownImage(
+                node = imageNode,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 2.dp)
+            )
+        }
+
     }
-    appendInlineContent(imageId, "[${imageNode.title ?: imageNode.text}]")
+    withStyle(ParagraphStyle(lineHeight = 300.sp)) {
+        appendInlineContent(imageId, "[${imageNode.title ?: imageNode.text}]")
+    }
 }
+
+data class MarkdownInlineTextContent(
+    val placeholder: Placeholder,
+    val children: @Composable (String) -> Unit
+)

@@ -1,7 +1,6 @@
 package com.iffly.compose.markdown.render
 
 import android.util.Log
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +35,7 @@ fun MarkdownImage(
             .diskCachePolicy(CachePolicy.ENABLED)
             .build(),
         contentDescription = altText,
-        contentScale = ContentScale.FillHeight,
+        contentScale = ContentScale.Fit,
         modifier = modifier
             .wrapContentSize()
             .clip(RoundedCornerShape(8.dp))

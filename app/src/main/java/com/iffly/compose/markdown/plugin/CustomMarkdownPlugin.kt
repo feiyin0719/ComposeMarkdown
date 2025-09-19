@@ -36,6 +36,7 @@ import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.InlineNodeStringBuilders
+import com.iffly.compose.markdown.render.MarkdownInlineTextContent
 import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.parser.InlineParser
@@ -416,7 +417,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
 class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: MentionNode,
-        inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
@@ -438,7 +439,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
 class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HashtagNode,
-        inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
@@ -454,7 +455,7 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
 class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HighlightNode,
-        inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
@@ -476,7 +477,7 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
 class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: BadgeNode,
-        inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,

@@ -1,6 +1,5 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.style.TypographyStyle
@@ -28,7 +27,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
      */
     fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
-        inlineContentMap: MutableMap<String, InlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
@@ -39,7 +38,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
 
 fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     node: T,
-    inlineContentMap: MutableMap<String, InlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     indentLevel: Int,
     linkInteractionListener: LinkInteractionListener? = null,

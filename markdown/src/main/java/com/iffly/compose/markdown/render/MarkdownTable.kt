@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentHtmlRenderer
@@ -214,11 +215,21 @@ private fun BodyScope.Rows(
 private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
-            MarkdownText(parent = node, modifier = Modifier)
+            MarkdownText(
+                parent = node,
+                modifier = Modifier,
+                textAlign = node.alignment.toTextAlign())
         }
     }
 }
 
+private fun TableCell.Alignment?.toTextAlign(): TextAlign {
+    return when (this) {
+        TableCell.Alignment.CENTER -> TextAlign.Center
+        TableCell.Alignment.RIGHT -> TextAlign.End
+        else -> TextAlign.Start
+    }
+}
 private fun TableCell.Alignment?.toTableAlignment(): Alignment {
     return when (this) {
         TableCell.Alignment.CENTER -> Alignment.TopCenter
