@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: "Compose Markdown: Breathe New Life into Markdown in Jetpack Compose!"
@@ -14,7 +13,14 @@ tags: [Android, Jetpack Compose, Markdown]
 
 > In the world of mobile development, Markdown rendering has always been a headache. Traditional WebView is bulky and slow, while native implementation is complex and tedious. But now, everything is different! 🎉
 
-## ✨ Why Choose Compose Markdown?
+## 📸 Sample Screenshots
+
+| Custom Styles | Tables and Code Blocks |         Custom Plugins (Alerts)          |
+| :---: | :---: |:----------------------------------------:|
+| *Custom typography styles* | *Complex tables and code highlighting* |              *Custom Block*              |
+| ![Custom Style](images/custom_style.png) | ![Table and Code](images/table_and_code.png) | ![Custom Alert](images/custom_alert.png) |
+
+## ✨ Why Choose Compose Compose Markdown?
 
 Imagine you're developing a tech blog app that needs to display complex Markdown content. Traditional solutions force you to make difficult choices between performance and functionality, but **Compose Markdown** makes it effortless!
 

@@ -19,6 +19,13 @@ Markdown syntax and custom styling.
 
 ## 📋 Features
 
+### 📸 Sample Screenshots
+
+| Custom Styles | Tables and Code Blocks |             Custom Plugins (Alerts)             |
+| :---: | :---: |:-----------------------------------------------:|
+| *Custom typography styles* | *Complex tables and code highlighting* |                 *Custom block*                  |
+| ![Custom Style](_posts/images/custom_style.png) | ![Table and Code](_posts/images/table_and_code.png) | ![Custom Alert](_posts/images/custom_alert.png) |
+
 ### Core Features
 
 - ✅ **Standard Markdown Support** - Full support for CommonMark specification
@@ -984,7 +991,11 @@ interface IMarkdownRenderPlugin {
 ## Future Plans
 
 ~~- 🚀 Support load large markdown file and render progressively
-Load and render visible blocks to improve performance and memory usage~~
+Load and render visible blocks to improve performance and memory usage~~  -- Completed in v0.0.4
+
+- Support markdown inline editing mode(inline edit is edit markdown and render at the same time) -- Planned for v0.1.0
+
+- Supports jump-to-section functionality via clickable TOC.
 
 - 🚀 Add more built-in plugins for common use cases
 
