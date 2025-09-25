@@ -1,69 +1,68 @@
 # Compose Markdown
 
-[English](README.md) | [简体中文](README_zh-CN.md)
+[English](README.md) | 简体中文
 
-A powerful and highly customizable Jetpack Compose Markdown rendering library that supports rich
-Markdown syntax and custom styling.
+一个强大且高度可定制的 Jetpack Compose Markdown 渲染库，支持丰富的 Markdown 语法与自定义样式。
 
-## Table of Contents
+## 目录
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Core Components](#-core-components)
-- [Style Customization](#-style-customization)
-- [Advanced Features](#-advanced-features)
-- [API Reference](#-api-reference)
-- [FAQ](#-faq)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [功能](#-功能)
+- [技术栈](#-技术栈)
+- [安装](#-安装)
+- [快速开始](#-快速开始)
+- [核心组件](#-核心组件)
+- [样式自定义](#-样式自定义)
+- [高级特性](#-高级特性)
+- [API 参考](#-api-参考)
+- [常见问题](#-常见问题)
+- [贡献](#-贡献)
+- [许可证](#-许可证)
 
-## 📋 Features
+## 📋 功能
 
-### 📸 Sample Screenshots
+### 📸 示例截图
 
-| Custom Styles | Tables and Code Blocks |             Custom Plugins (Alerts)             |
-| :---: | :---: |:-----------------------------------------------:|
-| *Custom typography styles* | *Complex tables and code highlighting* |                 *Custom block*                  |
+| 自定义样式 | 表格与代码块 | 自定义插件（提示框） |
+| :---: | :---: | :---: |
+| 自定义排版样式 | 复杂表格与代码高亮 | 自定义块级组件 |
 | ![Custom Style](_posts/images/custom_style.png) | ![Table and Code](_posts/images/table_and_code.png) | ![Custom Alert](_posts/images/custom_alert.png) |
 
-### Core Features
+### 核心能力
 
-- ✅ **Standard Markdown Support** - Full support for CommonMark specification
-- ✅ **Extended Syntax** - Support for GFM (GitHub Flavored Markdown) tables
-- ✅ **Code Syntax Highlighting** - Multi-language code block syntax highlighting
-- ✅ **Multimedia Support** - Rendering of images, links and other multimedia content
-- ✅ **Responsive Design** - Perfect adaptation to different screen sizes
+- ✅ 标准 Markdown 支持——完整兼容 CommonMark 规范
+- ✅ 扩展语法——支持 GFM（GitHub Flavored Markdown）表格
+- ✅ 代码语法高亮——多语言代码块高亮
+- ✅ 多媒体支持——渲染图片、链接等富内容
+- ✅ 响应式设计——良好适配不同屏幕尺寸
 
-### Performance & Extensions
+### 性能与扩展
 
-- ⚡ **Async Parsing** - Background thread parsing ensures UI fluidity
-- 🎨 **Fully Customizable** - Support for custom styles, renderers and parsers
-- 🔌 **Plugin System** - Flexible plugin architecture for feature extensions
-- 🛡️ **Error Handling** - Graceful error state handling mechanism
+- ⚡ 异步解析——后台线程解析，保证 UI 流畅
+- 🎨 完全可定制——支持自定义样式、渲染器与解析器
+- 🔌 插件系统——灵活的插件架构，便于功能扩展
+- 🛡️ 错误处理——完善的错误状态处理机制
 
-## 🔧 Tech Stack
+## 🔧 技术栈
 
-| Technology            | Version     | Purpose                       |
-|-----------------------|-------------|-------------------------------|
-| **Jetpack Compose**   | 2024.09.00+ | Modern UI framework           |
-| **Flexmark**          | 0.64.8      | Markdown parsing engine       |
-| **Kotlin Coroutines** | 1.7+        | Asynchronous processing       |
-| **Material Design 3** | Latest      | Design language specification |
+| 技术 | 版本 | 作用 |
+|------|------|------|
+| Jetpack Compose | 2024.09.00+ | 现代化 UI 框架 |
+| Flexmark | 0.64.8 | Markdown 解析引擎 |
+| Kotlin 协程 | 1.7+ | 异步处理 |
+| Material Design 3 | 最新 | 设计规范 |
 
-## 📦 Installation
+## 📦 安装
 
-### System Requirements
+### 系统要求
 
-- **Android API**: 24+ (Android 7.0)
-- **Kotlin**: 2.0.21+
-- **Compose BOM**: 2024.09.00+
-- **Java**: 8+
+- Android API：24+（Android 7.0）
+- Kotlin：2.0.21+
+- Compose BOM：2024.09.00+
+- Java：8+
 
-### Add Dependency
+### 添加依赖
 
-1. Add `jitpack.io` repository to your project:
+1. 在项目中添加 `jitpack.io` 仓库：
 
 ```kotlin
 repositories {
@@ -72,8 +71,7 @@ repositories {
 }
 ```
 
-2. Add the dependency to your project's `build.gradle.kts` :
-   define library module in your `./gradle/libs.versions.toml` file:
+2. 在项目的 `./gradle/libs.versions.toml` 中定义依赖：
 
 ```toml
 [versions]
@@ -86,7 +84,7 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 ```
 
-add the dependency in your module `build.gradle.kts`:
+在模块 `build.gradle.kts` 中添加依赖：
 
 ```kotlin
 dependencies {
@@ -101,11 +99,11 @@ dependencies {
 }
 ```
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Basic Usage
+### 基本用法
 
-The simplest way to use:
+最简单的使用方式：
 
 ```kotlin
 import com.iffly.compose.markdown.MarkdownView
@@ -142,7 +140,7 @@ fun SimpleMarkdownExample() {
 }
 ```
 
-### Usage with Configuration
+### 自定义配置用法
 
 ```kotlin
 @Composable
@@ -163,13 +161,13 @@ fun ConfiguredMarkdownExample() {
         content = "# Custom Style Title\n\nThis is Markdown content with custom styling.",
         markdownRenderConfig = config,
         linkInteractionListener = LinkInteractionListener { url ->
-            // Handle link click events
+            // 处理链接点击事件
             println("Link clicked: $url")
         },
         onError = { error ->
-            // Custom error handling
+            // 自定义错误处理
             Text(
-                text = "Content parsing failed: ${error.message}",
+                text = "内容解析失败: ${error.message}",
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -177,11 +175,11 @@ fun ConfiguredMarkdownExample() {
 }
 ```
 
-## 🧩 Core Components
+## 🧩 核心组件
 
 ### MarkdownView
 
-The main Composable component for rendering Markdown content.
+用于渲染 Markdown 内容的主 Composable 组件。
 
 ```kotlin
 @Composable
@@ -196,7 +194,7 @@ fun MarkdownView(
 
 ### MarkdownRenderConfig
 
-Configuration class for customizing Markdown rendering behavior.
+用于自定义 Markdown 渲染行为的配置类。
 
 ```kotlin
 class MarkdownRenderConfig private constructor(
@@ -219,9 +217,9 @@ class MarkdownRenderConfig private constructor(
 }
 ```
 
-## 🎨 Style Customization
+## 🎨 样式自定义
 
-### Basic Style Configuration
+### 基本样式配置
 
 ```kotlin
 val customTypography = TypographyStyle(
@@ -248,7 +246,7 @@ val customTypography = TypographyStyle(
 )
 ```
 
-### Heading Style Customization
+### 标题样式配置
 
 ```kotlin
 val headingStyles = mapOf(
@@ -267,11 +265,11 @@ val headingStyles = mapOf(
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface
     ),
-    // ... other levels
+    // ... 其他级别
 )
 ```
 
-### Link Style Configuration
+### 链接样式配置
 
 ```kotlin
 val linkStyles = TextLinkStyles(
@@ -290,15 +288,13 @@ val linkStyles = TextLinkStyles(
 )
 ```
 
-## 🔧 Advanced Features
+## 🔧 高级特性
 
-### MarkdownView Usage Modes
+### MarkdownView 三种用法模式
 
-MarkdownView provides three different usage modes to adapt to different use cases:
+#### 1. 同步解析（即时解析）
 
-#### 1. Synchronous Parsing Version (Instant Parsing)
-
-Suitable for small content that can be parsed instantly without blocking the UI.
+适用于小体量内容，解析瞬时完成且不会阻塞 UI。
 
 ```kotlin
 @Composable
@@ -311,7 +307,7 @@ fun MarkdownView(
 )
 ```
 
-**Usage Example:**
+用法示例：
 
 ```kotlin
 @Composable
@@ -330,12 +326,12 @@ fun SyncMarkdownExample() {
         markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
         modifier = Modifier.padding(16.dp),
         linkInteractionListener = LinkInteractionListener { url ->
-            // Handle link clicks
+            // 处理链接点击
             Log.d("MarkdownView", "Link clicked: $url")
         },
         onError = { error ->
             Text(
-                text = "Parsing failed: ${error.message}",
+                text = "解析失败: ${error.message}",
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -343,9 +339,9 @@ fun SyncMarkdownExample() {
 }
 ```
 
-#### 2. Asynchronous Parsing Version (Background Parsing)
+#### 2. 异步解析（后台解析）
 
-Recommended for large content or scenarios requiring loading/error state display.
+推荐用于大体量内容或需要显示加载/错误状态的场景。
 
 ```kotlin
 @Composable
@@ -360,7 +356,7 @@ fun MarkdownView(
 )
 ```
 
-**Usage Example:**
+用法示例：
 
 ```kotlin
 @Composable
@@ -381,17 +377,17 @@ fun AsyncMarkdownExample() {
         linkInteractionListener = LinkInteractionListener { url ->
             when {
                 url.startsWith("mailto:") -> {
-                    // Handle email links
+                    // 处理邮件链接
                     val email = url.removePrefix("mailto:")
                     openEmailClient(email)
                 }
                 url.startsWith("tel:") -> {
-                    // Handle phone links
+                    // 处理电话链接
                     val phone = url.removePrefix("tel:")
                     openDialer(phone)
                 }
                 else -> {
-                    // Handle web links
+                    // 处理网页链接
                     openWebBrowser(url)
                 }
             }
@@ -408,7 +404,7 @@ fun AsyncMarkdownExample() {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Parsing markdown content...",
+                        text = "正在解析 Markdown 内容...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -434,14 +430,14 @@ fun AsyncMarkdownExample() {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Parse Error",
+                            text = "解析错误",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = error.message ?: "Unknown error occurred",
+                        text = error.message ?: "发生未知错误",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -452,9 +448,9 @@ fun AsyncMarkdownExample() {
 }
 ```
 
-#### 3. Pre-parsed Node Version
+#### 3. 预解析节点版本
 
-Suitable for cases where you already have parsed Nodes.
+适用于已提前解析得到 Node 的场景。
 
 ```kotlin
 @Composable
@@ -466,7 +462,7 @@ fun MarkdownView(
 )
 ```
 
-**Usage Example:**
+用法示例：
 
 ```kotlin
 @Composable
@@ -481,20 +477,20 @@ fun PreParsedMarkdownExample() {
         markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
         modifier = Modifier.padding(16.dp),
         linkInteractionListener = LinkInteractionListener { url ->
-            // Handle link clicks
+            // 处理链接点击
         }
     )
 }
 ```
 
-### Performance Optimization Recommendations
+### 性能优化建议
 
-#### 1. Choose the Right Version
+#### 1. 选择合适的使用方式
 
-- **Small content** (< 1KB): Use synchronous version to avoid unnecessary loading states
-- **Large content**: Use asynchronous version to ensure UI fluidity
+- 小内容（< 1KB）：使用同步版本，避免不必要的加载状态
+- 大内容：使用异步版本，确保 UI 流畅
 
-#### 2. Custom Dispatcher
+#### 2. 自定义 Dispatcher
 
 ```kotlin
 val customDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -502,11 +498,11 @@ val customDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher
 MarkdownView(
     content = largeContent,
     parseDispatcher = customDispatcher,
-    // ... other parameters
+    // ... 其他参数
 )
 ```
 
-#### 3. Node Caching
+#### 3. 节点缓存
 
 ```kotlin
 val nodeCache = remember { mutableMapOf<String, Node>() }
@@ -517,26 +513,24 @@ val cachedNode = nodeCache.getOrPut(contentKey) {
 MarkdownView(node = cachedNode, ...)
 ```
 
-#### 4. Memory Management
+#### 4. 内存管理
 
-For very large documents, consider implementing pagination or virtual scrolling.
+对于超大文档，可考虑分页或虚拟滚动方案。
 
-### MarkdownPlugin Usage
+### Markdown 插件用法
 
-MarkdownPlugin is a powerful plugin system that allows you to extend Markdown parsing and rendering
-functionality. By implementing the `IMarkdownRenderPlugin` interface, you can add custom block-level
-elements, inline elements, and renderers.
+MarkdownPlugin 是一套强大的插件系统，可扩展 Markdown 的解析与渲染能力。通过实现 `IMarkdownRenderPlugin` 接口，你可以添加自定义块级元素、行内元素与对应的渲染器。
 
-#### Creating Custom Plugins
+#### 自定义插件示例
 
 ```kotlin
 class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
 
-    // Register custom block parser factories
+    // 注册自定义块级解析器工厂
     override fun blockParserFactories(): List<CustomBlockParserFactory> =
         listOf(AlertBlockParserFactory())
 
-    // Register custom inline content parser factories
+    // 注册自定义行内解析扩展工厂
     override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = listOf(
         MentionInlineParserFactory(),
         HashtagInlineParserFactory(),
@@ -544,11 +538,11 @@ class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
         HighlightInlineParserFactory()
     )
 
-    // Register custom block renderers
+    // 注册自定义块级渲染器
     override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
         mapOf(AlertBlock::class.java to AlertBlockRenderer())
 
-    // Register custom inline node string builders
+    // 注册自定义行内节点字符串构建器
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
         mapOf(
             MentionNode::class.java to MentionNodeStringBuilder(),
@@ -559,7 +553,7 @@ class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
 }
 ```
 
-#### Using Custom Plugins
+#### 使用自定义插件
 
 ```kotlin
 @Composable
@@ -590,19 +584,17 @@ fun PluginMarkdownExample() {
 }
 ```
 
-#### Supported Extended Syntax
+#### 支持的扩展语法
 
-Through `CustomMarkdownPlugin`, you can use the following extended syntax:
+通过 `CustomMarkdownPlugin`，你可以使用以下扩展语法：
 
-- **Alert Blocks**: `:::info Title` `Content` `:::`
-- **User Mentions**: `@username`
-- **Hashtags**: `#hashtag`
-- **Highlighted Text**: `==highlighted content==`
-- **Badges**: `!!type:text!!`
+- 提示块（Alert Blocks）：`:::info Title` `Content` `:::`
+- 用户提及：`@username`
+- 话题标签：`#hashtag`
+- 高亮文本：`==highlighted content==`
+- 徽章：`!!type:text!!`
 
-### Custom Block Renderer
-
-Create custom block-level element renderers:
+### 自定义块级渲染器
 
 ```kotlin
 class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
@@ -659,7 +651,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-                    // Use MarkdownText to render child nodes
+                    // 使用 MarkdownText 渲染子节点
                     MarkdownText(node)
                 }
             }
@@ -668,7 +660,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
 }
 ```
 
-### Custom Inline Node Builder
+### 自定义行内节点构建器
 
 ```kotlin
 class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
@@ -692,19 +684,19 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
 }
 ```
 
-### Custom Node Definitions
+### 自定义节点定义
 
 ```kotlin
 /**
- * Alert block node
- * Syntax: :::type title
+ * 提示框块级节点
+ * 语法：:::type title
  * content
  * :::
  */
 class AlertBlock : Block() {
     var alertType: String = TYPE_INFO
     var title: String? = null
-    // Content is stored as child nodes, not as a string property
+    // 内容保存为子节点，而非字符串属性
 
     override fun getSegments(): Array<BasedSequence> = emptyArray()
 
@@ -717,8 +709,8 @@ class AlertBlock : Block() {
 }
 
 /**
- * Mention node
- * Syntax: @username
+ * 提及节点
+ * 语法：@username
  */
 class MentionNode(private val seq: BasedSequence) : Node() {
     var username: String = seq.subSequence(1, seq.length).toString()
@@ -726,8 +718,8 @@ class MentionNode(private val seq: BasedSequence) : Node() {
 }
 
 /**
- * Hashtag node
- * Syntax: #hashtag
+ * 话题标签节点
+ * 语法：#hashtag
  */
 class HashtagNode(private val seq: BasedSequence) : Node() {
     var hashtag: String = seq.subSequence(1, seq.length).toString()
@@ -735,8 +727,8 @@ class HashtagNode(private val seq: BasedSequence) : Node() {
 }
 
 /**
- * Highlight text node
- * Syntax: ==highlight text==
+ * 高亮文本节点
+ * 语法：==highlight text==
  */
 class HighlightNode : Node() {
     var highlightText: String = ""
@@ -744,8 +736,8 @@ class HighlightNode : Node() {
 }
 
 /**
- * Badge node
- * Syntax: !!type:text!!
+ * 徽章节点
+ * 语法：!!type:text!!
  */
 class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) :
     Node() {
@@ -753,7 +745,7 @@ class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badge
 }
 ```
 
-### Register Custom Components
+### 注册自定义组件
 
 ```kotlin
 val config = MarkdownRenderConfig.Builder()
@@ -766,20 +758,19 @@ val config = MarkdownRenderConfig.Builder()
     .build()
 ```
 
-### Custom Image Loader
+### 自定义图片加载
 
-The library uses Coil for image loading by default. You can refer to Coil's documentation to
-customize image loading behavior -- [coil](https://coil-kt.github.io/coil/image_loaders/)
+库默认使用 Coil 进行图片加载。你可以参考 Coil 文档自定义加载行为——[coil](https://coil-kt.github.io/coil/image_loaders/)
 
-## 📚 API Reference
+## 📚 API 参考
 
-### Main Interfaces
+### 主要接口
 
 #### MarkdownView
 
-Three overloads of the `MarkdownView` Composable function:
+`MarkdownView` 提供三种重载的 Composable 方法：
 
-- Synchronous version
+- 同步版本
 
 ```kotlin
 @Composable
@@ -792,7 +783,7 @@ fun MarkdownView(
 )
 ```
 
-- Asynchronous version
+- 异步版本
 
 ```kotlin
 @Composable
@@ -807,7 +798,7 @@ fun MarkdownView(
 )
 ```
 
-- Pre-parsed Node version
+- 预解析 Node 版本
 
 ```kotlin
 @Composable
@@ -821,17 +812,15 @@ fun MarkdownView(
 
 #### LazyMarkdownView
 
-The `LazyMarkdownView` is designed for efficiently rendering large Markdown files by loading and
-displaying content in chunks as the user scrolls. This component is perfect for documents that are
-too large to load entirely into memory at once.
+`LazyMarkdownView` 专为高效渲染大型 Markdown 文件设计，随着滚动按块加载与展示内容。该组件适用于无法一次性全部载入内存的长文档。
 
-**Key Features:**
+特点：
 
-- 📄 **Chunk-based Loading** - Loads Markdown content progressively as needed
-- ⚡ **Memory Efficient** - Only keeps visible and nearby chunks in memory
-- 🎯 **Smart Prefetching** - Prefetches content based on scroll direction
-- 🔄 **Background Parsing** - Parses content on background threads
-- 📱 **Smooth Scrolling** - Built-in LazyColumn with optimized prefetching
+- 📄 分块加载——按需逐步加载 Markdown 内容
+- ⚡ 内存友好——仅保留可见与附近块在内存中
+- 🎯 智能预取——基于滚动方向的预取策略
+- 🔄 后台解析——在后台线程解析内容
+- 📱 流畅滚动——基于 LazyColumn 的优化预取
 
 ```kotlin
 @Composable
@@ -846,17 +835,17 @@ fun LazyMarkdownView(
 )
 ```
 
-**Parameters:**
+参数说明：
 
-- `file` - The Markdown file to be displayed
-- `markdownRenderConfig` - Configuration for rendering the Markdown
-- `modifier` - Modifier to be applied to the LazyColumn
-- `showNotSupportedText` - Whether to show text for unsupported elements
-- `linkInteractionListener` - Listener for link interactions
-- `chunkLoaderConfig` - Configuration for the chunk loader (see ChunkLoaderConfig below)
-- `nestedPrefetchItemCount` - Number of items to prefetch for smoother scrolling
+- `file`——要展示的 Markdown 文件
+- `markdownRenderConfig`——渲染配置
+- `modifier`——应用于 LazyColumn 的修饰符
+- `showNotSupportedText`——是否显示不支持元素的文本
+- `linkInteractionListener`——链接交互回调
+- `chunkLoaderConfig`——分块加载配置（见下文）
+- `nestedPrefetchItemCount`——预取条目数量，提升滚动体验
 
-**Usage Example:**
+用法示例：
 
 ```kotlin
 @Composable
@@ -877,36 +866,36 @@ fun LargeMarkdownDocument() {
 }
 ```
 
-**When to Use LazyMarkdownView:**
+适用场景：
 
-- Large Markdown files (>10MB or >10000 lines)
-- Documents with many images or complex content
-- Mobile devices with limited memory
-- When you need responsive scrolling performance
+- 超大 Markdown 文件（>10MB 或 >10000 行）
+- 包含大量图片或复杂内容的文档
+- 移动设备内存受限场景
+- 需要保证滚动交互响应
 
 #### ChunkLoaderConfig
 
-Configuration class for controlling how `LazyMarkdownView` loads and caches content:
+用于控制 `LazyMarkdownView` 如何加载与缓存内容的配置：
 
 ```kotlin
 data class ChunkLoaderConfig(
-    val initialLines: Int = 1000,           // Initial number of lines to load
-    val incrementalLines: Int = 500,        // Lines to load when expanding
-    val maxCachedChunks: Int = 1000,        // Maximum chunks to keep in memory
-    val maxCachedFileLines: Int = 2000,     // Maximum file lines to cache
-    val chunkSize: Int = 5,                 // Number of blocks per chunk
-    val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,  // Background parsing
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO           // File I/O operations
+    val initialLines: Int = 1000,           // 初始加载行数
+    val incrementalLines: Int = 500,        // 扩展加载的行数
+    val maxCachedChunks: Int = 1000,        // 内存保留的最大块数
+    val maxCachedFileLines: Int = 2000,     // 文件缓存的最大行数
+    val chunkSize: Int = 5,                 // 每个块包含的区块数
+    val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,  // 后台解析
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO           // 文件 I/O
 )
 ```
 
-**Configuration Tips:**
+配置建议：
 
-- Increase `initialLines` for faster initial loading of small-medium files
-- Increase `incrementalLines` for smoother expansion when scrolling
-- Decrease `chunkSize` for more granular loading and better memory usage
-- Use `MarkdownThreadPool.dispatcher` for `parserDispatcher` to avoid blocking UI
-- Adjust `maxCachedChunks`, `maxCachedFileLines` based on available memory
+- 小中等文件可提高 `initialLines`，加快首屏加载
+- 提高 `incrementalLines` 以在滚动展开时更顺滑
+- 降低 `chunkSize` 获得更细粒度加载与更优内存占用
+- 使用 `MarkdownThreadPool.dispatcher` 作为 `parserDispatcher` 以避免阻塞 UI
+- 根据设备内存调整 `maxCachedChunks`、`maxCachedFileLines`
 
 #### IBlockRenderer<T>
 
@@ -935,9 +924,9 @@ interface IInlineNodeStringBuilder<T : Node> {
 
 #### LinkInteractionListener
 
-handle link click events
+用于处理链接点击事件。
 
-### Style Classes
+### 样式类
 
 #### TypographyStyle
 
@@ -978,7 +967,7 @@ class MarkdownRenderConfig private constructor(
 }
 ```
 
-### Markdown Plugins
+### Markdown 插件接口
 
 ```kotlin
 interface IMarkdownRenderPlugin {
@@ -990,42 +979,38 @@ interface IMarkdownRenderPlugin {
 }
 ```
 
-## Future Plans
+## 未来计划
 
-~~- 🚀 Support load large markdown file and render progressively
-Load and render visible blocks to improve performance and memory usage~~  -- Completed in v0.0.4
+~~- 🚀 支持加载超大 Markdown 文件并逐步渲染\
+按可见区块渲染以提升性能与内存使用~~ —— 已在 v0.0.4 完成
 
-- Support markdown inline editing mode(inline edit is edit markdown and render at the same time) -- Planned for v0.1.0
+- 支持 Markdown 行内编辑模式（编辑与渲染同步进行）—— 计划在 v0.1.0 实现
 
-- Supports jump-to-section functionality via clickable TOC.
+- 通过可点击目录（TOC）支持跳转到指定章节
 
-- 🚀 Add more built-in plugins for common use cases
+- 🚀 增加更多内置插件，覆盖常见场景
 
-## ❓ FAQ
+## ❓ 常见问题
 
-### Q: How to handle performance issues with large Markdown documents?
+### 问：如何处理超大 Markdown 文档的性能问题？
 
-A: The library uses an asynchronous parsing mechanism that processes Markdown parsing in background
-threads without blocking the UI thread. For very large documents, pagination or lazy loading is
-recommended.
+答：本库使用异步解析机制，在后台线程进行 Markdown 解析，不阻塞 UI 线程。对于超大文档，建议使用分页或懒加载。
 
-### Q: What Markdown extension syntaxes are supported?
+### 问：当前支持哪些 Markdown 扩展语法？
 
-A: Currently supports CommonMark standard syntax and GFM tables. More extension syntax support will
-be added in the future.
+答：目前支持 CommonMark 标准语法与 GFM 表格。未来将持续增强更多扩展语法支持。
 
-### Q: How to customize syntax highlighting for code blocks?
+### 问：如何自定义代码块的语法高亮？
 
-A: You can implement custom syntax highlighting by creating a custom `CodeBlockRenderer` and
-integrating third-party syntax highlighting libraries.
-
+答：你可以实现自定义 `CodeBlockRenderer`，并集成第三方语法高亮库。
 
 ---
 
 <div align="center">
 
-**[⬆ Back to top](#compose-markdown)**
+**[⬆ 回到顶部](#compose-markdown)**
 
-Made with ❤️ by the Compose Markdown team
+由 Compose Markdown 团队用 ❤️ 打造
 
 </div>
+
