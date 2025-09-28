@@ -295,7 +295,7 @@ val linkStyles = TextLinkStyles(
 
 ### MarkdownView Usage Modes
 
-MarkdownView provides three different usage modes to adapt to different use cases:
+MarkdownView provides four different usage modes to adapt to different use cases:
 
 #### 1. Synchronous Parsing Version (Instant Parsing)
 
@@ -488,7 +488,87 @@ fun PreParsedMarkdownExample() {
 }
 ```
 
-### Performance Optimization Recommendations
+#### 4. Lazy Loading Version
+
+When dealing with very large Markdown sources (multi‑MB, >10k lines, lots of images / long code blocks), even the async MarkdownView can incur long first‑parse latency and high memory. `LazyMarkdownView` solves this via on‑demand, chunked parsing + scroll‑aware prefetch.
+
+```kotlin
+@Composable
+fun LazyMarkdownView(
+    file: File,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    linkInteractionListener: LinkInteractionListener? = null,
+    chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
+    nestedPrefetchItemCount: Int = 3,
+)
+```
+
+Basic example:
+```kotlin
+@Composable
+fun LargeMarkdownDocument() {
+    val markdownFile = File("/path/to/large-document.md")
+    val config = MarkdownRenderConfig.Builder().build()
+
+    LazyMarkdownView(
+        file = markdownFile,
+        markdownRenderConfig = config,
+        modifier = Modifier.fillMaxSize(),
+        chunkLoaderConfig = ChunkLoaderConfig(
+            initialLines = 1000,
+            incrementalLines = 500,
+            chunkSize = 5
+        )
+    )
+}
+```
+
+Minimal usage (use defaults):
+```kotlin
+LazyMarkdownView(
+    file = File(path),
+    markdownRenderConfig = MarkdownRenderConfig.Builder().build()
+)
+```
+
+Key benefits:
+- Incremental parsing: only parses visible + nearby regions
+- Background work: file I/O & parsing off main thread
+- Directional prefetch: anticipates user scroll direction
+- Memory bounded: configurable cache limits for chunks & raw lines
+
+Tuning `ChunkLoaderConfig`:
+- `initialLines`: first screen window (too small -> early blank; too large -> slower first paint)
+- `incrementalLines`: lines appended per scroll expansion (higher = fewer parse bursts)
+- `chunkSize`: structural blocks per render unit (smaller = finer granularity / more scheduling)
+- `maxCachedChunks` / `maxCachedFileLines`: cap growth during long sessions
+- `parserDispatcher`: dedicated background dispatcher (default pool already optimized)
+
+Recommended scenarios:
+- Long technical manuals / wiki exports / AI generated long‑form
+- Offline document readers with user libraries
+- Large mixed media docs (tables, images, code)
+
+Comparison:
+| Aspect | Async MarkdownView | LazyMarkdownView |
+|--------|--------------------|------------------|
+| Initial render | Whole document parse | First window + prefetch |
+| Memory usage | All nodes in memory | Bounded by cache config |
+| Huge file risk | Possible OOM / long wait | Designed to scale |
+| Scroll smoothness | Degrades with size | Stable even when huge |
+
+Integration tips:
+1. Remote content: download to `cacheDir` then pass the File
+2. Updating file: change File reference or ensure lastModified changes
+3. Future TOC jump: map headings -> chunk index for fast scroll
+4. Media heavy docs: combine with image lazy loading / placeholders
+5. Start conservative, then profile & tune `initialLines` / `incrementalLines`
+
+> Not ideal for rapidly changing live preview editors (incremental diff parsing planned).
+
+## Performance Optimization Recommendations
 
 #### 1. Choose the Right Version
 
@@ -580,7 +660,7 @@ fun PluginMarkdownExample() {
     """.trimIndent()
 
     val config = MarkdownRenderConfig.Builder()
-        .plugin(CustomMarkdownPlugin())
+        .addPlugin(CustomMarkdownPlugin())
         .build()
 
     MarkdownView(
@@ -772,13 +852,94 @@ val config = MarkdownRenderConfig.Builder()
 The library uses Coil for image loading by default. You can refer to Coil's documentation to
 customize image loading behavior -- [coil](https://coil-kt.github.io/coil/image_loaders/)
 
+## 🔌 Plugins
+
+Currently supported official plugin modules:
+
+| Plugin | Module (artifact) | Description |
+|--------|-------------------|-------------|
+| Task List | markdown-task | Supports GitHub-style task list checkboxes: `- [ ]` / `- [x]` |
+| LaTeX / Math | markdown-latex | Supports inline and block formulas: `$...$`, `$$...$$` |
+
+### Dependency Declaration (if published as separate artifacts)
+```kotlin
+dependencies {
+    implementation("com.github.feiyin0719:markdown-task:<version>")
+    implementation("com.github.feiyin0719:markdown-latex:<version>")
+}
+```
+If only the root library (e.g. `ComposeMarkdown`) is published, these modules may already be bundled and you can just import their classes directly.
+
+### Task List Example
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(
+        TaskMarkdownRenderPlugin(
+            taskStyle = SpanStyle(/* customize color / weight etc. */)
+        )
+    )
+    .build()
+```
+Markdown sample:
+```
+- [ ] Unfinished item
+- [x] Completed item
+```
+
+### LaTeX / Math Formula Example
+```kotlin
+val mathConfig = MarkdownRenderConfig.Builder()
+    .addPlugin(
+        MarkdownMathPlugin(
+            mathStyle = SpanStyle(fontStyle = FontStyle.Italic),
+            width = 200.sp,
+            height = 80.sp,
+            align = TextAlign.Center,
+            enableGitLabExtension = false
+        )
+    )
+    .build()
+```
+Supported:
+- Inline: `$E = mc^2$`
+- Multi-line block:
+  ```
+  $$
+  E = mc^2
+  $$
+  ```
+- Single-line block: `$$ E = mc^2 $$`
+
+### Enabling Multiple Plugins Simultaneously
+```kotlin
+val fullConfig = MarkdownRenderConfig.Builder()
+    .addPlugin(TaskMarkdownRenderPlugin())
+    .addPlugin(
+        MarkdownMathPlugin(
+            mathStyle = SpanStyle(fontStyle = FontStyle.Italic),
+            width = 180.sp,
+            height = 72.sp,
+            align = TextAlign.Center
+        )
+    )
+    .build()
+```
+
+### Custom Plugin Recap
+Implement `IMarkdownRenderPlugin` (or extend `AbstractMarkdownRenderPlugin`) and register via `addPlugin()`. A typical plugin can:
+- Add Flexmark extensions (override `extensions()`)
+- Provide custom block/inline parsers
+- Register custom block renderers / inline node string builders
+
+> See the earlier "Creating Custom Plugins" section for a complete example.
+
 ## 📚 API Reference
 
 ### Main Interfaces
 
 #### MarkdownView
 
-Three overloads of the `MarkdownView` Composable function:
+Four usage variants: three overloads of `MarkdownView` plus the standalone `LazyMarkdownView` for large-file lazy loading.
 
 - Synchronous version
 
@@ -817,6 +978,21 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     linkInteractionListener: LinkInteractionListener? = null,
+)
+```
+
+- Lazy loading (separate composable for very large files)
+
+```kotlin
+@Composable
+fun LazyMarkdownView(
+    file: File,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    linkInteractionListener: LinkInteractionListener? = null,
+    chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
+    nestedPrefetchItemCount: Int = 3,
 )
 ```
 

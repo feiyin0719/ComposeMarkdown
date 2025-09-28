@@ -291,7 +291,7 @@ val linkStyles = TextLinkStyles(
 
 ## 🔧 高级特性
 
-### MarkdownView 三种用法模式
+### MarkdownView 四种用法模式
 
 #### 1. 同步解析（即时解析）
 
@@ -484,6 +484,105 @@ fun PreParsedMarkdownExample() {
 }
 ```
 
+#### 4. 懒加载大文件（LazyMarkdownView）
+
+当需要展示超大 Markdown 文件（例如：> 1~2 MB、上万行、包含大量图片或代码块）时，使用普通 `MarkdownView` 即使异步解析也可能出现：
+
+- 首次解析耗时长，白屏时间增加
+- 一次性构建所有节点导致内存占用高
+- 滚动时可能出现掉帧
+
+`LazyMarkdownView` 通过“按需分块解析 + 懒加载渲染”策略解决上述问题：
+
+特点：
+- 分块解析：只解析当前可见区域附近的 Markdown 片段
+- 后台线程：解析与文件读取在独立线程池执行，UI 流畅
+- 滚动感知：根据滚动方向预取后续或前一部分内容
+- 内存友好：可通过配置限制缓存块/缓存行数
+
+核心 API：
+```kotlin
+@Composable
+fun LazyMarkdownView(
+    file: File,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    linkInteractionListener: LinkInteractionListener? = null,
+    chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
+    nestedPrefetchItemCount: Int = 3,
+)
+```
+
+基础示例：
+```kotlin
+@Composable
+fun LazyLargeDocExample() {
+    // 真实项目中可将网络/Assets 中的内容先写入 cacheFile 再传入
+    val context = LocalContext.current
+    val cacheFile = remember {
+        File(context.cacheDir, "large_article.md").apply {
+            if (!exists()) {
+                writeText(generateOrWriteLargeContent()) // 示例：生成或写入超大内容
+            }
+        }
+    }
+    val config = remember { MarkdownRenderConfig.Builder().build() }
+
+    LazyMarkdownView(
+        file = cacheFile,
+        markdownRenderConfig = config,
+        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+        chunkLoaderConfig = ChunkLoaderConfig(
+            initialLines = 1200,      // 首屏多加载一些，减少首滚动空白
+            incrementalLines = 600,   // 每次向前/向后扩展的行数
+            chunkSize = 6,            // 一个“渲染块”含多少 markdown 结构节点
+            maxCachedChunks = 300,    // 根据内存情况调整
+            maxCachedFileLines = 3000 // 限制文本缓存行数
+        ),
+        linkInteractionListener = LinkInteractionListener { url ->
+            // 统一处理链接（外链 / 内部锚点 / tel: / mailto: 等）
+        }
+    )
+}
+```
+
+最小配置（用默认分块策略即可）：
+```kotlin
+LazyMarkdownView(
+    file = File(path),
+    markdownRenderConfig = MarkdownRenderConfig.Builder().build()
+)
+```
+
+常见调优参数说明（`ChunkLoaderConfig`）：
+- `initialLines`：首屏预加载行数，过小可能导致快速滚动出现短暂空白；过大会拉长首次启动时间
+- `incrementalLines`：滚动触发的追加加载行数，越大滚动越顺但单次解析耗时增加
+- `chunkSize`：一个渲染块包含的节点数量（语义块，比如段落/标题/列表等），越小越细粒度，越大越少组合开销
+- `maxCachedChunks` / `maxCachedFileLines`：限制内存占用，防止长时间阅读后缓存无限增长
+- `parserDispatcher`：解析线程调度器；默认使用库内线程池，必要时可自建
+
+适用场景建议：
+- 技术文档 / 笔记合集 / 导出 Wiki / AI 生成的海量长文
+- 含大量图片（可结合图片懒加载策略）
+- 阅读器类 App 中的本地离线 MD 文档
+
+与普通 `MarkdownView` 对比：
+| 对比点 | MarkdownView (异步) | LazyMarkdownView |
+|--------|---------------------|------------------|
+| 首次渲染延迟 | 解析整个文档 | 解析局部（首屏 + 预取） |
+| 内存占用 | 全量节点常驻 | 可控（缓存上限） |
+| 超大文件可行性 | 易 OOM / 长等待 | 流畅、可扩展 |
+| 滚动体验 | 与文档规模相关 | 大文件仍平滑 |
+
+集成提示：
+1. 远程 Markdown：先下载写入 `cacheDir` 后再传入 `file`
+2. 动态更新：若文件内容发生变化，可变更 `File` 引用或修改时间戳触发重建
+3. 锚点跳转：可结合未来的 TOC 支持，通过记录块索引滚动到指定位置
+4. 预加载策略：根据用户阅读方向（当前实现已自动推断）进行前瞻解析
+
+> 若你的场景只是在一个会频繁变化的编辑区实时预览，不建议使用 `LazyMarkdownView`，而应考虑增量解析或局部 diff 方案（规划中）。
+
 ### 性能优化建议
 
 #### 1. 选择合适的使用方式
@@ -574,7 +673,7 @@ fun PluginMarkdownExample() {
     """.trimIndent()
 
     val config = MarkdownRenderConfig.Builder()
-        .plugin(CustomMarkdownPlugin())
+        .addPlugin(CustomMarkdownPlugin())
         .build()
 
     MarkdownView(
@@ -763,13 +862,96 @@ val config = MarkdownRenderConfig.Builder()
 
 库默认使用 Coil 进行图片加载。你可以参考 Coil 文档自定义加载行为——[coil](https://coil-kt.github.io/coil/image_loaders/)
 
+## 🔌 插件
+
+当前支持的官方插件模块如下：
+
+| 插件 | 模块 (artifact) | 功能 |
+|------|-----------------|------|
+| 任务列表 (Task List) | markdown-task | 支持 GitHub 风格任务列表 `- [ ]` / `- [x]` |
+| LaTeX / 数学公式 | markdown-latex | 支持行内与块级公式：`$...$`、`$$...$$` |
+
+### 依赖声明（若插件以独立 artifact 发布）
+```kotlin
+dependencies {
+    implementation("com.github.feiyin0719:markdown-task:<version>")
+    implementation("com.github.feiyin0719:markdown-latex:<version>")
+}
+```
+若只发布根库（如 `ComposeMarkdown`），这些模块可能已打包，可直接导入其类。
+
+### 任务列表示例
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(
+        TaskMarkdownRenderPlugin(
+            taskStyle = SpanStyle(/* 自定义颜色/字重等 */)
+        )
+    )
+    .build()
+```
+Markdown 示例：
+```
+- [ ] 未完成事项
+- [x] 已完成事项
+```
+
+### LaTeX / 数学公式示例
+```kotlin
+val mathConfig = MarkdownRenderConfig.Builder()
+    .addPlugin(
+        MarkdownMathPlugin(
+            mathStyle = SpanStyle(fontStyle = FontStyle.Italic),
+            width = 200.sp,
+            height = 80.sp,
+            align = TextAlign.Center,
+            enableGitLabExtension = false
+        )
+    )
+    .build()
+```
+支持：
+- 行内：`$E = mc^2$`
+- 多行块级：
+  ```
+  $$
+  E = mc^2
+  $$
+  ```
+- 单行块级：`$$ E = mc^2 $$`
+
+### 同时启用多个插件
+```kotlin
+val fullConfig = MarkdownRenderConfig.Builder()
+    .addPlugin(TaskMarkdownRenderPlugin())
+    .addPlugin(
+        MarkdownMathPlugin(
+            mathStyle = SpanStyle(fontStyle = FontStyle.Italic),
+            width = 180.sp,
+            height = 72.sp,
+            align = TextAlign.Center
+        )
+    )
+    .build()
+```
+
+### 自定义插件回顾
+实现 `IMarkdownRenderPlugin`（或继承 `AbstractMarkdownRenderPlugin`）并通过 `addPlugin()` 注册。典型插件可：
+- 添加 Flexmark 扩展（重写 `extensions()`）
+- 提供自定义块级 / 行内解析器
+- 提供块级渲染器 / 行内节点字符串构建器
+
+> 完整示例见前文 “创建自定义插件” 部分。
+
+---
+
 ## 📚 API 参考
 
 ### 主要接口
 
 #### MarkdownView
 
-`MarkdownView` 提供三种重载的 Composable 方法：
+`MarkdownView` 提供四种重载的 Composable 方法：
 
 - 同步版本
 
@@ -808,6 +990,21 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     linkInteractionListener: LinkInteractionListener? = null,
+)
+```
+
+- LazyMarkdownView 版本（针对大文件懒加载）
+
+```kotlin
+@Composable
+fun LazyMarkdownView(
+    file: File,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    linkInteractionListener: LinkInteractionListener? = null,
+    chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
+    nestedPrefetchItemCount: Int = 3,
 )
 ```
 
@@ -898,7 +1095,12 @@ data class ChunkLoaderConfig(
 - 使用 `MarkdownThreadPool.dispatcher` 作为 `parserDispatcher` 以避免阻塞 UI
 - 根据设备内存调整 `maxCachedChunks`、`maxCachedFileLines`
 
-#### IBlockRenderer<T>
+适用场景建议：
+- 技术文档 / 笔记合集 / 导出 Wiki / AI 生成的海量长文
+- 含大量图片（可结合图片懒加载策略）
+- 阅读器类 App 中的本地离线 MD 文档
+
+### IBlockRenderer<T>
 
 ```kotlin
 interface IBlockRenderer<T : Node> {
@@ -907,7 +1109,7 @@ interface IBlockRenderer<T : Node> {
 }
 ```
 
-#### IInlineNodeStringBuilder<T>
+### IInlineNodeStringBuilder<T>
 
 ```kotlin
 interface IInlineNodeStringBuilder<T : Node> {
@@ -923,7 +1125,7 @@ interface IInlineNodeStringBuilder<T : Node> {
 }
 ```
 
-#### LinkInteractionListener
+### LinkInteractionListener
 
 用于处理链接点击事件。
 
