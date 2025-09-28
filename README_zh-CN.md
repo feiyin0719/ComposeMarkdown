@@ -13,6 +13,7 @@
 - [核心组件](#-核心组件)
 - [样式自定义](#-样式自定义)
 - [高级特性](#-高级特性)
+- [插件](#-插件)
 - [API 参考](#-api-参考)
 - [常见问题](#-常见问题)
 - [贡献](#-贡献)
@@ -1004,6 +1005,67 @@ interface IMarkdownRenderPlugin {
 
 答：你可以实现自定义 `CodeBlockRenderer`，并集成第三方语法高亮库。
 
+## 🤝 贡献
+
+欢迎你的贡献！协作步骤：
+1. Fork 本仓库
+2. 新建分支：`git checkout -b feat/my-feature`
+3. 开发与提交（保持改动聚焦，必要时补充/更新测试）
+4. 本地执行检查：
+   - `./gradlew build` 编译并运行测试
+   - 若配置额外工具，可执行：`./gradlew lintKotlin detekt`
+5. 使用约定式提交信息：
+   - `feat:` 新功能
+   - `fix:` 缺陷修复
+   - `docs:` 文档更新
+   - `refactor:` 重构（无行为变更）
+   - `perf:` 性能优化
+   - `test:` 测试补充/调整
+   - `build:` 构建或依赖相关改动
+   - `chore:` 其他维护性工作
+6. 提交 PR，描述：
+   - 改动目的与背景
+   - 截图（UI 变更）/ 性能对比（性能相关）
+   - 关联 issue（例如 `Closes #12`）
+
+问题反馈请附：
+- 复现步骤（越简越好）
+- 最小触发 markdown 片段
+- 运行环境：设备/模拟器 API、库版本、系统版本
+
+代码风格建议：
+- 拆分可复用的小型 Composable 与函数
+- 公共 API 添加 KDoc
+- 避免过早优化，先用数据支撑
+
+## 📄 许可证
+
+本项目基于 MIT License 开源发布。
+
+```
+MIT License
+
+Copyright (c) 2025 Compose Markdown Authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ---
 
 <div align="center">
@@ -1013,4 +1075,3 @@ interface IMarkdownRenderPlugin {
 由 Compose Markdown 团队用 ❤️ 打造
 
 </div>
-

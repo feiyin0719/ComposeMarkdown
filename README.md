@@ -14,6 +14,7 @@ Markdown syntax and custom styling.
 - [Core Components](#-core-components)
 - [Style Customization](#-style-customization)
 - [Advanced Features](#-advanced-features)
+- [Plugins](#-plugins)
 - [API Reference](#-api-reference)
 - [FAQ](#-faq)
 - [Contributing](#-contributing)
@@ -1019,6 +1020,67 @@ be added in the future.
 A: You can implement custom syntax highlighting by creating a custom `CodeBlockRenderer` and
 integrating third-party syntax highlighting libraries.
 
+## 🤝 Contributing
+
+We welcome contributions! To get started:
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Make your changes (keep scope focused; add tests when possible)
+4. Run checks locally (examples):
+   - `./gradlew build` – compile & run tests
+   - `./gradlew lintKotlin detekt` (if configured)
+5. Commit using conventional prefixes:
+   - `feat:` new feature
+   - `fix:` bug fix
+   - `docs:` documentation changes
+   - `refactor:` code restructure without behavior change
+   - `perf:` performance improvement
+   - `test:` adding / improving tests
+   - `build:` build system / dependency changes
+   - `chore:` maintenance tasks
+6. Open a Pull Request describing:
+   - What & why
+   - Screenshots (UI changes) / benchmarks (perf changes)
+   - Related issue IDs (e.g. `Closes #12`)
+
+Code Style & Guidelines:
+- Prefer small, composable functions
+- Avoid premature optimization—measure first
+- Keep public APIs documented with KDoc
+- Use meaningful, concise commit messages
+
+Issue Reports:
+- Provide reproduction steps
+- Attach minimal markdown sample content triggering the issue
+- Include device / emulator API level & library version
+
+## 📄 License
+
+Released under the MIT License.
+
+```
+MIT License
+
+Copyright (c) 2025 Compose Markdown Authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
 ---
 
