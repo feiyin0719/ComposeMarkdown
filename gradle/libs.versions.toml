@@ -13,6 +13,7 @@ material = "1.12.0"
 flexmark = "0.64.8"
 coil3 = "3.3.0"
 compose-markdown = "0.0.3"
+jlatexmath-android = "0.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,10 +45,12 @@ flexmark-ext-tables = { group = "com.vladsch.flexmark", name = "flexmark-ext-tab
 flexmark-ext-gfm-strikethrough = { group = "com.vladsch.flexmark", name = "flexmark-ext-gfm-strikethrough", version.ref = "flexmark" }
 flexmark-ext-gfm-tasklist = { group = "com.vladsch.flexmark", name = "flexmark-ext-gfm-tasklist", version.ref = "flexmark" }
 flexmark-ext-autolink = { group = "com.vladsch.flexmark", name = "flexmark-ext-autolink", version.ref = "flexmark" }
+flexmark-ext-gitlab = { group = "com.vladsch.flexmark", name = "flexmark-ext-gitlab", version.ref = "flexmark" }
 coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
 coil3-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil3" }
 compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 compose-markdown-task = { group = "com.github.feiyin0719.ComposeMarkdown", name = "markdown-task", version.ref = "compose-markdown" }
+jlatexmath = { module = "ru.noties:jlatexmath-android", version.ref = "jlatexmath-android" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

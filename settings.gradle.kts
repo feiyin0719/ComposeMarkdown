@@ -25,3 +25,4 @@ rootProject.name = "ComposeMarkdown"
 include(":app")
 include(":markdown")
 include(":markdown-task")
+include(":markdown-latex")

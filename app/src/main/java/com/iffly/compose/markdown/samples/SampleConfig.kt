@@ -76,5 +76,12 @@ val markdownExamples = listOf(
         description = "Demonstrates LazyMarkdownView for large content with optimized performance"
     ) { paddingValues ->
         LazyMarkdownExample(paddingValues)
+    },
+
+    MarkdownExample(
+        title = "LaTeX Math Example",
+        description = "Demonstrates inline LaTeX math rendering using MarkdownMathPlugin"
+    ) { paddingValues ->
+        LatexMathExample(paddingValues)
     }
 )
