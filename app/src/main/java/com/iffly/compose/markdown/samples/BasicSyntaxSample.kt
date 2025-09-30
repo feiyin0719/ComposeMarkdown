@@ -37,6 +37,8 @@ fun BasicSyntaxExample(paddingValues: PaddingValues) {
                 1. First item
                 2. Second item
                    1. Nested item
+                      - 1
+                      - 2
                    2. Another nested item
                 3. Third item
                 

@@ -294,7 +294,7 @@ private class ChunkCache(
         if (chunks.size <= maxSize) return
 
         val toRemove = chunks.size - maxSize
-        if (toRemove< minRemovedBatchSize) return
+        if (toRemove < minRemovedBatchSize) return
         repeat(toRemove) { num ->
             val chunk = when (scrollDirection) {
                 ScrollDirection.UP -> chunks.removeLastOrNull()
