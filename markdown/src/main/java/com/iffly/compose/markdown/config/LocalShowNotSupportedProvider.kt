@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.config
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 val LocalShowNotSupportedProvider = staticCompositionLocalOf {
@@ -8,6 +9,7 @@ val LocalShowNotSupportedProvider = staticCompositionLocalOf {
 }
 
 @Composable
+@ReadOnlyComposable
 internal fun isShowNotSupported(): Boolean {
     return LocalShowNotSupportedProvider.current
 }

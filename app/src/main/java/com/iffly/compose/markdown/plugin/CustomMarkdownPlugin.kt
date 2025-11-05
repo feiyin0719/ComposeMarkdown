@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
 import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.parser.InlineParser
 import com.vladsch.flexmark.parser.InlineParserExtension
@@ -422,7 +422,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     ) {
         withStyle(
             SpanStyle(
@@ -444,7 +444,7 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     ) {
         withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)) {
             append("#${node.hashtag}")
@@ -460,7 +460,7 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     ) {
         withStyle(
             SpanStyle(
@@ -482,7 +482,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     ) {
         val (bg, fg) = when (node.badgeType.lowercase()) {
             "primary" -> Color(0xFF1976D2) to Color.White

@@ -12,8 +12,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import com.iffly.compose.markdown.config.currentInlineNodeStringBuilders
 import com.iffly.compose.markdown.config.currentLinkClickListener
+import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
@@ -75,19 +75,20 @@ fun MarkdownText(
     textAlign: TextAlign = TextAlign.Start,
 ) {
     val typographyStyle = currentTypographyStyle()
-    val inlineNodeStringBuilders = currentInlineNodeStringBuilders()
+    val renderRegistry = currentRenderRegistry()
     val linkInteractionListener = currentLinkClickListener()
     val isShowNotSupported = isShowNotSupported()
     val (text, inlineContent) = remember(
         parent,
         typographyStyle,
-        inlineNodeStringBuilders,
+        renderRegistry,
         isShowNotSupported,
+        linkInteractionListener,
     ) {
         markdownText(
             parent,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             1,
             isShowNotSupported,
@@ -114,7 +115,7 @@ fun MarkdownText(
 fun markdownText(
     node: Node,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    renderRegistry: RenderRegistry,
     linkInteractionListener: LinkInteractionListener? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
@@ -127,13 +128,13 @@ fun markdownText(
         withStyle(paragraphStyle) {
             withStyle(style) {
                 buildMarkdownAnnotatedString(
-                    node,
-                    indentLevel,
-                    inlineContentMap,
-                    typographyStyle,
-                    inlineNodeStringBuilders,
-                    linkInteractionListener,
-                    isShowNotSupported,
+                    parent = node,
+                    indentLevel = indentLevel,
+                    inlineContentMap = inlineContentMap,
+                    typographyStyle = typographyStyle,
+                    renderRegistry = renderRegistry,
+                    linkInteractionListener = linkInteractionListener,
+                    isShowNotSupported = isShowNotSupported,
                 )
             }
         }
@@ -147,21 +148,21 @@ fun AnnotatedString.Builder.buildMarkdownAnnotatedString(
     indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    renderRegistry: RenderRegistry,
     linkInteractionListener: LinkInteractionListener? = null,
     isShowNotSupported: Boolean,
 ) {
     var node = parent.firstChild
     while (node != null) {
         val customBuilder =
-            inlineNodeStringBuilders[node::class.java]
+            renderRegistry.getInlineNodeStringBuilder(node::class.java)
         customBuilder?.buildMarkdownInlineNodeString(
             node,
             inlineContentMap,
             typographyStyle,
             indentLevel,
             linkInteractionListener,
-            inlineNodeStringBuilders,
+            renderRegistry,
             isShowNotSupported,
             this,
 

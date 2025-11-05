@@ -13,8 +13,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
+import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
 
@@ -39,7 +39,7 @@ class InlineMathNodeStringBuilder(
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         val latexBody = node.text.toString()
         val placeholderId =

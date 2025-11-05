@@ -1,12 +1,10 @@
 package com.iffly.compose.markdown.config
 
-import com.iffly.compose.markdown.render.BlockRenderers
+import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.InlineNodeStringBuilders
+import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.TypographyStyle
-import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension
-import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
 import com.vladsch.flexmark.parser.Parser
@@ -22,43 +20,45 @@ class MarkdownRenderConfig {
     var typographyStyle: TypographyStyle? = null
         private set
 
-    var inlineNodeStringBuilders: InlineNodeStringBuilders
-        private set
-
-    var blockRenderers: BlockRenderers
-        private set
-
     var parser: Parser
         private set
 
     var htmlRenderer: HtmlRenderer
         private set
 
+    var renderRegistry: RenderRegistry
+        private set
+
     private constructor(
         typographyStyle: TypographyStyle?,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
-        blockRenderers: BlockRenderers,
+        renderRegistry: RenderRegistry,
         parser: Parser,
         htmlRenderer: HtmlRenderer,
     ) {
         this.typographyStyle = typographyStyle ?: TypographyStyle()
-        this.inlineNodeStringBuilders = inlineNodeStringBuilders
-        this.blockRenderers = blockRenderers
+        this.renderRegistry = renderRegistry
         this.parser = parser
         this.htmlRenderer = htmlRenderer
     }
 
+    companion object {
+        private val internalPlugins = listOf<IMarkdownRenderPlugin>(
+            // Add internal plugins here if needed
+            CorePlugin()
+        )
+    }
+
     class Builder {
-        private val plugins = mutableListOf<IMarkdownRenderPlugin>()
+        private val plugins = mutableListOf(
+            *internalPlugins.toTypedArray()
+        )
 
         private var typographyStyle: TypographyStyle? = null
 
-        private val inlineNodeStringBuilder: InlineNodeStringBuilders.Builder =
-            InlineNodeStringBuilders.Builder()
+        private val inlineNodeStringBuilders =
+            mutableMapOf<Class<out Node>, IInlineNodeStringBuilder<out Node>>()
 
-        private val blockRendererBuilder: BlockRenderers.Builder =
-            BlockRenderers.Builder()
-
+        private val blockRenderers = mutableMapOf<Class<out Block>, IBlockRenderer<out Block>>()
         private val blockParserFactories: MutableList<CustomBlockParserFactory> = mutableListOf()
 
         private val inlineContentParserFactories: MutableList<InlineParserExtensionFactory> =
@@ -84,7 +84,7 @@ class MarkdownRenderConfig {
             nodeClass: Class<out Node>,
             builder: IInlineNodeStringBuilder<out Node>
         ): Builder {
-            inlineNodeStringBuilder.addAnnotatedStringBuilder(nodeClass, builder)
+            inlineNodeStringBuilders[nodeClass] = builder
             return this
         }
 
@@ -92,7 +92,7 @@ class MarkdownRenderConfig {
             blockClass: Class<out Block>,
             renderer: IBlockRenderer<out Block>
         ): Builder {
-            blockRendererBuilder.addRenderer(blockClass, renderer)
+            blockRenderers[blockClass] = renderer
             return this
         }
 
@@ -121,21 +121,17 @@ class MarkdownRenderConfig {
             val pluginExtensions = plugins.flatMap { it.extensions() }
             options.set(
                 Parser.EXTENSIONS,
-                listOf(
-                    TablesExtension.create(),
-                    StrikethroughSubscriptExtension.create(),
-                ).plus(extensions)
-                    .plus(pluginExtensions)
+                pluginExtensions.plus(extensions)
             )
             val parserBuilder = Parser.builder(options)
             val htmlRendererBuilder = HtmlRenderer.builder(options)
 
             plugins.forEach { plugin ->
                 plugin.inlineNodeStringBuilders().forEach { (nodeClass, builder) ->
-                    inlineNodeStringBuilder.addAnnotatedStringBuilder(nodeClass, builder)
+                    addInlineNodeStringBuilder(nodeClass = nodeClass, builder = builder)
                 }
                 plugin.blockRenderers().forEach { (blockClass, renderer) ->
-                    blockRendererBuilder.addRenderer(blockClass, renderer)
+                    addBlockRenderer(blockClass = blockClass, renderer = renderer)
                 }
                 plugin.blockParserFactories().forEach { factory ->
                     parserBuilder.customBlockParserFactory(factory)
@@ -159,8 +155,10 @@ class MarkdownRenderConfig {
 
             return MarkdownRenderConfig(
                 typographyStyle,
-                inlineNodeStringBuilder.build(),
-                blockRendererBuilder.build(),
+                RenderRegistry(
+                    blockRenderers.toMap(),
+                    inlineNodeStringBuilders.toMap()
+                ),
                 parserBuilder.build(),
                 htmlRendererBuilder.build()
             )

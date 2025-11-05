@@ -20,7 +20,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
      * @param linkInteractionListener Optional listener for link interactions.
      * @param indentLevel The current indentation level for nested lists.
      * @param isShowNotSupported Whether to show unsupported node indicators.
-     * @param inlineNodeStringBuilders A map of inline node string builders for handling child nodes.
+     * @param renderRegistry A map of inline node string builders for handling child nodes.
      *
      * @return An [AnnotatedString] representing the content of the node.
      *
@@ -32,7 +32,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     )
 }
 
@@ -42,7 +42,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     typographyStyle: TypographyStyle,
     indentLevel: Int,
     linkInteractionListener: LinkInteractionListener? = null,
-    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    renderRegistry: RenderRegistry,
     isShowNotSupported: Boolean,
     builder: AnnotatedString.Builder
 ) {
@@ -54,7 +54,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
             linkInteractionListener,
             indentLevel,
             isShowNotSupported,
-            inlineNodeStringBuilders,
+            renderRegistry,
         )
     }
 }

@@ -18,25 +18,26 @@ interface IMarkdownRenderPlugin {
     /**
      * Returns a list of custom block parser factories.
      */
-    fun blockParserFactories(): List<CustomBlockParserFactory>
+    fun blockParserFactories(): List<CustomBlockParserFactory> = emptyList()
 
     /**
      * Returns a list of inline parser extension factories.
      */
-    fun inlineContentParserFactories(): List<InlineParserExtensionFactory>
+    fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = emptyList()
 
     /**
      * Returns a map of block renderers.
      * The key is the class of the block node, and the value is the corresponding renderer.
      */
-    fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>>
+    fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> = emptyMap()
 
     /**
      * Returns a map of inline node string builders.
      * The key is the class of the inline node, and the value is the corresponding string builder.
      */
-    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>>
+    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+        emptyMap()
 
-    fun extensions(): List<Extension>
+    fun extensions(): List<Extension> = emptyList()
 
 }

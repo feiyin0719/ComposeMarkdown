@@ -20,12 +20,17 @@ import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeParagraphStyle
 import com.vladsch.flexmark.ast.BulletList
+import com.vladsch.flexmark.ast.Code
+import com.vladsch.flexmark.ast.Emphasis
+import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ast.OrderedListItem
+import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
+import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
@@ -37,7 +42,7 @@ private fun AnnotatedString.Builder.buildStyleString(
     indentLevel: Int,
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    renderRegistry: RenderRegistry,
     linkInteractionListener: LinkInteractionListener?,
     isShowNotSupported: Boolean,
     style: SpanStyle? = null,
@@ -48,7 +53,7 @@ private fun AnnotatedString.Builder.buildStyleString(
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
@@ -71,7 +76,7 @@ object TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         append(node.contentText())
     }
@@ -85,7 +90,7 @@ object ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         val imageNode = node
         val imageId = "image_${imageNode.hashCode()}"
@@ -113,8 +118,7 @@ object ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
     }
 }
 
-object SoftLineBreakNodeStringBuilder :
-    IInlineNodeStringBuilder<SoftLineBreak> {
+object SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: SoftLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -122,7 +126,7 @@ object SoftLineBreakNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         append("\n")
     }
@@ -131,20 +135,19 @@ object SoftLineBreakNodeStringBuilder :
 object HardLineBreakNodeStringBuilder :
     IInlineNodeStringBuilder<com.vladsch.flexmark.ast.HardLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: com.vladsch.flexmark.ast.HardLineBreak,
+        node: HardLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         append("\n")
     }
 }
 
-object StrikethroughNodeStringBuilder :
-    IInlineNodeStringBuilder<Strikethrough> {
+object StrikethroughNodeStringBuilder : IInlineNodeStringBuilder<Strikethrough> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Strikethrough,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -152,14 +155,14 @@ object StrikethroughNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
             typographyStyle.strikethrough
@@ -167,8 +170,7 @@ object StrikethroughNodeStringBuilder :
     }
 }
 
-object SubscriptNodeStringBuilder :
-    IInlineNodeStringBuilder<Subscript> {
+object SubscriptNodeStringBuilder : IInlineNodeStringBuilder<Subscript> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Subscript,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -176,14 +178,14 @@ object SubscriptNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
             typographyStyle.subscript
@@ -191,23 +193,22 @@ object SubscriptNodeStringBuilder :
     }
 }
 
-object StrongEmphasisNodeStringBuilder :
-    IInlineNodeStringBuilder<com.vladsch.flexmark.ast.StrongEmphasis> {
+object StrongEmphasisNodeStringBuilder : IInlineNodeStringBuilder<StrongEmphasis> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: com.vladsch.flexmark.ast.StrongEmphasis,
+        node: StrongEmphasis,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
             typographyStyle.strongEmphasis
@@ -215,23 +216,22 @@ object StrongEmphasisNodeStringBuilder :
     }
 }
 
-object EmphasisNodeStringBuilder :
-    IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Emphasis> {
+object EmphasisNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Emphasis> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: com.vladsch.flexmark.ast.Emphasis,
+        node: Emphasis,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
             typographyStyle.emphasis
@@ -241,13 +241,13 @@ object EmphasisNodeStringBuilder :
 
 object CodeNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Code> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: com.vladsch.flexmark.ast.Code,
+        node: Code,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         withStyle(typographyStyle.code.toSpanStyle()) {
             append(node.contentText())
@@ -263,7 +263,7 @@ object LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         val linkNode = node
         val linkAnnotation = LinkAnnotation.Url(
@@ -277,7 +277,7 @@ object LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
                 indentLevel,
                 inlineContentMap,
                 typographyStyle,
-                inlineNodeStringBuilders,
+                renderRegistry,
                 linkInteractionListener,
                 isShowNotSupported,
             )
@@ -285,8 +285,7 @@ object LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     }
 }
 
-object OrderedListNodeStringBuilder :
-    IInlineNodeStringBuilder<OrderedList> {
+object OrderedListNodeStringBuilder : IInlineNodeStringBuilder<OrderedList> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: OrderedList,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -294,22 +293,21 @@ object OrderedListNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel + 1,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
     }
 }
 
-object BulletListNodeStringBuilder :
-    IInlineNodeStringBuilder<BulletList> {
+object BulletListNodeStringBuilder : IInlineNodeStringBuilder<BulletList> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: BulletList,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -317,14 +315,14 @@ object BulletListNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel + 1,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
@@ -337,7 +335,7 @@ private fun AnnotatedString.Builder.buildListItem(
     marker: String,
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
-    inlineNodeStringBuilders: InlineNodeStringBuilders,
+    renderRegistry: RenderRegistry,
     linkInteractionListener: LinkInteractionListener? = null,
     isShowNotSupported: Boolean,
 ) {
@@ -354,7 +352,7 @@ private fun AnnotatedString.Builder.buildListItem(
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
@@ -363,8 +361,7 @@ private fun AnnotatedString.Builder.buildListItem(
 }
 
 
-object OrderedListItemNodeStringBuilder :
-    IInlineNodeStringBuilder<OrderedListItem> {
+object OrderedListItemNodeStringBuilder : IInlineNodeStringBuilder<OrderedListItem> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: OrderedListItem,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -372,7 +369,7 @@ object OrderedListItemNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildListItem(
             node,
@@ -380,15 +377,14 @@ object OrderedListItemNodeStringBuilder :
             node.getMarkerText(),
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
     }
 }
 
-object BulletListItemNodeStringBuilder :
-    IInlineNodeStringBuilder<ListItem> {
+object BulletListItemNodeStringBuilder : IInlineNodeStringBuilder<ListItem> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: ListItem,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -396,7 +392,7 @@ object BulletListItemNodeStringBuilder :
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildListItem(
             node,
@@ -404,30 +400,29 @@ object BulletListItemNodeStringBuilder :
             node.getMarkerText(),
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )
     }
 }
 
-object ParagraphNodeStringBuilder :
-    IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Paragraph> {
+object ParagraphNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Paragraph> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: com.vladsch.flexmark.ast.Paragraph,
+        node: Paragraph,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders
+        renderRegistry: RenderRegistry
     ) {
         buildStyleString(
             node,
             indentLevel,
             inlineContentMap,
             typographyStyle,
-            inlineNodeStringBuilders,
+            renderRegistry,
             linkInteractionListener,
             isShowNotSupported,
         )

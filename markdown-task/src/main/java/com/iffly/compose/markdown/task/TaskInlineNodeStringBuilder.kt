@@ -6,8 +6,8 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.InlineNodeStringBuilders
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
+import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.buildMarkdownAnnotatedString
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
@@ -25,7 +25,7 @@ class TaskInlineNodeStringBuilder(
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        inlineNodeStringBuilders: InlineNodeStringBuilders,
+        renderRegistry: RenderRegistry,
     ) {
         withStyle(taskParagraphStyle ?: typographyStyle.bulletListParagraphStyle) {
             // Add indentation for nested lists
@@ -46,7 +46,7 @@ class TaskInlineNodeStringBuilder(
                     inlineContentMap,
                     typographyStyle,
                     linkInteractionListener = linkInteractionListener,
-                    inlineNodeStringBuilders = inlineNodeStringBuilders,
+                    renderRegistry = renderRegistry,
                     isShowNotSupported = isShowNotSupported
                 )
             }

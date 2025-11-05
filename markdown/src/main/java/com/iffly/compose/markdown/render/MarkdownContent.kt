@@ -16,7 +16,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import com.iffly.compose.markdown.config.currentBlockRenderers
+import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
@@ -48,10 +48,10 @@ fun MarkdownBlock(
     node: Node,
     modifier: Modifier,
 ) {
-    val blockRenderers = currentBlockRenderers()
+    val renderRegistry = currentRenderRegistry()
     val typographyStyle = currentTypographyStyle()
     if (node is Block) {
-        val renderer = blockRenderers[node::class.java]
+        val renderer = renderRegistry.getBlockRenderer(node::class.java)
         if (renderer != null) {
             renderer.Invoke(node, modifier)
         } else {
