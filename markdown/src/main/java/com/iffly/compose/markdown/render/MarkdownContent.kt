@@ -1,12 +1,8 @@
 package com.iffly.compose.markdown.render
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -17,28 +13,26 @@ import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentRenderRegistry
-import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.MarkdownPreview
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.widget.BasicStringText
 import com.vladsch.flexmark.util.ast.Block
-import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun MarkdownContent(root: Document, modifier: Modifier = Modifier) {
-    Column(
-        verticalArrangement = Arrangement.Top,
-        modifier = modifier.wrapContentSize()
-    ) {
-        var node = root.firstChild
-
-        while (node != null) {
-            MarkdownBlock(node, Modifier)
-            node = node.next
+fun MarkdownContent(node: Node, modifier: Modifier = Modifier) {
+    when (node) {
+        is Block -> {
+            MarkdownBlock(
+                node = node,
+                modifier = modifier
+            )
         }
+
+        else ->
+            MarkdownText(node, modifier = modifier)
     }
 }
 
@@ -49,7 +43,6 @@ fun MarkdownBlock(
     modifier: Modifier,
 ) {
     val renderRegistry = currentRenderRegistry()
-    val typographyStyle = currentTypographyStyle()
     if (node is Block) {
         val renderer = renderRegistry.getBlockRenderer(node::class.java)
         if (renderer != null) {
@@ -69,9 +62,6 @@ fun MarkdownBlock(
                 BasicStringText(node.contentText())
             }
         }
-    }
-    if (typographyStyle.showSpace) {
-        Spacer(Modifier.height(typographyStyle.spaceHeight))
     }
 }
 

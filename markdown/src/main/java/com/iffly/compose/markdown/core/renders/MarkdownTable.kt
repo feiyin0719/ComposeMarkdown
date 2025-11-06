@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import android.content.ClipData
 import androidx.compose.foundation.ScrollState
@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentHtmlRenderer
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.render.IBlockRenderer
+import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.widget.table.BodyScope
 import com.iffly.compose.markdown.widget.table.RowScope
 import com.iffly.compose.markdown.widget.table.Table
@@ -50,7 +52,7 @@ import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.ext.tables.TableRow
 import kotlinx.coroutines.launch
 
-object TableRenderer : IBlockRenderer<TableBlock> {
+class TableRenderer : IBlockRenderer<TableBlock> {
     @Composable
     override fun Invoke(
         node: TableBlock,

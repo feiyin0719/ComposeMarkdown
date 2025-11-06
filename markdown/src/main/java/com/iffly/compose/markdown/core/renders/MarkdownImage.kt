@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import android.util.Log
 import androidx.compose.foundation.layout.padding

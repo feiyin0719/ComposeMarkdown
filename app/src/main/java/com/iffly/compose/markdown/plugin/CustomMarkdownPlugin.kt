@@ -33,6 +33,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
+import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
@@ -523,6 +524,7 @@ class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
 
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
         mapOf(
+            AlertBlock::class.java to CompositeChildNodeStringBuilder<AlertBlock>(),
             MentionNode::class.java to MentionNodeStringBuilder(),
             HashtagNode::class.java to HashtagNodeStringBuilder(),
             HighlightNode::class.java to HighlightNodeStringBuilder(),

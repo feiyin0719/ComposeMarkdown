@@ -1,32 +1,35 @@
 package com.iffly.compose.markdown.core.plugins
 
 import com.iffly.compose.markdown.config.IMarkdownRenderPlugin
-import com.iffly.compose.markdown.render.BlockQuoteRenderer
-import com.iffly.compose.markdown.render.BreakLineRenderer
-import com.iffly.compose.markdown.render.BulletListItemNodeStringBuilder
-import com.iffly.compose.markdown.render.BulletListNodeStringBuilder
-import com.iffly.compose.markdown.render.BulletListRenderer
-import com.iffly.compose.markdown.render.CodeNodeStringBuilder
-import com.iffly.compose.markdown.render.EmphasisNodeStringBuilder
-import com.iffly.compose.markdown.render.FencedCodeBlockRenderer
-import com.iffly.compose.markdown.render.HardLineBreakNodeStringBuilder
-import com.iffly.compose.markdown.render.HeadingRenderer
+import com.iffly.compose.markdown.core.renders.BlockQuoteRenderer
+import com.iffly.compose.markdown.core.renders.BreakLineRenderer
+import com.iffly.compose.markdown.core.renders.BulletListItemNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.BulletListNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.BulletListRenderer
+import com.iffly.compose.markdown.core.renders.CodeNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.EmphasisNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.FencedCodeBlockRenderer
+import com.iffly.compose.markdown.core.renders.HardLineBreakNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.HeadingNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.HeadingRenderer
+import com.iffly.compose.markdown.core.renders.ImageNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
+import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.MarkdownDocumentRenderer
+import com.iffly.compose.markdown.core.renders.OrderedListItemNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.OrderedListNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.OrderedListRenderer
+import com.iffly.compose.markdown.core.renders.ParagraphNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.ParagraphRenderer
+import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.StrikethroughNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.StrongEmphasisNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.SubscriptNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.TableCellNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.TableRenderer
+import com.iffly.compose.markdown.core.renders.TextNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.ImageNodeStringBuilder
-import com.iffly.compose.markdown.render.IndentedCodeBlockRenderer
-import com.iffly.compose.markdown.render.LinkNodeStringBuilder
-import com.iffly.compose.markdown.render.OrderedListItemNodeStringBuilder
-import com.iffly.compose.markdown.render.OrderedListNodeStringBuilder
-import com.iffly.compose.markdown.render.OrderedListRenderer
-import com.iffly.compose.markdown.render.ParagraphNodeStringBuilder
-import com.iffly.compose.markdown.render.ParagraphRenderer
-import com.iffly.compose.markdown.render.SoftLineBreakNodeStringBuilder
-import com.iffly.compose.markdown.render.StrikethroughNodeStringBuilder
-import com.iffly.compose.markdown.render.StrongEmphasisNodeStringBuilder
-import com.iffly.compose.markdown.render.SubscriptNodeStringBuilder
-import com.iffly.compose.markdown.render.TableRenderer
-import com.iffly.compose.markdown.render.TextNodeStringBuilder
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.BulletListItem
@@ -49,43 +52,48 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
 import com.vladsch.flexmark.ext.tables.TableBlock
+import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.Extension
 
 class CorePlugin : IMarkdownRenderPlugin {
     override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> {
         return mutableMapOf(
-            TableBlock::class.java to TableRenderer,
-            Paragraph::class.java to ParagraphRenderer,
-            Heading::class.java to HeadingRenderer,
-            OrderedList::class.java to OrderedListRenderer,
-            BulletList::class.java to BulletListRenderer,
-            FencedCodeBlock::class.java to FencedCodeBlockRenderer,
-            IndentedCodeBlock::class.java to IndentedCodeBlockRenderer,
-            ThematicBreak::class.java to BreakLineRenderer,
-            BlockQuote::class.java to BlockQuoteRenderer,
+            Document::class.java to MarkdownDocumentRenderer(),
+            TableBlock::class.java to TableRenderer(),
+            Paragraph::class.java to ParagraphRenderer(),
+            Heading::class.java to HeadingRenderer(),
+            OrderedList::class.java to OrderedListRenderer(),
+            BulletList::class.java to BulletListRenderer(),
+            FencedCodeBlock::class.java to FencedCodeBlockRenderer(),
+            IndentedCodeBlock::class.java to IndentedCodeBlockRenderer(),
+            ThematicBreak::class.java to BreakLineRenderer(),
+            BlockQuote::class.java to BlockQuoteRenderer(),
         )
     }
 
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> {
         return mutableMapOf(
-            Text::class.java to TextNodeStringBuilder,
-            Paragraph::class.java to ParagraphNodeStringBuilder,
-            Image::class.java to ImageNodeStringBuilder,
-            Code::class.java to CodeNodeStringBuilder,
-            BulletList::class.java to BulletListNodeStringBuilder,
-            BulletListItem::class.java to BulletListItemNodeStringBuilder,
-            OrderedList::class.java to OrderedListNodeStringBuilder,
-            OrderedListItem::class.java to OrderedListItemNodeStringBuilder,
-            StrongEmphasis::class.java to StrongEmphasisNodeStringBuilder,
-            Emphasis::class.java to EmphasisNodeStringBuilder,
-            Subscript::class.java to SubscriptNodeStringBuilder,
-            Strikethrough::class.java to StrikethroughNodeStringBuilder,
-            SoftLineBreak::class.java to SoftLineBreakNodeStringBuilder,
-            HardLineBreak::class.java to HardLineBreakNodeStringBuilder,
-            Link::class.java to LinkNodeStringBuilder,
+            Text::class.java to TextNodeStringBuilder(),
+            Paragraph::class.java to ParagraphNodeStringBuilder(),
+            Image::class.java to ImageNodeStringBuilder(),
+            Code::class.java to CodeNodeStringBuilder(),
+            BulletList::class.java to BulletListNodeStringBuilder(),
+            BulletListItem::class.java to BulletListItemNodeStringBuilder(),
+            OrderedList::class.java to OrderedListNodeStringBuilder(),
+            OrderedListItem::class.java to OrderedListItemNodeStringBuilder(),
+            StrongEmphasis::class.java to StrongEmphasisNodeStringBuilder(),
+            Emphasis::class.java to EmphasisNodeStringBuilder(),
+            Subscript::class.java to SubscriptNodeStringBuilder(),
+            Strikethrough::class.java to StrikethroughNodeStringBuilder(),
+            SoftLineBreak::class.java to SoftLineBreakNodeStringBuilder(),
+            HardLineBreak::class.java to HardLineBreakNodeStringBuilder(),
+            Link::class.java to LinkNodeStringBuilder(),
+            Heading::class.java to HeadingNodeStringBuilder(),
+            TableCell::class.java to TableCellNodeStringBuilder(),
         )
     }
 

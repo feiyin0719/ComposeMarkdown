@@ -15,6 +15,7 @@ import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.MarkdownPreview
 import com.vladsch.flexmark.util.ast.Document
+import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -56,7 +57,7 @@ fun MarkdownView(
     }
 
 
-    when (val state = markdownState) {
+    when (markdownState) {
         is MarkdownState.Loading -> {
             // Loading state is instantaneous here since parsing is done in remember
             // You can implement a more complex loading state if needed
@@ -64,7 +65,7 @@ fun MarkdownView(
 
         is MarkdownState.Success -> {
             MarkdownView(
-                node = state.node,
+                node = markdownState.node,
                 markdownRenderConfig = markdownRenderConfig,
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
@@ -73,7 +74,7 @@ fun MarkdownView(
         }
 
         is MarkdownState.Error -> {
-            onError?.invoke(state.exception)
+            onError?.invoke(markdownState.exception)
         }
     }
 
@@ -144,7 +145,7 @@ fun MarkdownView(
 
 /**
  * A Composable function that renders a parsed Markdown AST node.
- * @param node The root AST node of the parsed Markdown content.
+ * @param node The node of the parsed Markdown content.
  * @param markdownRenderConfig Configuration for rendering the Markdown.
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
@@ -153,7 +154,7 @@ fun MarkdownView(
  */
 @Composable
 fun MarkdownView(
-    node: Document,
+    node: Node,
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,

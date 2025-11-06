@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import android.content.ClipData
 import androidx.compose.foundation.background
@@ -23,12 +23,13 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.render.IBlockRenderer
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.util.ast.Block
 import kotlinx.coroutines.launch
 
-object FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
+class FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
     @Composable
     override fun Invoke(
         node: FencedCodeBlock,
@@ -39,7 +40,7 @@ object FencedCodeBlockRenderer : IBlockRenderer<FencedCodeBlock> {
 
 }
 
-object IndentedCodeBlockRenderer : IBlockRenderer<IndentedCodeBlock> {
+class IndentedCodeBlockRenderer : IBlockRenderer<IndentedCodeBlock> {
     @Composable
     override fun Invoke(
         node: IndentedCodeBlock,
@@ -85,7 +86,7 @@ fun MarkdownCodeBlock(
                 text = codeText,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 40.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)
+                    .padding(top = 12.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)
                     .horizontalScroll(rememberScrollState()),
                 style = typographyStyle.code
             )

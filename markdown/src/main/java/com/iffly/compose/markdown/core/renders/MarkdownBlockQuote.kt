@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,11 @@ import androidx.compose.ui.draw.drawWithContent // added for custom left border 
 import androidx.compose.ui.geometry.Size // size used in custom draw
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.render.IBlockRenderer
+import com.iffly.compose.markdown.render.MarkdownBlock
 import com.vladsch.flexmark.ast.BlockQuote
 
-object BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
+class BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
     @Composable
     override fun Invoke(
         node: BlockQuote, modifier: Modifier

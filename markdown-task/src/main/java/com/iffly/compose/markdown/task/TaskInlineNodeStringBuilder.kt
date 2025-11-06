@@ -8,7 +8,7 @@ import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.buildMarkdownAnnotatedString
+import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
 
@@ -40,7 +40,7 @@ class TaskInlineNodeStringBuilder(
                 } else {
                     append("☐ ") // Unchecked checkbox
                 }
-                buildMarkdownAnnotatedString(
+                buildChildNodeAnnotatedString(
                     node,
                     indentLevel,
                     inlineContentMap,

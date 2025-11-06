@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.latex
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
 
@@ -44,7 +46,7 @@ class InlineMathNodeStringBuilder(
         val latexBody = node.text.toString()
         val placeholderId =
             "inline_math_${node.startOffset}_${node.endOffset}_${latexBody.hashCode()}"
-        inlineContentMap[placeholderId] = MarkdownInlineTextContent(
+        inlineContentMap[placeholderId] = InlineTextContent(
             placeholder = Placeholder(
                 width = width,
                 height = height,
@@ -57,7 +59,7 @@ class InlineMathNodeStringBuilder(
                 align = align,
                 modifier = Modifier.fillMaxSize()
             )
-        }
+        }.toFixedSizeMarkdownInlineTextContent()
         withStyle(paragraphStyle) {
             appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
         }

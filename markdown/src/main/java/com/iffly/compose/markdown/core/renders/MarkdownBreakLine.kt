@@ -1,14 +1,15 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.widget.HorizontalLine
 import com.vladsch.flexmark.ast.ThematicBreak
 
-object BreakLineRenderer : IBlockRenderer<ThematicBreak> {
+class BreakLineRenderer : IBlockRenderer<ThematicBreak> {
     @Composable
     override fun Invoke(node: ThematicBreak, modifier: Modifier) {
         BreakLine(node, modifier)

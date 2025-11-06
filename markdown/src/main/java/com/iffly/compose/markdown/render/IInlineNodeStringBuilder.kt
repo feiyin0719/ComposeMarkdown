@@ -20,7 +20,7 @@ interface IInlineNodeStringBuilder<T> where T : Node {
      * @param linkInteractionListener Optional listener for link interactions.
      * @param indentLevel The current indentation level for nested lists.
      * @param isShowNotSupported Whether to show unsupported node indicators.
-     * @param renderRegistry A map of inline node string builders for handling child nodes.
+     * @param renderRegistry The render registry containing all renderers and builders.
      *
      * @return An [AnnotatedString] representing the content of the node.
      *

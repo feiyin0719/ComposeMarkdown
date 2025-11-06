@@ -1,34 +1,43 @@
-package com.iffly.compose.markdown.render
+package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
+import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.MarkdownInlineTextContent
+import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
+import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeParagraphStyle
+import com.iffly.compose.markdown.util.getNodeSpanStyle
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.HardLineBreak
+import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ast.OrderedListItem
-import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
@@ -45,30 +54,19 @@ private fun AnnotatedString.Builder.buildStyleString(
     renderRegistry: RenderRegistry,
     linkInteractionListener: LinkInteractionListener?,
     isShowNotSupported: Boolean,
-    style: SpanStyle? = null,
 ) {
-    val buildFun = {
-        buildMarkdownAnnotatedString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
-    }
-    if (style == null) {
-        buildFun()
-    } else {
-        withStyle(style) {
-            buildFun()
-        }
-    }
-
+    buildChildNodeAnnotatedString(
+        node,
+        indentLevel,
+        inlineContentMap,
+        typographyStyle,
+        renderRegistry,
+        linkInteractionListener,
+        isShowNotSupported,
+    )
 }
 
-object TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
+class TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Text,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -82,7 +80,7 @@ object TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
     }
 }
 
-object ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
+class ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Image,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -92,33 +90,33 @@ object ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
-        val imageNode = node
-        val imageId = "image_${imageNode.hashCode()}"
+        val imageId = "image_${node.hashCode()}"
         val imageParagraphStyle = typographyStyle.imageParagraphStyle
-        inlineContentMap[imageId] = MarkdownInlineTextContent(
-            placeholder = Placeholder(
-                width = imageParagraphStyle.lineHeight,
-                height = imageParagraphStyle.lineHeight,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-            ),
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                MarkdownImage(
-                    node = imageNode,
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(horizontal = 2.dp)
-                )
-            }
+        inlineContentMap[imageId] =
+            InlineTextContent(
+                placeholder = Placeholder(
+                    width = imageParagraphStyle.lineHeight,
+                    height = imageParagraphStyle.lineHeight,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                ),
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    MarkdownImage(
+                        node = node,
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(horizontal = 2.dp)
+                    )
+                }
 
-        }
+            }.toFixedSizeMarkdownInlineTextContent()
         withStyle(imageParagraphStyle) {
-            appendInlineContent(imageId, "[${imageNode.title ?: imageNode.text}]")
+            appendInlineContent(imageId, "[${node.title ?: node.text}]")
         }
     }
 }
 
-object SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
+class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: SoftLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -128,12 +126,11 @@ object SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> 
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
-        append("\n")
+        append(" ")
     }
 }
 
-object HardLineBreakNodeStringBuilder :
-    IInlineNodeStringBuilder<com.vladsch.flexmark.ast.HardLineBreak> {
+class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HardLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -147,99 +144,31 @@ object HardLineBreakNodeStringBuilder :
     }
 }
 
-object StrikethroughNodeStringBuilder : IInlineNodeStringBuilder<Strikethrough> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: Strikethrough,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildStyleString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-            typographyStyle.strikethrough
-        )
+class StrikethroughNodeStringBuilder : CompositeChildNodeStringBuilder<Strikethrough>() {
+    override fun getSpanStyle(node: Strikethrough, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.strikethrough
     }
 }
 
-object SubscriptNodeStringBuilder : IInlineNodeStringBuilder<Subscript> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: Subscript,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildStyleString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-            typographyStyle.subscript
-        )
+class SubscriptNodeStringBuilder : CompositeChildNodeStringBuilder<Subscript>() {
+    override fun getSpanStyle(node: Subscript, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.subscript
     }
 }
 
-object StrongEmphasisNodeStringBuilder : IInlineNodeStringBuilder<StrongEmphasis> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: StrongEmphasis,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildStyleString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-            typographyStyle.strongEmphasis
-        )
+class StrongEmphasisNodeStringBuilder : CompositeChildNodeStringBuilder<StrongEmphasis>() {
+    override fun getSpanStyle(node: StrongEmphasis, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.strongEmphasis
     }
 }
 
-object EmphasisNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Emphasis> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: Emphasis,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildStyleString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-            typographyStyle.emphasis
-        )
+class EmphasisNodeStringBuilder : CompositeChildNodeStringBuilder<Emphasis>() {
+    override fun getSpanStyle(node: Emphasis, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.emphasis
     }
 }
 
-object CodeNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Code> {
+class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Code,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -255,7 +184,7 @@ object CodeNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast
     }
 }
 
-object LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
+class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Link,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -285,7 +214,7 @@ object LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     }
 }
 
-object OrderedListNodeStringBuilder : IInlineNodeStringBuilder<OrderedList> {
+class OrderedListNodeStringBuilder : IInlineNodeStringBuilder<OrderedList> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: OrderedList,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -295,19 +224,22 @@ object OrderedListNodeStringBuilder : IInlineNodeStringBuilder<OrderedList> {
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
-        buildStyleString(
-            node,
-            indentLevel + 1,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
+        withStyle(typographyStyle.orderListParagraphStyle) {
+            buildStyleString(
+                node,
+                indentLevel + 1,
+                inlineContentMap,
+                typographyStyle,
+                renderRegistry,
+                linkInteractionListener,
+                isShowNotSupported,
+            )
+        }
     }
 }
 
-object BulletListNodeStringBuilder : IInlineNodeStringBuilder<BulletList> {
+class BulletListNodeStringBuilder : IInlineNodeStringBuilder<BulletList> {
+
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: BulletList,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -317,15 +249,17 @@ object BulletListNodeStringBuilder : IInlineNodeStringBuilder<BulletList> {
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
-        buildStyleString(
-            node,
-            indentLevel + 1,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
+        withStyle(typographyStyle.bulletListParagraphStyle) {
+            buildStyleString(
+                node,
+                indentLevel + 1,
+                inlineContentMap,
+                typographyStyle,
+                renderRegistry,
+                linkInteractionListener,
+                isShowNotSupported,
+            )
+        }
     }
 }
 
@@ -347,7 +281,7 @@ private fun AnnotatedString.Builder.buildListItem(
         (node.parent as? OrderedList)?.let {
             append(it.delimiter)
         }
-        buildMarkdownAnnotatedString(
+        buildChildNodeAnnotatedString(
             node,
             indentLevel,
             inlineContentMap,
@@ -357,11 +291,10 @@ private fun AnnotatedString.Builder.buildListItem(
             isShowNotSupported,
         )
     }
-
 }
 
 
-object OrderedListItemNodeStringBuilder : IInlineNodeStringBuilder<OrderedListItem> {
+class OrderedListItemNodeStringBuilder : IInlineNodeStringBuilder<OrderedListItem> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: OrderedListItem,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -384,7 +317,7 @@ object OrderedListItemNodeStringBuilder : IInlineNodeStringBuilder<OrderedListIt
     }
 }
 
-object BulletListItemNodeStringBuilder : IInlineNodeStringBuilder<ListItem> {
+class BulletListItemNodeStringBuilder : IInlineNodeStringBuilder<ListItem> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: ListItem,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
@@ -407,24 +340,38 @@ object BulletListItemNodeStringBuilder : IInlineNodeStringBuilder<ListItem> {
     }
 }
 
-object ParagraphNodeStringBuilder : IInlineNodeStringBuilder<com.vladsch.flexmark.ast.Paragraph> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: Paragraph,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildStyleString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
+class HeadingNodeStringBuilder() : CompositeChildNodeStringBuilder<Heading>() {
+    override fun getSpanStyle(node: Heading, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.getNodeSpanStyle(node)
+    }
+
+    override fun getParagraphStyle(
+        node: Heading,
+        typographyStyle: TypographyStyle
+    ): ParagraphStyle? {
+        return typographyStyle.getNodeParagraphStyle(node)
+    }
+}
+
+class ParagraphNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
+
+    private fun isInListItem(node: Node): Boolean {
+        return node.parent is ListItem
+    }
+
+    override fun getParagraphStyle(
+        node: Node,
+        typographyStyle: TypographyStyle
+    ): ParagraphStyle? {
+        if (isInListItem(node = node)) {
+            return null
+        }
+        return typographyStyle.getNodeParagraphStyle(node)
+    }
+}
+
+class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
+    override fun getSpanStyle(node: Node, typographyStyle: TypographyStyle): SpanStyle? {
+        return typographyStyle.getNodeSpanStyle(node)
     }
 }
