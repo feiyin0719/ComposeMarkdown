@@ -3,10 +3,10 @@ package com.iffly.compose.markdown.core.plugins
 import com.iffly.compose.markdown.config.IMarkdownRenderPlugin
 import com.iffly.compose.markdown.core.renders.BlockQuoteRenderer
 import com.iffly.compose.markdown.core.renders.BreakLineRenderer
-import com.iffly.compose.markdown.core.renders.BulletListItemNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.BulletListNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.BulletListRenderer
+import com.iffly.compose.markdown.core.renders.BulletListBlockRenderer
+import com.iffly.compose.markdown.core.renders.BulletListItemRenderer
 import com.iffly.compose.markdown.core.renders.CodeNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.DocumentRenderer
 import com.iffly.compose.markdown.core.renders.EmphasisNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.FencedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.HardLineBreakNodeStringBuilder
@@ -15,10 +15,8 @@ import com.iffly.compose.markdown.core.renders.HeadingRenderer
 import com.iffly.compose.markdown.core.renders.ImageNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.MarkdownDocumentRenderer
-import com.iffly.compose.markdown.core.renders.OrderedListItemNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.OrderedListNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.OrderedListRenderer
+import com.iffly.compose.markdown.core.renders.OrderedListBlockRenderer
+import com.iffly.compose.markdown.core.renders.OrderedListItemRenderer
 import com.iffly.compose.markdown.core.renders.ParagraphNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.ParagraphRenderer
 import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
@@ -62,12 +60,14 @@ import com.vladsch.flexmark.util.misc.Extension
 class CorePlugin : IMarkdownRenderPlugin {
     override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> {
         return mutableMapOf(
-            Document::class.java to MarkdownDocumentRenderer(),
+            Document::class.java to DocumentRenderer(),
             TableBlock::class.java to TableRenderer(),
             Paragraph::class.java to ParagraphRenderer(),
             Heading::class.java to HeadingRenderer(),
-            OrderedList::class.java to OrderedListRenderer(),
-            BulletList::class.java to BulletListRenderer(),
+            OrderedList::class.java to OrderedListBlockRenderer(),
+            BulletList::class.java to BulletListBlockRenderer(),
+            OrderedListItem::class.java to OrderedListItemRenderer(),
+            BulletListItem::class.java to BulletListItemRenderer(),
             FencedCodeBlock::class.java to FencedCodeBlockRenderer(),
             IndentedCodeBlock::class.java to IndentedCodeBlockRenderer(),
             ThematicBreak::class.java to BreakLineRenderer(),
@@ -81,10 +81,6 @@ class CorePlugin : IMarkdownRenderPlugin {
             Paragraph::class.java to ParagraphNodeStringBuilder(),
             Image::class.java to ImageNodeStringBuilder(),
             Code::class.java to CodeNodeStringBuilder(),
-            BulletList::class.java to BulletListNodeStringBuilder(),
-            BulletListItem::class.java to BulletListItemNodeStringBuilder(),
-            OrderedList::class.java to OrderedListNodeStringBuilder(),
-            OrderedListItem::class.java to OrderedListItemNodeStringBuilder(),
             StrongEmphasis::class.java to StrongEmphasisNodeStringBuilder(),
             Emphasis::class.java to EmphasisNodeStringBuilder(),
             Subscript::class.java to SubscriptNodeStringBuilder(),

@@ -41,6 +41,35 @@ fun BasicSyntaxExample(paddingValues: PaddingValues) {
                       - 2
                    2. Another nested item
                 3. Third item
+                4. 1. Fourth item with number
+                   2. Another fourth item
+                
+                ### Loose List
+                1. Item 1
+                    
+                    This is a loose list item with multiple paragraphs.
+                    
+                    Another paragraph in the same list item.
+                    
+                    > Blockquote inside loose list item.
+                    > Another line of blockquote.
+                    
+                    1. Nested ordered list inside loose item.
+                    
+                    2. ``` kotlin
+                       val x = 10
+                       ```
+                       
+                2. > quote as second item
+                   >> another line of quote
+                   
+                   test paragraph after quote.
+                   
+                   ```java
+                     System.out.println("Hello, World!");
+                   ```
+                   
+                              
                 
                 ### Unordered Lists
                 - Item A
@@ -53,6 +82,12 @@ fun BasicSyntaxExample(paddingValues: PaddingValues) {
                 
                 > This is a quote block
                 > Can contain multiple lines of content
+                
+                ### Quote with List
+                > - Quote list item 1
+                > - Quote list item 2
+                >>  - Nested quote list item
+                >>  - Another nested quote list item
                 
                 ## Dividers
                 

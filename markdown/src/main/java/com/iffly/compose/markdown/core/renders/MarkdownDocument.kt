@@ -29,7 +29,7 @@ fun Document(node: Document, modifier: Modifier) {
     }
 }
 
-class MarkdownDocumentRenderer : IBlockRenderer<Document> {
+class DocumentRenderer : IBlockRenderer<Document> {
     @Composable
     override fun Invoke(node: Document, modifier: Modifier) {
         Document(node, modifier)

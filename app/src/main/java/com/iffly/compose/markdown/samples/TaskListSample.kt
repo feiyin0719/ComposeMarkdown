@@ -14,9 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
@@ -27,12 +24,7 @@ fun TaskListExample(paddingValues: PaddingValues) {
     // Create configuration with TaskListItem plugin
     val taskConfig = MarkdownRenderConfig.Builder()
         .addPlugin(
-            TaskMarkdownRenderPlugin(
-                taskStyle = SpanStyle(
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            )
+            TaskMarkdownRenderPlugin()
         )
         .build()
 
@@ -47,7 +39,11 @@ fun TaskListExample(paddingValues: PaddingValues) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                    alpha = 0.3f
+                )
+            )
         ) {
             Text(
                 text = "📋 Task List Features Demo\n" +

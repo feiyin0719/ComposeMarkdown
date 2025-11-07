@@ -2,18 +2,20 @@ package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent // added for custom left border drawing
-import androidx.compose.ui.geometry.Size // size used in custom draw
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownBlock
+import com.iffly.compose.markdown.render.MarkdownContent
 import com.vladsch.flexmark.ast.BlockQuote
 
 class BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
@@ -37,7 +39,6 @@ private fun MarkdownBlockQuote(
             .wrapContentHeight()
             .background(
                 color = typographyStyle.blockQuoteContentBackgroundColor,
-                shape = RoundedCornerShape(bottomEnd = 8.dp, topEnd = 8.dp)
             )
             .drawWithContent {
                 drawContent()
@@ -47,12 +48,19 @@ private fun MarkdownBlockQuote(
                     size = Size(strokeWidthPx, size.height)
                 )
             }
-            .padding(12.dp)
+            .padding(12.dp, bottom = 0.dp, top = 0.dp, end = 12.dp)
     ) {
         var child = node.firstChild
+        Spacer(modifier = Modifier.height(typographyStyle.spaceHeight))
         while (child != null) {
-            MarkdownBlock(child, Modifier)
+            MarkdownContent(child, Modifier)
+            if (child.next != null && typographyStyle.showSpace) {
+                Spacer(modifier = Modifier.height(typographyStyle.spaceHeight))
+            }
             child = child.next
+        }
+        if (node.lastChild !is BlockQuote) {
+            Spacer(modifier = Modifier.height(typographyStyle.spaceHeight))
         }
     }
 }

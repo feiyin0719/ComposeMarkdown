@@ -25,26 +25,20 @@ import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
-import com.iffly.compose.markdown.util.getMarkerText
 import com.iffly.compose.markdown.util.getNodeParagraphStyle
 import com.iffly.compose.markdown.util.getNodeSpanStyle
-import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.Link
-import com.vladsch.flexmark.ast.ListItem
-import com.vladsch.flexmark.ast.OrderedList
-import com.vladsch.flexmark.ast.OrderedListItem
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
 import com.vladsch.flexmark.util.ast.Node
-import kotlin.text.Typography.nbsp
 
 private fun AnnotatedString.Builder.buildStyleString(
     node: Node,
@@ -214,132 +208,6 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     }
 }
 
-class OrderedListNodeStringBuilder : IInlineNodeStringBuilder<OrderedList> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: OrderedList,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        withStyle(typographyStyle.orderListParagraphStyle) {
-            buildStyleString(
-                node,
-                indentLevel + 1,
-                inlineContentMap,
-                typographyStyle,
-                renderRegistry,
-                linkInteractionListener,
-                isShowNotSupported,
-            )
-        }
-    }
-}
-
-class BulletListNodeStringBuilder : IInlineNodeStringBuilder<BulletList> {
-
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: BulletList,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        withStyle(typographyStyle.bulletListParagraphStyle) {
-            buildStyleString(
-                node,
-                indentLevel + 1,
-                inlineContentMap,
-                typographyStyle,
-                renderRegistry,
-                linkInteractionListener,
-                isShowNotSupported,
-            )
-        }
-    }
-}
-
-private fun AnnotatedString.Builder.buildListItem(
-    node: ListItem,
-    indentLevel: Int,
-    marker: String,
-    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-    typographyStyle: TypographyStyle,
-    renderRegistry: RenderRegistry,
-    linkInteractionListener: LinkInteractionListener? = null,
-    isShowNotSupported: Boolean,
-) {
-    val paragraphStyle = typographyStyle.getNodeParagraphStyle(node.parent)
-    withStyle(paragraphStyle) {
-        append("$nbsp".repeat(indentLevel))
-
-        append(marker)
-        (node.parent as? OrderedList)?.let {
-            append(it.delimiter)
-        }
-        buildChildNodeAnnotatedString(
-            node,
-            indentLevel,
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
-    }
-}
-
-
-class OrderedListItemNodeStringBuilder : IInlineNodeStringBuilder<OrderedListItem> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: OrderedListItem,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildListItem(
-            node,
-            indentLevel,
-            node.getMarkerText(),
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
-    }
-}
-
-class BulletListItemNodeStringBuilder : IInlineNodeStringBuilder<ListItem> {
-    override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: ListItem,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
-        typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
-        indentLevel: Int,
-        isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
-    ) {
-        buildListItem(
-            node,
-            indentLevel,
-            node.getMarkerText(),
-            inlineContentMap,
-            typographyStyle,
-            renderRegistry,
-            linkInteractionListener,
-            isShowNotSupported,
-        )
-    }
-}
-
 class HeadingNodeStringBuilder() : CompositeChildNodeStringBuilder<Heading>() {
     override fun getSpanStyle(node: Heading, typographyStyle: TypographyStyle): SpanStyle? {
         return typographyStyle.getNodeSpanStyle(node)
@@ -355,17 +223,10 @@ class HeadingNodeStringBuilder() : CompositeChildNodeStringBuilder<Heading>() {
 
 class ParagraphNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
 
-    private fun isInListItem(node: Node): Boolean {
-        return node.parent is ListItem
-    }
-
     override fun getParagraphStyle(
         node: Node,
         typographyStyle: TypographyStyle
     ): ParagraphStyle? {
-        if (isInListItem(node = node)) {
-            return null
-        }
         return typographyStyle.getNodeParagraphStyle(node)
     }
 }

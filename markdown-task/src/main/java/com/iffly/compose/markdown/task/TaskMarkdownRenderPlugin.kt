@@ -1,26 +1,21 @@
 package com.iffly.compose.markdown.task
 
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
 import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
-import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.IBlockRenderer
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
-import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.misc.Extension
 
-class TaskMarkdownRenderPlugin(
-    private val taskStyle: SpanStyle = SpanStyle(),
-    private val taskParagraphStyle: ParagraphStyle? = null
-) : AbstractMarkdownRenderPlugin() {
+class TaskMarkdownRenderPlugin() : AbstractMarkdownRenderPlugin() {
     override fun extensions(): List<Extension> {
         return listOf(TaskListExtension.create())
     }
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
-        mapOf(
-            TaskListItem::class.java to
-                    TaskInlineNodeStringBuilder(taskStyle, taskParagraphStyle)
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> {
+        return mapOf(
+            TaskListItem::class.java to TaskListItemRenderer()
         )
+    }
 
 }

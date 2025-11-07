@@ -21,12 +21,14 @@ data class TypographyStyle(
     val spaceHeight: Dp = 8.dp,
     val breakLineHeight: Dp = 1.dp,
     val breakLineColor: Color = Color(0xFFE0E0E0),
-    val textStyle: TextStyle? = null,
+    val textStyle: TextStyle = TextStyle(
+        fontSize = 18.sp,
+        fontFamily = FontFamily.Default,
+        color = Color.Black,
+        lineHeight = 20.sp,
+    ),
     val imageParagraphStyle: ParagraphStyle = ParagraphStyle(
         lineHeight = 300.sp,
-    ),
-    val paragraphStyle: ParagraphStyle = ParagraphStyle(
-        lineHeight = 24.sp,
     ),
     val orderListParagraphStyle: ParagraphStyle = ParagraphStyle(
         lineHeight = 24.sp,
@@ -143,7 +145,8 @@ data class TypographyStyle(
         4 to ParagraphStyle(lineHeight = 28.sp),
         5 to ParagraphStyle(lineHeight = 24.sp),
         6 to ParagraphStyle(lineHeight = 20.sp),
-    )
+    ),
+    val listIndentSize: Dp = 6.dp,
 )
 
 val DefaultTypographyStyle by lazy { TypographyStyle() }

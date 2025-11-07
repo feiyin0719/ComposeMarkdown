@@ -23,7 +23,3 @@ open class MarkdownTextRenderer<T> : IBlockRenderer<T> where T : Block {
 class ParagraphRenderer : MarkdownTextRenderer<Paragraph>()
 
 class HeadingRenderer : MarkdownTextRenderer<Heading>()
-
-class OrderedListRenderer : MarkdownTextRenderer<OrderedList>()
-
-class BulletListRenderer : MarkdownTextRenderer<BulletList>()

@@ -25,10 +25,10 @@ fun TypographyStyle.getNodeSpanStyle(node: Node): SpanStyle {
 
 fun TypographyStyle.getNodeParagraphStyle(node: Node?): ParagraphStyle {
     return when (node) {
-        is Heading -> this.headParagraphStyle[node.level] ?: this.paragraphStyle
+        is Heading -> this.headParagraphStyle[node.level] ?: this.textStyle.toParagraphStyle()
         is BulletList -> this.bulletListParagraphStyle
         is OrderedList -> this.orderListParagraphStyle
-        else -> this.paragraphStyle
+        else -> this.textStyle.toParagraphStyle()
     }
 }
 
@@ -64,4 +64,16 @@ fun ListItem.getMarkerText(): String {
 
         else -> ""
     }
+}
+
+fun ListItem.getIndentLevel(): Int {
+    var level = 0
+    var parent = this.parent
+    while (parent != null) {
+        if (parent is ListItem) {
+            level++
+        }
+        parent = parent.parent
+    }
+    return level
 }

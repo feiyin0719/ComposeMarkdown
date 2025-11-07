@@ -101,6 +101,50 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
                 | John | 25 |
                 | Jane | 30 |
                 | Bob | 28 |
+                
+                ## Quoted Code Block
+                > ```python
+                > def hello_world():
+                >     print("Hello, World!")
+                >
+                
+                ## Quoted Table
+                > | Product | Price |
+                > |---------|-------|
+                > | Apple   | $1    |
+                > | Banana  | $0.5  |
+                > | Cherry  | $2    |
+                
+                ## Quoted Mixed Content
+                > Here is a table:
+                >
+                > | Feature | Android | iOS | Web | Description |
+                > |---------|:-------:|:---:|:---:|-------------|
+                > | Basic Rendering | ✅ | ✅ | ✅ | Supports standard Markdown syntax |
+                > | Table Support | ✅ | ✅ | ✅ | GFM table extension |
+                > | Code Highlighting | ✅ | ❌ | ✅ | Syntax highlighting display |
+                > | Image Rendering | ✅ | ✅ | ✅ | Local and network images |
+                > | Custom Styling | ✅ | ✅ | ✅ | Fully customizable |
+                >> And here is some code:
+                >> ```javascript
+                >> console.log("Hello from quoted code!");
+                >> ```
+                
+                ## List with Table
+                1. First item
+                
+                   | Task       | Status   |
+                   |------------|----------|
+                   | Task 1     | Completed|
+                   | Task 2     | Pending  |
+                 
+                2. | Feature | Android | iOS | Web | Description |
+                   |---------|:-------:|:---:|:---:|-------------|
+                   | Basic Rendering | ✅ | ✅ | ✅ | Supports standard Markdown syntax |
+                   | Table Support | ✅ | ✅ | ✅ | GFM table extension |
+                   | Code Highlighting | ✅ | ❌ | ✅ | Syntax highlighting display |
+                   | Image Rendering | ✅ | ✅ | ✅ | Local and network images |
+                   | Custom Styling | ✅ | ✅ | ✅ | Fully customizable |
             """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp)

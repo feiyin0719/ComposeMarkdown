@@ -1,11 +1,11 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkInteractionListener
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import com.iffly.compose.markdown.config.currentLinkClickListener
@@ -22,6 +22,7 @@ fun MarkdownText(
     parent: Node,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    textStyle: TextStyle? = null,
 ) {
     val typographyStyle = currentTypographyStyle()
     val renderRegistry = currentRenderRegistry()
@@ -54,7 +55,7 @@ fun MarkdownText(
         inlineContent = inlineContentMap,
         modifier = modifier,
         textAlign = textAlign,
-        style = typographyStyle.textStyle ?: LocalTextStyle.current
+        style = textStyle ?: typographyStyle.textStyle
     )
 }
 

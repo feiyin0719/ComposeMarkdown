@@ -18,6 +18,7 @@ import com.iffly.compose.markdown.chunkloader.MarkdownChunkLoader
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownBlock
+import com.iffly.compose.markdown.render.MarkdownContent
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.io.File
 
@@ -111,7 +112,7 @@ fun LazyMarkdownView(
             state = listState,
         ) {
             items(nodes, key = { System.identityHashCode(it) }) { node ->
-                MarkdownBlock(
+                MarkdownContent(
                     node = node,
                     modifier = Modifier
                 )
