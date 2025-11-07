@@ -56,9 +56,9 @@ class MarkdownRenderConfig {
         private var typographyStyle: TypographyStyle? = null
 
         private val inlineNodeStringBuilders =
-            mutableMapOf<Class<out Node>, IInlineNodeStringBuilder<out Node>>()
+            mutableMapOf<Class<out Node>, IInlineNodeStringBuilder<*>>()
 
-        private val blockRenderers = mutableMapOf<Class<out Block>, IBlockRenderer<out Block>>()
+        private val blockRenderers = mutableMapOf<Class<out Block>, IBlockRenderer<*>>()
         private val blockParserFactories: MutableList<CustomBlockParserFactory> = mutableListOf()
 
         private val inlineContentParserFactories: MutableList<InlineParserExtensionFactory> =
@@ -82,7 +82,7 @@ class MarkdownRenderConfig {
 
         fun addInlineNodeStringBuilder(
             nodeClass: Class<out Node>,
-            builder: IInlineNodeStringBuilder<out Node>
+            builder: IInlineNodeStringBuilder<*>
         ): Builder {
             inlineNodeStringBuilders[nodeClass] = builder
             return this
@@ -90,7 +90,7 @@ class MarkdownRenderConfig {
 
         fun addBlockRenderer(
             blockClass: Class<out Block>,
-            renderer: IBlockRenderer<out Block>
+            renderer: IBlockRenderer<*>
         ): Builder {
             blockRenderers[blockClass] = renderer
             return this

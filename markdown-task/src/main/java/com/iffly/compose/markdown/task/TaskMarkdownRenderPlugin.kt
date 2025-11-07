@@ -17,7 +17,7 @@ class TaskMarkdownRenderPlugin(
         return listOf(TaskListExtension.create())
     }
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
             TaskListItem::class.java to
                     TaskInlineNodeStringBuilder(taskStyle, taskParagraphStyle)

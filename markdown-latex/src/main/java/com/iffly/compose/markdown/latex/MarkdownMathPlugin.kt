@@ -35,7 +35,7 @@ class MarkdownMathPlugin(
         }
     }
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         buildMap {
             // Custom inline latex
             put(
@@ -61,7 +61,7 @@ class MarkdownMathPlugin(
             }
         }
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
         mapOf(
             LatexBlock::class.java to LatexBlockRenderer(
                 style = mathStyle,

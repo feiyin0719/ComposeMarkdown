@@ -29,13 +29,13 @@ interface IMarkdownRenderPlugin {
      * Returns a map of block renderers.
      * The key is the class of the block node, and the value is the corresponding renderer.
      */
-    fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> = emptyMap()
+    fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> = emptyMap()
 
     /**
      * Returns a map of inline node string builders.
      * The key is the class of the inline node, and the value is the corresponding string builder.
      */
-    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         emptyMap()
 
     fun extensions(): List<Extension> = emptyList()

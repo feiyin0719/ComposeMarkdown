@@ -60,7 +60,7 @@ import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.Extension
 
 class CorePlugin : IMarkdownRenderPlugin {
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> {
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> {
         return mutableMapOf(
             Document::class.java to MarkdownDocumentRenderer(),
             TableBlock::class.java to TableRenderer(),
@@ -75,7 +75,7 @@ class CorePlugin : IMarkdownRenderPlugin {
         )
     }
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> {
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> {
         return mutableMapOf(
             Text::class.java to TextNodeStringBuilder(),
             Paragraph::class.java to ParagraphNodeStringBuilder(),

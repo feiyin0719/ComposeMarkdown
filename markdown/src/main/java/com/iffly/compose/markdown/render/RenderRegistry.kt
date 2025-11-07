@@ -4,8 +4,8 @@ import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
 class RenderRegistry(
-    private val blockRenderers: Map<Class<out Block>, IBlockRenderer<out Block>>,
-    private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<out Node>>
+    private val blockRenderers: Map<Class<out Block>, IBlockRenderer<*>>,
+    private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>
 ) {
     fun getBlockRenderer(blockClass: Class<out Block>): IBlockRenderer<Block>? {
         return blockRenderers[blockClass] as? IBlockRenderer<Block>

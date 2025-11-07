@@ -11,7 +11,7 @@ import com.vladsch.flexmark.util.ast.Node
  * Implement this interface for each inline node type you want to support.
  * @param T The type of the inline node, must be a subclass of [Node].
  */
-interface IInlineNodeStringBuilder<T> where T : Node {
+interface IInlineNodeStringBuilder<in T> where T : Node {
     /**
      * Builds an AnnotatedString for the given inline node.
      * @param node The inline node to build the string for.

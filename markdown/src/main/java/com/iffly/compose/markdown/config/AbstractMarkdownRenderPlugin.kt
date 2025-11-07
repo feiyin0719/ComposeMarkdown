@@ -13,10 +13,10 @@ abstract class AbstractMarkdownRenderPlugin : IMarkdownRenderPlugin {
 
     override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = emptyList()
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
         emptyMap()
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         emptyMap()
 
     override fun extensions(): List<Extension> = emptyList()

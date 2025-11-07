@@ -9,7 +9,7 @@ import com.vladsch.flexmark.util.ast.Block
  * Implement this interface for each block node type you want to support.
  * @param T The type of the block node, must be a subclass of [Block].
  */
-interface IBlockRenderer<T> where T : Block {
+interface IBlockRenderer<in T> where T : Block {
 
     /**
      * Composable function to render the given block node.

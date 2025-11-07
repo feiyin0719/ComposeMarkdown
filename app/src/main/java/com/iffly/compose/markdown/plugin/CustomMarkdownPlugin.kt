@@ -519,10 +519,10 @@ class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
         HighlightInlineParserFactory()
     )
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<out Block>> =
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
         mapOf(AlertBlock::class.java to AlertBlockRenderer())
 
-    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<out Node>> =
+    override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
             AlertBlock::class.java to CompositeChildNodeStringBuilder<AlertBlock>(),
             MentionNode::class.java to MentionNodeStringBuilder(),
