@@ -36,7 +36,6 @@ data class TypographyStyle(
     val bulletListParagraphStyle: ParagraphStyle = ParagraphStyle(
         lineHeight = 24.sp,
     ),
-    val body: SpanStyle = SpanStyle(),
     val strongEmphasis: SpanStyle = SpanStyle(
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Default,
@@ -106,47 +105,60 @@ data class TypographyStyle(
     ),
     val blockQuoteContentBackgroundColor: Color = Color.LightGray,
     val blockQuoteBorderColor: Color = Color.Gray,
-    val head: Map<Int, SpanStyle> = mapOf(
-        1 to SpanStyle(
+    val headStyle: Map<Int, TextStyle> = mapOf(
+        HEAD1 to TextStyle(
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
+            fontFamily = FontFamily.Default,
+            lineHeight = 36.sp,
+            color = Color.Black,
         ),
-        2 to SpanStyle(
+        HEAD2 to TextStyle(
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
+            fontFamily = FontFamily.Default,
+            lineHeight = 32.sp,
+            color = Color.Black,
         ),
-        3 to SpanStyle(
+        HEAD3 to TextStyle(
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
+            fontFamily = FontFamily.Default,
+            lineHeight = 28.sp,
+            color = Color.Black,
         ),
-        4 to SpanStyle(
+        HEAD4 to TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
+            fontFamily = FontFamily.Default,
+            lineHeight = 24.sp,
+            color = Color.Black,
         ),
-        5 to SpanStyle(
+        HEAD5 to TextStyle(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Default,
+            lineHeight = 22.sp,
+            color = Color.Black,
+        ),
+        HEAD6 to TextStyle(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
+            fontFamily = FontFamily.Default,
+            lineHeight = 20.sp,
+            color = Color.Black,
         ),
-        6 to SpanStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default
-        ),
-    ),
-    val headParagraphStyle: Map<Int, ParagraphStyle> = mapOf(
-        1 to ParagraphStyle(lineHeight = 40.sp),
-        2 to ParagraphStyle(lineHeight = 36.sp),
-        3 to ParagraphStyle(lineHeight = 32.sp),
-        4 to ParagraphStyle(lineHeight = 28.sp),
-        5 to ParagraphStyle(lineHeight = 24.sp),
-        6 to ParagraphStyle(lineHeight = 20.sp),
     ),
     val listIndentSize: Dp = 6.dp,
-)
+) {
+    companion object {
+        const val HEAD1 = 1
+        const val HEAD2 = 2
+        const val HEAD3 = 3
+        const val HEAD4 = 4
+        const val HEAD5 = 5
+        const val HEAD6 = 6
+    }
+}
 
 val DefaultTypographyStyle by lazy { TypographyStyle() }

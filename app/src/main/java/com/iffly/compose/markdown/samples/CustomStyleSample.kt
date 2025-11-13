@@ -23,8 +23,11 @@ import com.iffly.compose.markdown.style.TypographyStyle
 @Composable
 fun CustomStyleExample(paddingValues: PaddingValues) {
     val customTypography = TypographyStyle(
-        textStyle = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
-        body = SpanStyle(color = Color(0xFF2E7D32)),
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 24.sp,
+            color = Color(0xFF2E7D32)
+        ),
         strongEmphasis = SpanStyle(
             fontWeight = FontWeight.Bold,
             color = Color(0xFF1976D2)
@@ -39,18 +42,18 @@ fun CustomStyleExample(paddingValues: PaddingValues) {
             color = Color(0xFF37474F),
             background = Color(0xFFE8F5E8)
         ),
-        head = mapOf(
-            1 to SpanStyle(
+        headStyle = mapOf(
+            1 to TextStyle(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1976D2)
             ),
-            2 to SpanStyle(
+            2 to TextStyle(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF388E3C)
             ),
-            3 to SpanStyle(
+            3 to TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF7B1FA2)

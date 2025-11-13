@@ -13,19 +13,21 @@ import com.vladsch.flexmark.util.ast.Node
 
 fun TypographyStyle.getNodeSpanStyle(node: Node): SpanStyle {
     return when (node) {
-        is Heading -> this.head[node.level] ?: this.body
+        is Heading -> this.headStyle[node.level]?.toSpanStyle() ?: this.textStyle.toSpanStyle()
         is TableCell -> {
             // Check if this cell is in a table header
             if (node.isInTableHeader()) this.tableHeader else this.tableCell
         }
 
-        else -> this.body
+        else -> this.textStyle.toSpanStyle()
     }
 }
 
 fun TypographyStyle.getNodeParagraphStyle(node: Node?): ParagraphStyle {
     return when (node) {
-        is Heading -> this.headParagraphStyle[node.level] ?: this.textStyle.toParagraphStyle()
+        is Heading -> this.headStyle[node.level]?.toParagraphStyle()
+            ?: this.textStyle.toParagraphStyle()
+
         is BulletList -> this.bulletListParagraphStyle
         is OrderedList -> this.orderListParagraphStyle
         else -> this.textStyle.toParagraphStyle()

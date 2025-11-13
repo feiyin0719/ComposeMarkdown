@@ -8,8 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.config.LocalTypographyStyleProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentRenderRegistry
@@ -140,11 +138,7 @@ private fun MarkdownContentPreview() {
     """.trimIndent()
     val node = MarkdownRenderConfig.Builder().build().parser.parse(testText)
     CompositionLocalProvider(
-        LocalTypographyStyleProvider provides TypographyStyle(
-            body = SpanStyle(
-                fontSize = 20.sp
-            )
-        )
+        LocalTypographyStyleProvider provides TypographyStyle()
     ) {
         Column(
             modifier = Modifier

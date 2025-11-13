@@ -24,8 +24,11 @@ import com.iffly.compose.markdown.style.TypographyStyle
 @Composable
 fun DarkThemeExample(paddingValues: PaddingValues) {
     val darkTypography = TypographyStyle(
-        textStyle = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
-        body = SpanStyle(color = Color.White),
+        textStyle = TextStyle(
+            fontSize = 16.sp,
+            lineHeight = 24.sp,
+            color = Color.White,
+        ),
         strongEmphasis = SpanStyle(
             fontWeight = FontWeight.Bold,
             color = Color(0xFF64B5F6)
@@ -40,18 +43,18 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
             color = Color(0xFF81C784),
             background = Color(0xFF2E2E2E)
         ),
-        head = mapOf(
-            1 to SpanStyle(
+        headStyle = mapOf(
+            1 to TextStyle(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF64B5F6)
             ),
-            2 to SpanStyle(
+            2 to TextStyle(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF81C784)
             ),
-            3 to SpanStyle(
+            3 to TextStyle(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFBA68C8)
