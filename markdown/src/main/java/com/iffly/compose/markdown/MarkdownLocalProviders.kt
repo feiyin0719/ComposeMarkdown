@@ -2,8 +2,6 @@ package com.iffly.compose.markdown
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.text.LinkInteractionListener
 import com.iffly.compose.markdown.config.LocalHtmlRenderProvider
 import com.iffly.compose.markdown.config.LocalLinkClickListenerProvider
@@ -19,9 +17,9 @@ internal fun MarkdownLocalProviders(
     linkInteractionListener: LinkInteractionListener? = null,
     content: @Composable () -> Unit
 ) {
-    val linkInteractionListener by rememberUpdatedState(linkInteractionListener)
-    val typographyStyle by rememberUpdatedState(markdownRenderConfig.typographyStyle)
-    val htmlRenderer by rememberUpdatedState(markdownRenderConfig.htmlRenderer)
+    val linkInteractionListener = linkInteractionListener
+    val typographyStyle = markdownRenderConfig.typographyStyle
+    val htmlRenderer = markdownRenderConfig.htmlRenderer
     CompositionLocalProvider(
         LocalRenderRegistryProvider provides markdownRenderConfig.renderRegistry,
         LocalTypographyStyleProvider provides typographyStyle,

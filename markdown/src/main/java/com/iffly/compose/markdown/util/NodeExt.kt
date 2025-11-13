@@ -7,17 +7,12 @@ import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.OrderedList
-import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.util.ast.Node
 
 fun TypographyStyle.getNodeSpanStyle(node: Node): SpanStyle {
     return when (node) {
         is Heading -> this.headStyle[node.level]?.toSpanStyle() ?: this.textStyle.toSpanStyle()
-        is TableCell -> {
-            // Check if this cell is in a table header
-            if (node.isInTableHeader()) this.tableHeader else this.tableCell
-        }
 
         else -> this.textStyle.toSpanStyle()
     }
@@ -28,8 +23,6 @@ fun TypographyStyle.getNodeParagraphStyle(node: Node?): ParagraphStyle {
         is Heading -> this.headStyle[node.level]?.toParagraphStyle()
             ?: this.textStyle.toParagraphStyle()
 
-        is BulletList -> this.bulletListParagraphStyle
-        is OrderedList -> this.orderListParagraphStyle
         else -> this.textStyle.toParagraphStyle()
     }
 }

@@ -47,7 +47,7 @@ fun MarkdownView(
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
 
-    val parser by rememberUpdatedState(markdownRenderConfig.parser)
+    val parser = markdownRenderConfig.parser
     val markdownState = remember(content, parser) {
         try {
             MarkdownState.Success(parser.parse(content))

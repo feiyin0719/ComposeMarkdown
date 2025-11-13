@@ -30,12 +30,6 @@ data class TypographyStyle(
     val imageParagraphStyle: ParagraphStyle = ParagraphStyle(
         lineHeight = 300.sp,
     ),
-    val orderListParagraphStyle: ParagraphStyle = ParagraphStyle(
-        lineHeight = 24.sp,
-    ),
-    val bulletListParagraphStyle: ParagraphStyle = ParagraphStyle(
-        lineHeight = 24.sp,
-    ),
     val strongEmphasis: SpanStyle = SpanStyle(
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Default,
@@ -76,11 +70,11 @@ data class TypographyStyle(
             textDecoration = TextDecoration.Underline
         ),
     ),
-    val tableHeader: SpanStyle = SpanStyle(
+    val tableHeader: TextStyle = TextStyle(
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.Default,
     ),
-    val tableCell: SpanStyle = SpanStyle(
+    val tableCell: TextStyle = TextStyle(
         fontFamily = FontFamily.Default,
     ),
     val tableBorderColor: Color = Color.Gray,

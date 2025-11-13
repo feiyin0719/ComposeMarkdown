@@ -231,8 +231,4 @@ class ParagraphNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
     }
 }
 
-class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
-    override fun getSpanStyle(node: Node, typographyStyle: TypographyStyle): SpanStyle? {
-        return typographyStyle.getNodeSpanStyle(node)
-    }
-}
+class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()

@@ -193,7 +193,7 @@ private fun TableScope.Header(
     backgroundColor: Color
 ) {
     header(modifier = Modifier.background(backgroundColor)) {
-        Cells(headerCells, modifier)
+        Cells(headerCells, modifier, isHeader = true)
     }
 }
 
@@ -219,13 +219,15 @@ private fun BodyScope.Rows(
     }
 }
 
-private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier) {
+private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier, isHeader: Boolean = false) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
+            val typographyStyle = currentTypographyStyle()
             MarkdownText(
                 parent = node,
                 modifier = Modifier,
-                textAlign = node.alignment.toTextAlign()
+                textAlign = node.alignment.toTextAlign(),
+                textStyle = if (isHeader) typographyStyle.tableHeader else typographyStyle.tableCell,
             )
         }
     }
