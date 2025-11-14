@@ -1,10 +1,10 @@
 package com.iffly.compose.markdown.render
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.util.ast.Node
@@ -15,7 +15,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     renderRegistry: RenderRegistry,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
     isShowNotSupported: Boolean,
 ) {
     var node = parent.firstChild
@@ -27,7 +27,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
             inlineContentMap,
             typographyStyle,
             indentLevel,
-            linkInteractionListener,
+            actionHandler,
             renderRegistry,
             isShowNotSupported,
             this,
@@ -87,7 +87,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
         node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
@@ -100,7 +100,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
                     inlineContentMap = inlineContentMap,
                     typographyStyle = typographyStyle,
                     renderRegistry = renderRegistry,
-                    linkInteractionListener = linkInteractionListener,
+                    actionHandler = actionHandler,
                     isShowNotSupported = isShowNotSupported,
                 )
             }

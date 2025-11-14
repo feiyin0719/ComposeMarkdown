@@ -34,7 +34,7 @@ internal sealed class MarkdownState {
  * @param markdownRenderConfig Configuration for rendering the Markdown.
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
- * @param linkInteractionListener Listener for link interactions.
+ * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
  * @param onError Composable to display in case of an error during parsing.
  */
 @Composable
@@ -43,7 +43,7 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
 
@@ -69,7 +69,7 @@ fun MarkdownView(
                 markdownRenderConfig = markdownRenderConfig,
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
-                linkInteractionListener = linkInteractionListener,
+                actionHandler = actionHandler,
             )
         }
 
@@ -88,7 +88,7 @@ fun MarkdownView(
  * @param markdownRenderConfig Configuration for rendering the Markdown.
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
- * @param linkInteractionListener Listener for link interactions.
+ * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
@@ -99,7 +99,7 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
     parseDispatcher: CoroutineDispatcher? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
@@ -132,7 +132,7 @@ fun MarkdownView(
                 markdownRenderConfig = markdownRenderConfig,
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
-                linkInteractionListener = linkInteractionListener,
+                actionHandler = actionHandler,
             )
         }
 
@@ -149,7 +149,7 @@ fun MarkdownView(
  * @param markdownRenderConfig Configuration for rendering the Markdown.
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
- * @param linkInteractionListener Listener for link interactions.
+ * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
  *
  */
 @Composable
@@ -158,9 +158,9 @@ fun MarkdownView(
     markdownRenderConfig: MarkdownRenderConfig,
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
 ) {
-    MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, linkInteractionListener) {
+    MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, actionHandler) {
         MarkdownContent(node, modifier)
     }
 }

@@ -15,9 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.task.TaskMarkdownRenderPlugin
+import com.vladsch.flexmark.util.ast.Node
 
 @Composable
 fun TaskListExample(paddingValues: PaddingValues) {
@@ -143,8 +145,11 @@ fun TaskListExample(paddingValues: PaddingValues) {
             """.trimIndent(),
             markdownRenderConfig = taskConfig,
             modifier = Modifier.padding(16.dp),
-            linkInteractionListener = { linkAnnotation ->
-                Log.d("TaskList", "Clicked link: $linkAnnotation")
+            actionHandler = object : ActionHandler {
+                override fun handleUrlClick(url: String, node: Node) {
+                    Log.d("BasicSyntax", "Clicked link: $url")
+
+                }
             }
         )
     }

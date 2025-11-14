@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -17,6 +16,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.MarkdownLinkInteractionListener
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineTextContent
@@ -46,7 +47,7 @@ private fun AnnotatedString.Builder.buildStyleString(
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     renderRegistry: RenderRegistry,
-    linkInteractionListener: LinkInteractionListener?,
+    actionHandler: ActionHandler?,
     isShowNotSupported: Boolean,
 ) {
     buildChildNodeAnnotatedString(
@@ -55,7 +56,7 @@ private fun AnnotatedString.Builder.buildStyleString(
         inlineContentMap,
         typographyStyle,
         renderRegistry,
-        linkInteractionListener,
+        actionHandler,
         isShowNotSupported,
     )
 }
@@ -65,7 +66,7 @@ class TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
         node: Text,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
@@ -79,7 +80,7 @@ class ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
         node: Image,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
@@ -115,7 +116,7 @@ class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
         node: SoftLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
@@ -129,7 +130,7 @@ class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
         node: HardLineBreak,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
@@ -167,7 +168,7 @@ class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
         node: Code,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
@@ -183,12 +184,15 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         node: Link,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
         val linkNode = node
+        val linkInteractionListener = actionHandler?.let {
+            MarkdownLinkInteractionListener(actionHandler = it, node = linkNode)
+        }
         val linkAnnotation = LinkAnnotation.Url(
             url = linkNode.url.toString(),
             styles = typographyStyle.link,
@@ -201,7 +205,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
                 inlineContentMap,
                 typographyStyle,
                 renderRegistry,
-                linkInteractionListener,
+                actionHandler,
                 isShowNotSupported,
             )
         }

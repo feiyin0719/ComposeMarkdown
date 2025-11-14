@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import com.iffly.compose.markdown.config.currentLinkClickListener
+import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
@@ -26,20 +26,20 @@ fun MarkdownText(
 ) {
     val typographyStyle = currentTypographyStyle()
     val renderRegistry = currentRenderRegistry()
-    val linkInteractionListener = currentLinkClickListener()
+    val actionHandler = currentActionHandler()
     val isShowNotSupported = isShowNotSupported()
     val (text, inlineContent) = remember(
         parent,
         typographyStyle,
         renderRegistry,
         isShowNotSupported,
-        linkInteractionListener,
+        actionHandler,
     ) {
         markdownText(
             parent,
             typographyStyle,
             renderRegistry,
-            linkInteractionListener,
+            actionHandler,
             1,
             isShowNotSupported,
         )
@@ -63,7 +63,7 @@ fun markdownText(
     node: Node,
     typographyStyle: TypographyStyle,
     renderRegistry: RenderRegistry,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
 ): Pair<AnnotatedString, Map<String, MarkdownInlineTextContent>> {
@@ -77,7 +77,7 @@ fun markdownText(
                 inlineContentMap,
                 typographyStyle,
                 indentLevel,
-                linkInteractionListener,
+                actionHandler,
                 renderRegistry,
                 isShowNotSupported,
                 this,

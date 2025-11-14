@@ -16,9 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.plugin.CustomMarkdownPlugin
+import com.vladsch.flexmark.util.ast.Node
 
 @Composable
 fun CustomPluginExample(paddingValues: PaddingValues) {
@@ -157,8 +159,11 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
             """.trimIndent(),
             markdownRenderConfig = customConfig,
             modifier = Modifier.padding(16.dp),
-            linkInteractionListener = { linkAnnotation ->
-                Log.d("CustomPlugin", "Link clicked: $linkAnnotation")
+            actionHandler = object : ActionHandler {
+                override fun handleUrlClick(url: String, node: Node) {
+                    Log.d("BasicSyntax", "Clicked link: $url")
+
+                }
             }
         )
     }

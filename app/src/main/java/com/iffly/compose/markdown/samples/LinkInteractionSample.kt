@@ -1,7 +1,6 @@
 package com.iffly.compose.markdown.samples
 
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,11 +11,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import androidx.core.net.toUri
+import com.vladsch.flexmark.util.ast.Node
 
 @Composable
 fun LinkInteractionExample(paddingValues: PaddingValues) {
@@ -56,56 +56,57 @@ fun LinkInteractionExample(paddingValues: PaddingValues) {
             """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),
-            linkInteractionListener = { url ->
-                Log.d("LinkInteraction", "Clicked link: $url")
+            actionHandler = object : ActionHandler {
+                override fun handleUrlClick(url: String, node: Node) {
 
-                // Extract URL string from LinkAnnotation
-                val urlString = when (url) {
-                    is androidx.compose.ui.text.LinkAnnotation.Url -> url.url
-                    else -> url.toString()
+                    Log.d("LinkInteraction", "Clicked link: $url")
+
+                    // Extract URL string from LinkAnnotation
+                    val urlString = url
+
+                    when {
+                        urlString.startsWith("http") -> {
+                            // Open external link
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, urlString.toUri())
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("LinkInteraction", "Cannot open link: $urlString", e)
+                            }
+                        }
+
+                        urlString.startsWith("/internal") -> {
+                            // Handle internal navigation
+                            Log.i("LinkInteraction", "Navigate to internal page: $urlString")
+                            // Navigation component integration can go here
+                        }
+
+                        urlString.startsWith("mailto:") -> {
+                            // Handle email link
+                            try {
+                                val intent = Intent(Intent.ACTION_SENDTO, urlString.toUri())
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("LinkInteraction", "Cannot open email: $urlString", e)
+                            }
+                        }
+
+                        urlString.startsWith("tel:") -> {
+                            // Handle phone link
+                            try {
+                                val intent = Intent(Intent.ACTION_DIAL, urlString.toUri())
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Log.e("LinkInteraction", "Cannot dial phone: $urlString", e)
+                            }
+                        }
+
+                        else -> {
+                            Log.i("LinkInteraction", "Other type of link: $urlString")
+                        }
+                    }
                 }
 
-                when {
-                    urlString.startsWith("http") -> {
-                        // Open external link
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, urlString.toUri())
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Log.e("LinkInteraction", "Cannot open link: $urlString", e)
-                        }
-                    }
-
-                    urlString.startsWith("/internal") -> {
-                        // Handle internal navigation
-                        Log.i("LinkInteraction", "Navigate to internal page: $urlString")
-                        // Navigation component integration can go here
-                    }
-
-                    urlString.startsWith("mailto:") -> {
-                        // Handle email link
-                        try {
-                            val intent = Intent(Intent.ACTION_SENDTO, urlString.toUri())
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Log.e("LinkInteraction", "Cannot open email: $urlString", e)
-                        }
-                    }
-
-                    urlString.startsWith("tel:") -> {
-                        // Handle phone link
-                        try {
-                            val intent = Intent(Intent.ACTION_DIAL, urlString.toUri())
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Log.e("LinkInteraction", "Cannot dial phone: $urlString", e)
-                        }
-                    }
-
-                    else -> {
-                        Log.i("LinkInteraction", "Other type of link: $urlString")
-                    }
-                }
             }
         )
     }

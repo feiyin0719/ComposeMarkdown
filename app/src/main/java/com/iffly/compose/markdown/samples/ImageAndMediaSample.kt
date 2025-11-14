@@ -10,8 +10,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.vladsch.flexmark.util.ast.Node
 
 @Composable
 fun ImageAndMediaExample(paddingValues: PaddingValues) {
@@ -51,8 +53,11 @@ fun ImageAndMediaExample(paddingValues: PaddingValues) {
             """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),
-            linkInteractionListener = { linkAnnotation ->
-                Log.d("ImageAndMedia", "Clicked image link: $linkAnnotation")
+            actionHandler = object : ActionHandler {
+                override fun handleUrlClick(url: String, node: Node) {
+                    Log.d("BasicSyntax", "Clicked link: $url")
+
+                }
             }
         )
     }

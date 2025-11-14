@@ -1,7 +1,7 @@
 package com.iffly.compose.markdown.render
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkInteractionListener
+import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.vladsch.flexmark.util.ast.Node
 
@@ -17,7 +17,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
      * @param node The inline node to build the string for.
      * @param inlineContentMap A map to hold any inline content (like images) that needs to be rendered.
      * @param typographyStyle The markdown typography style.
-     * @param linkInteractionListener Optional listener for link interactions.
+     * @param actionHandler Optional listener for link interactions.
      * @param indentLevel The current indentation level for nested lists.
      * @param isShowNotSupported Whether to show unsupported node indicators.
      * @param renderRegistry The render registry containing all renderers and builders.
@@ -29,7 +29,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
         node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
         typographyStyle: TypographyStyle,
-        linkInteractionListener: LinkInteractionListener?,
+        actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
@@ -41,7 +41,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
     typographyStyle: TypographyStyle,
     indentLevel: Int,
-    linkInteractionListener: LinkInteractionListener? = null,
+    actionHandler: ActionHandler? = null,
     renderRegistry: RenderRegistry,
     isShowNotSupported: Boolean,
     builder: AnnotatedString.Builder
@@ -51,7 +51,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
             node,
             inlineContentMap,
             typographyStyle,
-            linkInteractionListener,
+            actionHandler,
             indentLevel,
             isShowNotSupported,
             renderRegistry,
