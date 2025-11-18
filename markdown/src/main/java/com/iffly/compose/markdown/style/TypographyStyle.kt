@@ -143,7 +143,8 @@ data class TypographyStyle(
             color = Color.Black,
         ),
     ),
-    val listIndentSize: Dp = 6.dp,
+    val listMarkerSpaceSize: Dp = 4.dp,
+    val listTightSpaceSize: Dp = 4.dp,
 ) {
     companion object {
         const val HEAD1 = 1

@@ -45,16 +45,20 @@ fun ListItem.getMarkerText(): String {
     return when (this.parent) {
         is BulletList -> BULLET_POINT
         is OrderedList -> {
+            var max = 1
             var index = 1
             var node = this.parent?.firstChild
             while (node != null) {
                 if (node == this) {
-                    break
+                    index = max
                 }
-                index++
+                max++
                 node = node.next
             }
-            index.toString()
+            val maxLength = max.toString().length
+            val indexString = index.toString()
+            val indexLength = indexString.length
+            "${StringExt.FIGURE_SPACE.repeat(maxLength - indexLength)}$indexString"
         }
 
         else -> ""
