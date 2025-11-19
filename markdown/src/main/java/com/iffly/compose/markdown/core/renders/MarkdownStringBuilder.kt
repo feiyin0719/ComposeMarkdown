@@ -1,33 +1,24 @@
 package com.iffly.compose.markdown.core.renders
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownLinkInteractionListener
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.MarkdownInlineTextContent
+import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
-import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.getNodeParagraphStyle
 import com.iffly.compose.markdown.util.getNodeSpanStyle
+import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.HardLineBreak
@@ -44,7 +35,7 @@ import com.vladsch.flexmark.util.ast.Node
 private fun AnnotatedString.Builder.buildStyleString(
     node: Node,
     indentLevel: Int,
-    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineView>,
     typographyStyle: TypographyStyle,
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler?,
@@ -64,7 +55,7 @@ private fun AnnotatedString.Builder.buildStyleString(
 class TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Text,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -78,7 +69,7 @@ class TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
 class ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Image,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -86,35 +77,19 @@ class ImageNodeStringBuilder : IInlineNodeStringBuilder<Image> {
         renderRegistry: RenderRegistry
     ) {
         val imageId = "image_${node.hashCode()}"
-        val imageParagraphStyle = typographyStyle.imageParagraphStyle
-        inlineContentMap[imageId] =
-            InlineTextContent(
-                placeholder = Placeholder(
-                    width = imageParagraphStyle.lineHeight,
-                    height = imageParagraphStyle.lineHeight,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-                ),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    MarkdownImage(
-                        node = node,
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .padding(horizontal = 2.dp)
-                    )
-                }
-
-            }.toFixedSizeMarkdownInlineTextContent()
-        withStyle(imageParagraphStyle) {
-            appendInlineContent(imageId, "[${node.title ?: node.text}]")
+        inlineContentMap[imageId] = MarkdownInlineView.MarkdownStandaloneInlineView(
+            modifier = Modifier
+        ) { modifier ->
+            MarkdownImage(node, modifier = modifier)
         }
+        appendStandaloneInlineTextContent(imageId, "[${node.title ?: node.text}]")
     }
 }
 
 class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: SoftLineBreak,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -128,7 +103,7 @@ class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
 class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HardLineBreak,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -166,7 +141,7 @@ class EmphasisNodeStringBuilder : CompositeChildNodeStringBuilder<Emphasis>() {
 class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Code,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -182,7 +157,7 @@ class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
 class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Link,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -218,8 +193,7 @@ class HeadingNodeStringBuilder() : CompositeChildNodeStringBuilder<Heading>() {
     }
 
     override fun getParagraphStyle(
-        node: Heading,
-        typographyStyle: TypographyStyle
+        node: Heading, typographyStyle: TypographyStyle
     ): ParagraphStyle? {
         return typographyStyle.getNodeParagraphStyle(node)
     }
@@ -228,8 +202,7 @@ class HeadingNodeStringBuilder() : CompositeChildNodeStringBuilder<Heading>() {
 class ParagraphNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
 
     override fun getParagraphStyle(
-        node: Node,
-        typographyStyle: TypographyStyle
+        node: Node, typographyStyle: TypographyStyle
     ): ParagraphStyle? {
         return typographyStyle.getNodeParagraphStyle(node)
     }

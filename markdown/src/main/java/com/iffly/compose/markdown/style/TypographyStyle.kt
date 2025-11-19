@@ -2,7 +2,6 @@ package com.iffly.compose.markdown.style
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
@@ -26,9 +25,6 @@ data class TypographyStyle(
         fontFamily = FontFamily.Default,
         color = Color.Black,
         lineHeight = 20.sp,
-    ),
-    val imageParagraphStyle: ParagraphStyle = ParagraphStyle(
-        lineHeight = 300.sp,
     ),
     val strongEmphasis: SpanStyle = SpanStyle(
         fontWeight = FontWeight.Bold,

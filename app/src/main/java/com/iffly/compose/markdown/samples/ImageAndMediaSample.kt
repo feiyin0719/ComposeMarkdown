@@ -27,6 +27,8 @@ fun ImageAndMediaExample(paddingValues: PaddingValues) {
             content = """
                 # Image and Media Example
                 
+                ![Image 4](https://b.zol-img.com.cn/soft/6/614/ceaszSDde0JHA.jpg)
+                
                 This example demonstrates image rendering functionality.
                 
                 ## Network Images
@@ -48,6 +50,7 @@ fun ImageAndMediaExample(paddingValues: PaddingValues) {
                 
                 ![Image 2](https://qcloud.dpfile.com/pc/w7BUcqbwgbqmYoDIbJcYkS-4p5gNsX7g5bXVyqeC386xoJR2wB3zvXKeaGZtgX19.jpg)
                 
+                ![Image 3](https://failed.test)
                 
                 The image above is clickable and will navigate to the Android developer website.
             """.trimIndent(),

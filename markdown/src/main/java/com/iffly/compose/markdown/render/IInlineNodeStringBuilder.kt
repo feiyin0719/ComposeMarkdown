@@ -27,7 +27,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
      */
     fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
@@ -38,7 +38,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 
 fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     node: T,
-    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineView>,
     typographyStyle: TypographyStyle,
     indentLevel: Int,
     actionHandler: ActionHandler? = null,

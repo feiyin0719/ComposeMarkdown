@@ -14,7 +14,7 @@ import com.iffly.compose.markdown.config.currentTypographyStyle
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.TypographyStyle
 import com.iffly.compose.markdown.util.contentText
-import com.iffly.compose.markdown.widget.BasicText
+import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
@@ -45,17 +45,28 @@ fun MarkdownText(
         )
     }
     val inlineContentMap = remember(inlineContent) {
-        inlineContent.mapValues {
-            it.value.toInlineTextContent()
-        }
+        inlineContent.mapNotNull { (key, value) ->
+            (value as? MarkdownInlineView.MarkdownInlineTextContent)?.let {
+                key to value.toInlineTextContent()
+            }
+        }.toMap()
     }
 
-    BasicText(
+    val standaloneInlineTextContent = remember(inlineContent) {
+        inlineContent.mapNotNull { (key, value) ->
+            (value as? MarkdownInlineView.MarkdownStandaloneInlineView)?.let {
+                key to it.toStandaloneInlineTextContent()
+            }
+        }.toMap()
+    }
+
+    RichText(
         text = text,
         inlineContent = inlineContentMap,
         modifier = modifier,
         textAlign = textAlign,
-        style = textStyle ?: typographyStyle.textStyle
+        style = textStyle ?: typographyStyle.textStyle,
+        standaloneInlineTextContent = standaloneInlineTextContent,
     )
 }
 
@@ -66,8 +77,8 @@ fun markdownText(
     actionHandler: ActionHandler? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
-): Pair<AnnotatedString, Map<String, MarkdownInlineTextContent>> {
-    val inlineContentMap = mutableMapOf<String, MarkdownInlineTextContent>()
+): Pair<AnnotatedString, Map<String, MarkdownInlineView>> {
+    val inlineContentMap = mutableMapOf<String, MarkdownInlineView>()
 
     val annotatedString = buildAnnotatedString {
         val buildNodeAnnotatedString = renderRegistry.getInlineNodeStringBuilder(node::class.java)

@@ -14,7 +14,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
-import com.iffly.compose.markdown.render.MarkdownInlineTextContent
+import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.TypographyStyle
@@ -29,7 +29,7 @@ class InlineLatexNodeStringBuilder(
 
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: InlineLatexNode,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,

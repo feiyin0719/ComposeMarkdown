@@ -12,7 +12,7 @@ import com.vladsch.flexmark.util.ast.Node
 fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
-    inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+    inlineContentMap: MutableMap<String, MarkdownInlineView>,
     typographyStyle: TypographyStyle,
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler? = null,
@@ -85,7 +85,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
 
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
-        inlineContentMap: MutableMap<String, MarkdownInlineTextContent>,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
         typographyStyle: TypographyStyle,
         actionHandler: ActionHandler?,
         indentLevel: Int,
