@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentHtmlRenderer
 import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.widget.table.BodyScope
@@ -50,6 +51,7 @@ import com.vladsch.flexmark.ext.tables.TableBody
 import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.ext.tables.TableRow
+import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.launch
 
 class TableRenderer : IBlockRenderer<TableBlock> {
@@ -62,6 +64,9 @@ class TableRenderer : IBlockRenderer<TableBlock> {
     }
 
 }
+
+class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
+
 
 @Composable
 fun MarkdownTable(

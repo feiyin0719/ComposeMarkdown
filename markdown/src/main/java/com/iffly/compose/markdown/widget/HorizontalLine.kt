@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.widget
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -10,7 +11,7 @@ fun HorizontalLine(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    androidx.compose.foundation.Canvas(modifier = modifier) {
+    Canvas(modifier = modifier) {
         val strokeWidth = size.height
         drawLine(
             color = color,

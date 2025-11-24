@@ -38,7 +38,7 @@ fun MarkdownImage(
     modifier: Modifier = Modifier
 ) {
     val url = node.url
-    val altText = node.title?.toString()?.takeIf { it.isNotEmpty() } ?: node.text?.toString()
+    val altText = node.text?.toString() ?: node.title?.toString() ?: ""
     val context = LocalPlatformContext.current
 
     SubcomposeAsyncImage(
