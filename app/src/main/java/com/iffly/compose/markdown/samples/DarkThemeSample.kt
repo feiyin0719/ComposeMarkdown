@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 
 @Composable
 fun DarkThemeExample(paddingValues: PaddingValues) {
-    val darkTypography = TypographyStyle(
+    val darkTypography = MarkdownTheme(
         textStyle = TextStyle(
             fontSize = 16.sp,
             lineHeight = 24.sp,
@@ -63,7 +63,7 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
     )
 
     val config = MarkdownRenderConfig.Builder()
-        .typographyStyle(darkTypography)
+        .markdownTheme(darkTypography)
         .build()
 
     Surface(

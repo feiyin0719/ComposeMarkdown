@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.widget.HorizontalLine
 import com.vladsch.flexmark.ast.ThematicBreak
@@ -21,12 +21,12 @@ fun BreakLine(
     node: ThematicBreak,
     modifier: Modifier = Modifier,
 ) {
-    val typographyStyle = currentTypographyStyle()
+    val theme = currentTheme()
     // show a horizontal line
     HorizontalLine(
-        color = typographyStyle.breakLineColor,
+        color = theme.breakLineColor,
         modifier = modifier
-            .height(typographyStyle.breakLineHeight)
+            .height(theme.breakLineHeight)
             .fillMaxWidth()
     )
 }

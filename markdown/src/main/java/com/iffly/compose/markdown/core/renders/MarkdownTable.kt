@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentHtmlRenderer
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownText
@@ -76,8 +76,8 @@ fun MarkdownTable(
     val cells = tableBlock.cells()
     val columnsCount = cells.firstOrNull()?.size ?: 0
     if (columnsCount == 0 || cells.isEmpty()) return
-    val typographyStyle = currentTypographyStyle()
-    val borderColor = typographyStyle.tableBorderColor
+    val theme = currentTheme()
+    val borderColor = theme.tableBorderColor
     val widthWeights = if (columnsCount <= 2) List(columnsCount) { 1f } else null
 
     Column(
@@ -116,10 +116,10 @@ fun MarkdownTable(
                     ),
                     cellAlignment = Alignment.TopStart
                 ) {
-                    Header(cells.first(), cellModifier, typographyStyle.tableHeaderBackgroundColor)
+                    Header(cells.first(), cellModifier, theme.tableHeaderBackgroundColor)
                     val bodyCells = if (cells.size > 1) cells.subList(1, cells.size) else null
                     bodyCells?.let {
-                        Body(it, cellModifier, typographyStyle.tableRowHeaderBackgroundColor)
+                        Body(it, cellModifier, theme.tableRowHeaderBackgroundColor)
                     }
                 }
             }
@@ -136,13 +136,13 @@ private fun TableTitle(
     modifier: Modifier = Modifier,
 ) {
     val clipboardManager = LocalClipboard.current
-    val typographyStyle = currentTypographyStyle()
+    val theme = currentTheme()
     val htmlRenderer = currentHtmlRenderer()
     val scope = rememberCoroutineScope()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(typographyStyle.tableTitleBackgroundColor)
+            .background(theme.tableTitleBackgroundColor)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -150,7 +150,7 @@ private fun TableTitle(
         // Copy button
         Text(
             text = "Copy table",
-            style = typographyStyle.tableCopyStyle,
+            style = theme.tableCopyStyle,
             modifier = Modifier
                 .clickable {
                     scope.launch {
@@ -227,12 +227,12 @@ private fun BodyScope.Rows(
 private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier, isHeader: Boolean = false) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
-            val typographyStyle = currentTypographyStyle()
+            val theme = currentTheme()
             MarkdownText(
                 parent = node,
                 modifier = Modifier,
                 textAlign = node.alignment.toTextAlign(),
-                textStyle = if (isHeader) typographyStyle.tableHeader else typographyStyle.tableCell,
+                textStyle = if (isHeader) theme.tableHeader else theme.tableCell,
             )
         }
     }

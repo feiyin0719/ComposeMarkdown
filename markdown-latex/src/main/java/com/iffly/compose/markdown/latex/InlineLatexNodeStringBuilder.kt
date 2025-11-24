@@ -17,7 +17,7 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 
 class InlineLatexNodeStringBuilder(
     private val mathStyle: SpanStyle,
@@ -30,7 +30,7 @@ class InlineLatexNodeStringBuilder(
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: InlineLatexNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,

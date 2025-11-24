@@ -4,7 +4,7 @@ import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
 import com.vladsch.flexmark.parser.Parser
@@ -17,7 +17,7 @@ import com.vladsch.flexmark.util.misc.Extension
 
 class MarkdownRenderConfig {
 
-    var typographyStyle: TypographyStyle? = null
+    var markdownTheme: MarkdownTheme
         private set
 
     var parser: Parser
@@ -30,12 +30,12 @@ class MarkdownRenderConfig {
         private set
 
     private constructor(
-        typographyStyle: TypographyStyle?,
+        markdownTheme: MarkdownTheme,
         renderRegistry: RenderRegistry,
         parser: Parser,
         htmlRenderer: HtmlRenderer,
     ) {
-        this.typographyStyle = typographyStyle ?: TypographyStyle()
+        this.markdownTheme = markdownTheme
         this.renderRegistry = renderRegistry
         this.parser = parser
         this.htmlRenderer = htmlRenderer
@@ -53,7 +53,7 @@ class MarkdownRenderConfig {
             *internalPlugins.toTypedArray()
         )
 
-        private var typographyStyle: TypographyStyle? = null
+        private var markdownTheme: MarkdownTheme? = null
 
         private val inlineNodeStringBuilders =
             mutableMapOf<Class<out Node>, IInlineNodeStringBuilder<*>>()
@@ -70,8 +70,8 @@ class MarkdownRenderConfig {
         private val extensions: MutableList<Extension> = mutableListOf()
         private val options = MutableDataSet()
 
-        fun typographyStyle(typographyStyle: TypographyStyle): Builder {
-            this.typographyStyle = typographyStyle
+        fun markdownTheme(markdownTheme: MarkdownTheme): Builder {
+            this.markdownTheme = markdownTheme
             return this
         }
 
@@ -154,7 +154,7 @@ class MarkdownRenderConfig {
             }
 
             return MarkdownRenderConfig(
-                typographyStyle,
+                markdownTheme ?: MarkdownTheme(),
                 RenderRegistry(
                     blockRenderers.toMap(),
                     inlineNodeStringBuilders.toMap()

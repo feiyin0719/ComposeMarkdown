@@ -149,7 +149,7 @@ fun SimpleMarkdownExample() {
 @Composable
 fun ConfiguredMarkdownExample() {
     val config = MarkdownRenderConfig.Builder()
-        .typographyStyle(
+        .theme(
             TypographyStyle(
                 textStyle = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
                 head = mapOf(
@@ -201,13 +201,13 @@ Configuration class for customizing Markdown rendering behavior.
 
 ```kotlin
 class MarkdownRenderConfig private constructor(
-    val typographyStyle: TypographyStyle,
+    val theme: TypographyStyle,
     val blockRenderers: Map<Class<*>, IBlockRenderer<*>>,
     val inlineNodeStringBuilders: Map<Class<*>, IInlineNodeStringBuilder<*>>,
     val plugins: List<Plugin>
 ) {
     class Builder {
-        fun typographyStyle(style: TypographyStyle): Builder
+        fun theme(style: TypographyStyle): Builder
         fun addBlockRenderer(nodeClass: Class<*>, renderer: IBlockRenderer<*>): Builder
         fun addInlineNodeStringBuilder(
             nodeClass: Class<*>,
@@ -756,7 +756,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: MentionNode,
         inlineContentMap: MutableMap<String, androidx.compose.foundation.text.InlineTextContent>,
-        typographyStyle: TypographyStyle,
+        theme: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int
     ) {
@@ -838,7 +838,7 @@ class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badge
 
 ```kotlin
 val config = MarkdownRenderConfig.Builder()
-    .typographyStyle(customTypography)
+    .theme(customTypography)
     .addBlockRenderer(AlertBlock::class.java, AlertBlockRenderer())
     .addInlineNodeStringBuilder(MentionNode::class.java, MentionNodeStringBuilder())
     .addInlineNodeStringBuilder(HashtagNode::class.java, HashtagNodeStringBuilder())
@@ -1101,7 +1101,7 @@ interface IInlineNodeStringBuilder<T : Node> {
     fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
         inlineContentMap: MutableMap<String, InlineTextContent>,
-        typographyStyle: TypographyStyle,
+        theme: TypographyStyle,
         linkInteractionListener: LinkInteractionListener?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
@@ -1136,14 +1136,14 @@ data class TypographyStyle(
 
 ```kotlin
 class MarkdownRenderConfig private constructor(
-    val typographyStyle: TypographyStyle,
+    val theme: TypographyStyle,
     val blockRenderers: Map<Class<*>, IBlockRenderer<*>>,
     val inlineNodeStringBuilders: Map<Class<*>, IInlineNodeStringBuilder<*>>,
     val plugins: List<Plugin>,
     val parser: Parser
 ) {
     class Builder {
-        fun typographyStyle(style: TypographyStyle): Builder
+        fun theme(style: TypographyStyle): Builder
         fun addBlockRenderer(nodeClass: Class<*>, renderer: IBlockRenderer<*>): Builder
         fun addInlineNodeStringBuilder(
             nodeClass: Class<*>,

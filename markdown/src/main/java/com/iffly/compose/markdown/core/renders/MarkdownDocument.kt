@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.vladsch.flexmark.util.ast.Document
@@ -17,12 +17,12 @@ fun Document(node: Document, modifier: Modifier) {
     Column(
         verticalArrangement = Arrangement.Top, modifier = modifier.wrapContentSize()
     ) {
-        val typographyStyle = currentTypographyStyle()
+        val theme = currentTheme()
         var child = node.firstChild
         while (child != null) {
             MarkdownContent(child, Modifier)
-            if (child.next != null && typographyStyle.showSpace) {
-                Spacer(Modifier.height(typographyStyle.spaceHeight))
+            if (child.next != null && theme.showSpace) {
+                Spacer(Modifier.height(theme.spaceHeight))
             }
             child = child.next
         }

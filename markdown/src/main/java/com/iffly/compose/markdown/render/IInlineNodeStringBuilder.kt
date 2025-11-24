@@ -2,7 +2,7 @@ package com.iffly.compose.markdown.render
 
 import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.util.ast.Node
 
 
@@ -16,7 +16,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
      * Builds an AnnotatedString for the given inline node.
      * @param node The inline node to build the string for.
      * @param inlineContentMap A map to hold any inline content (like images) that needs to be rendered.
-     * @param typographyStyle The markdown typography style.
+     * @param markdownTheme The markdown typography style.
      * @param actionHandler Optional listener for link interactions.
      * @param indentLevel The current indentation level for nested lists.
      * @param isShowNotSupported Whether to show unsupported node indicators.
@@ -28,7 +28,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
     fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
@@ -39,7 +39,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     node: T,
     inlineContentMap: MutableMap<String, MarkdownInlineView>,
-    typographyStyle: TypographyStyle,
+    markdownTheme: MarkdownTheme,
     indentLevel: Int,
     actionHandler: ActionHandler? = null,
     renderRegistry: RenderRegistry,
@@ -50,7 +50,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
         buildInlineNodeString(
             node,
             inlineContentMap,
-            typographyStyle,
+            markdownTheme,
             actionHandler,
             indentLevel,
             isShowNotSupported,

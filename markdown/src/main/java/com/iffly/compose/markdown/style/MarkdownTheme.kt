@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Stable
-data class TypographyStyle(
+data class MarkdownTheme(
     val showSpace: Boolean = true,
     val spaceHeight: Dp = 8.dp,
     val breakLineHeight: Dp = 1.dp,
@@ -168,4 +168,4 @@ data class ImageTheme(
     val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
 )
 
-val DefaultTypographyStyle by lazy { TypographyStyle() }
+val DefaultMarkdownTheme by lazy { MarkdownTheme() }

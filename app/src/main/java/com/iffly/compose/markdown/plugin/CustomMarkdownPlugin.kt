@@ -39,7 +39,7 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.parser.InlineParser
 import com.vladsch.flexmark.parser.InlineParserExtension
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
@@ -419,7 +419,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: MentionNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
@@ -441,7 +441,7 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HashtagNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
@@ -457,7 +457,7 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: HighlightNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
@@ -479,7 +479,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: BadgeNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,

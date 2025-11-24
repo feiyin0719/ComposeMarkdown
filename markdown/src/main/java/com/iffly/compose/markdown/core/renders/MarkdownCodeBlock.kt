@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.IndentedCodeBlock
@@ -63,7 +63,7 @@ fun MarkdownCodeBlock(
     } else {
         "text"
     }
-    val typographyStyle = currentTypographyStyle()
+    val theme = currentTheme()
     Column {
         // Header with separate background
         CodeHeader(
@@ -77,7 +77,7 @@ fun MarkdownCodeBlock(
             modifier = modifier
                 .fillMaxWidth()
                 .background(
-                    color = typographyStyle.code.background,
+                    color = theme.code.background,
                     shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
                 )
         ) {
@@ -88,7 +88,7 @@ fun MarkdownCodeBlock(
                     .fillMaxWidth()
                     .padding(top = 12.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)
                     .horizontalScroll(rememberScrollState()),
-                style = typographyStyle.code
+                style = theme.code
             )
         }
     }
@@ -102,13 +102,13 @@ private fun CodeHeader(
     modifier: Modifier = Modifier,
 ) {
     val clipboardManager = LocalClipboard.current
-    val typographyStyle = currentTypographyStyle()
+    val theme = currentTheme()
     val scope = rememberCoroutineScope()
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                color = typographyStyle.codeTitleBackgroundColor,
+                color = theme.codeTitleBackgroundColor,
                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
             .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -118,7 +118,7 @@ private fun CodeHeader(
         // Language label
         Text(
             text = language.uppercase(),
-            style = typographyStyle.codeTitleStyle,
+            style = theme.codeTitleStyle,
             modifier = Modifier
                 .padding(horizontal = 6.dp, vertical = 2.dp)
         )
@@ -126,7 +126,7 @@ private fun CodeHeader(
         // Copy button
         Text(
             text = "Copy",
-            style = typographyStyle.codeCopyStyle,
+            style = theme.codeCopyStyle,
             modifier = Modifier
                 .clickable {
                     scope.launch {

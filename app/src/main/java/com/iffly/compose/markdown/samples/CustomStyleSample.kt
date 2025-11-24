@@ -18,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 
 @Composable
 fun CustomStyleExample(paddingValues: PaddingValues) {
-    val customTypography = TypographyStyle(
+    val customTypography = MarkdownTheme(
         textStyle = TextStyle(
             fontSize = 16.sp,
             lineHeight = 24.sp,
@@ -62,7 +62,7 @@ fun CustomStyleExample(paddingValues: PaddingValues) {
     )
 
     val config = MarkdownRenderConfig.Builder()
-        .typographyStyle(customTypography)
+        .markdownTheme(customTypography)
         .build()
 
     Column(

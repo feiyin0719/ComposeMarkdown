@@ -197,7 +197,7 @@ That's how simple it is! Three lines of code, and you have a fully functional Ma
 @Composable
 fun CustomStyledMarkdown() {
     val config = MarkdownRenderConfig.Builder()
-        .typographyStyle(
+        .theme(
             TypographyStyle(
                 // Custom paragraph spacing
                 spaceHeight = 12.dp,

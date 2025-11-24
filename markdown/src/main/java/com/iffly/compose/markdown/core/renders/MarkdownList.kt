@@ -13,7 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.getMarkerText
@@ -29,13 +29,13 @@ open class ListBlockRenderer : IBlockRenderer<ListBlock> {
         Column(
             verticalArrangement = Arrangement.Top, modifier = modifier.wrapContentSize()
         ) {
-            val typographyStyle = currentTypographyStyle()
+            val theme = currentTheme()
             var child = node.firstChild
             val spacerHeight =
-                if (node.isLoose) typographyStyle.spaceHeight else typographyStyle.listTightSpaceSize
+                if (node.isLoose) theme.spaceHeight else theme.listTightSpaceSize
             while (child != null) {
                 MarkdownContent(child, Modifier)
-                if (child.next != null && typographyStyle.showSpace) {
+                if (child.next != null && theme.showSpace) {
                     Spacer(Modifier.height(spacerHeight))
                 }
                 child = child.next
@@ -53,7 +53,7 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
 
     @Composable
     override fun Invoke(node: T, modifier: Modifier) {
-        val typographyStyle = currentTypographyStyle()
+        val theme = currentTheme()
         val marker = getMarker(node)
         Row(
             modifier = modifier
@@ -64,17 +64,17 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
             Text(
                 marker,
                 modifier = Modifier,
-                style = typographyStyle.textStyle,
+                style = theme.textStyle,
                 textAlign = TextAlign.End,
             )
-            Spacer(modifier = Modifier.width(typographyStyle.listMarkerSpaceSize))
+            Spacer(modifier = Modifier.width(theme.listMarkerSpaceSize))
             val spacerHeight =
-                if (node.isLoose) typographyStyle.spaceHeight else typographyStyle.listTightSpaceSize
+                if (node.isLoose) theme.spaceHeight else theme.listTightSpaceSize
             Column(verticalArrangement = Arrangement.Top, modifier = Modifier.wrapContentSize()) {
                 var child = node.firstChild
                 while (child != null) {
                     MarkdownContent(child, Modifier)
-                    if (child.next != null && typographyStyle.showSpace) {
+                    if (child.next != null && theme.showSpace) {
                         Spacer(Modifier.height(spacerHeight))
                     }
                     child = child.next

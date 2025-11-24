@@ -10,9 +10,9 @@ import androidx.compose.ui.text.style.TextAlign
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
-import com.iffly.compose.markdown.config.currentTypographyStyle
+import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.config.isShowNotSupported
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
@@ -24,20 +24,20 @@ fun MarkdownText(
     textAlign: TextAlign = TextAlign.Start,
     textStyle: TextStyle? = null,
 ) {
-    val typographyStyle = currentTypographyStyle()
+    val theme = currentTheme()
     val renderRegistry = currentRenderRegistry()
     val actionHandler = currentActionHandler()
     val isShowNotSupported = isShowNotSupported()
     val (text, inlineContent) = remember(
         parent,
-        typographyStyle,
+        theme,
         renderRegistry,
         isShowNotSupported,
         actionHandler,
     ) {
         markdownText(
             parent,
-            typographyStyle,
+            theme,
             renderRegistry,
             actionHandler,
             1,
@@ -65,14 +65,14 @@ fun MarkdownText(
         inlineContent = inlineContentMap,
         modifier = modifier,
         textAlign = textAlign,
-        style = textStyle ?: typographyStyle.textStyle,
+        style = textStyle ?: theme.textStyle,
         standaloneInlineTextContent = standaloneInlineTextContent,
     )
 }
 
 fun markdownText(
     node: Node,
-    typographyStyle: TypographyStyle,
+    markdownTheme: MarkdownTheme,
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler? = null,
     indentLevel: Int = 0,
@@ -86,7 +86,7 @@ fun markdownText(
             buildNodeAnnotatedString.buildMarkdownInlineNodeString(
                 node,
                 inlineContentMap,
-                typographyStyle,
+                markdownTheme,
                 indentLevel,
                 actionHandler,
                 renderRegistry,

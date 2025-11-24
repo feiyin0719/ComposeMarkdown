@@ -5,7 +5,7 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.ActionHandler
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.util.ast.Node
 
@@ -13,7 +13,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
     inlineContentMap: MutableMap<String, MarkdownInlineView>,
-    typographyStyle: TypographyStyle,
+    markdownTheme: MarkdownTheme,
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler? = null,
     isShowNotSupported: Boolean,
@@ -25,7 +25,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
         customBuilder?.buildMarkdownInlineNodeString(
             node,
             inlineContentMap,
-            typographyStyle,
+            markdownTheme,
             indentLevel,
             actionHandler,
             renderRegistry,
@@ -45,20 +45,20 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
 
 open class CompositeChildNodeStringBuilder<T : Node> :
     IInlineNodeStringBuilder<T> {
-    open fun getSpanStyle(node: T, typographyStyle: TypographyStyle): SpanStyle? {
+    open fun getSpanStyle(node: T, markdownTheme: MarkdownTheme): SpanStyle? {
         return null
     }
 
-    open fun getParagraphStyle(node: T, typographyStyle: TypographyStyle): ParagraphStyle? {
+    open fun getParagraphStyle(node: T, markdownTheme: MarkdownTheme): ParagraphStyle? {
         return null
     }
 
     fun <R : Any> AnnotatedString.Builder.withSpanStyle(
         node: T,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         content: AnnotatedString.Builder.() -> R
     ) {
-        val style = getSpanStyle(node, typographyStyle)
+        val style = getSpanStyle(node, markdownTheme)
         if (style != null) {
             withStyle(style) {
                 content()
@@ -70,10 +70,10 @@ open class CompositeChildNodeStringBuilder<T : Node> :
 
     fun <R : Any> AnnotatedString.Builder.withParagraphStyle(
         node: T,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         content: AnnotatedString.Builder.() -> R
     ) {
-        val style = getParagraphStyle(node, typographyStyle)
+        val style = getParagraphStyle(node, markdownTheme)
         if (style != null) {
             withStyle(style) {
                 content()
@@ -86,19 +86,19 @@ open class CompositeChildNodeStringBuilder<T : Node> :
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
     ) {
-        withParagraphStyle(node = node, typographyStyle = typographyStyle) {
-            withSpanStyle(node = node, typographyStyle = typographyStyle) {
+        withParagraphStyle(node = node, markdownTheme = markdownTheme) {
+            withSpanStyle(node = node, markdownTheme = markdownTheme) {
                 buildChildNodeAnnotatedString(
                     parent = node,
                     indentLevel = indentLevel,
                     inlineContentMap = inlineContentMap,
-                    typographyStyle = typographyStyle,
+                    markdownTheme = markdownTheme,
                     renderRegistry = renderRegistry,
                     actionHandler = actionHandler,
                     isShowNotSupported = isShowNotSupported,

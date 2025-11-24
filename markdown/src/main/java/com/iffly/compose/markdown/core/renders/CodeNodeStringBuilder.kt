@@ -6,7 +6,7 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.style.TypographyStyle
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.ast.Code
 
@@ -14,13 +14,13 @@ class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Code,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
-        typographyStyle: TypographyStyle,
+        markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry
     ) {
-        withStyle(typographyStyle.code.toSpanStyle()) {
+        withStyle(markdownTheme.code.toSpanStyle()) {
             append(node.contentText())
         }
     }
