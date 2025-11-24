@@ -1,7 +1,13 @@
 package com.iffly.compose.markdown.style
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
@@ -141,6 +147,7 @@ data class TypographyStyle(
     ),
     val listMarkerSpaceSize: Dp = 4.dp,
     val listTightSpaceSize: Dp = 4.dp,
+    val imageTheme: ImageTheme = ImageTheme(),
 ) {
     companion object {
         const val HEAD1 = 1
@@ -151,5 +158,14 @@ data class TypographyStyle(
         const val HEAD6 = 6
     }
 }
+
+@Immutable
+data class ImageTheme(
+    val alignment: Alignment = Alignment.Center,
+    val contentScale: ContentScale = ContentScale.Inside,
+    val shape: Shape = RoundedCornerShape(8.dp),
+    val modifier: Modifier = Modifier,
+    val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
+)
 
 val DefaultTypographyStyle by lazy { TypographyStyle() }
