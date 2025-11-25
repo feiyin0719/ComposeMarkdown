@@ -57,8 +57,7 @@ import kotlinx.coroutines.launch
 class TableRenderer : IBlockRenderer<TableBlock> {
     @Composable
     override fun Invoke(
-        node: TableBlock,
-        modifier: Modifier
+        node: TableBlock, modifier: Modifier
     ) {
         MarkdownTable(tableBlock = node, modifier = modifier)
     }
@@ -70,14 +69,13 @@ class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
 
 @Composable
 fun MarkdownTable(
-    tableBlock: TableBlock,
-    modifier: Modifier = Modifier
+    tableBlock: TableBlock, modifier: Modifier = Modifier
 ) {
     val cells = tableBlock.cells()
     val columnsCount = cells.firstOrNull()?.size ?: 0
     if (columnsCount == 0 || cells.isEmpty()) return
     val theme = currentTheme()
-    val borderColor = theme.tableBorderColor
+    val borderColor = theme.tableTheme.borderColor
     val widthWeights = if (columnsCount <= 2) List(columnsCount) { 1f } else null
 
     Column(
@@ -85,9 +83,7 @@ fun MarkdownTable(
             .wrapContentSize()
             .clip(RoundedCornerShape(8.dp))
             .border(
-                1.dp,
-                borderColor,
-                RoundedCornerShape(8.dp)
+                1.dp, borderColor, RoundedCornerShape(8.dp)
             )
     ) {
 
@@ -107,8 +103,7 @@ fun MarkdownTable(
                     .boxModifier(columnsCount, rememberScrollState())
             ) {
                 Table(
-                    modifier = Modifier
-                        .tableModifier(columnsCount),
+                    modifier = Modifier.tableModifier(columnsCount),
                     widthWeights = widthWeights,
                     cellPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     border = TableBorder.solid(
@@ -116,10 +111,10 @@ fun MarkdownTable(
                     ),
                     cellAlignment = Alignment.TopStart
                 ) {
-                    Header(cells.first(), cellModifier, theme.tableHeaderBackgroundColor)
+                    Header(cells.first(), cellModifier, theme.tableTheme.tableHeaderBackgroundColor)
                     val bodyCells = if (cells.size > 1) cells.subList(1, cells.size) else null
                     bodyCells?.let {
-                        Body(it, cellModifier, theme.tableRowHeaderBackgroundColor)
+                        Body(it, cellModifier, theme.tableTheme.tableCellBackgroundColor)
                     }
                 }
             }
@@ -142,7 +137,7 @@ private fun TableTitle(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(theme.tableTitleBackgroundColor)
+            .background(theme.tableTheme.titleBackgroundColor)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -150,20 +145,15 @@ private fun TableTitle(
         // Copy button
         Text(
             text = "Copy table",
-            style = theme.tableCopyStyle,
-            modifier = Modifier
-                .clickable {
-                    scope.launch {
-                        val clipData =
-                            ClipData.newHtmlText(
-                                "",
-                                buildTableText(cells),
-                                htmlRenderer.render(tableBlock)
-                            )
-                        clipboardManager.setClipEntry(clipData.toClipEntry())
-                    }
+            style = theme.tableTheme.copyTextStyle,
+            modifier = Modifier.clickable {
+                scope.launch {
+                    val clipData = ClipData.newHtmlText(
+                        "", buildTableText(cells), htmlRenderer.render(tableBlock)
+                    )
+                    clipboardManager.setClipEntry(clipData.toClipEntry())
                 }
-        )
+            })
     }
 }
 
@@ -193,9 +183,7 @@ private fun Modifier.tableModifier(columnsCount: Int): Modifier {
 }
 
 private fun TableScope.Header(
-    headerCells: List<TableCell>,
-    modifier: Modifier,
-    backgroundColor: Color
+    headerCells: List<TableCell>, modifier: Modifier, backgroundColor: Color
 ) {
     header(modifier = Modifier.background(backgroundColor)) {
         Cells(headerCells, modifier, isHeader = true)
@@ -203,9 +191,7 @@ private fun TableScope.Header(
 }
 
 private fun TableScope.Body(
-    rows: List<List<TableCell>>,
-    modifier: Modifier,
-    backgroundColor: Color
+    rows: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
 ) {
     body {
         Rows(rows, modifier, backgroundColor)
@@ -213,9 +199,7 @@ private fun TableScope.Body(
 }
 
 private fun BodyScope.Rows(
-    cells: List<List<TableCell>>,
-    modifier: Modifier,
-    backgroundColor: Color
+    cells: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
 ) {
     cells.forEach { rowCells ->
         row(Modifier.background(backgroundColor)) {
@@ -232,7 +216,7 @@ private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier, isHeader:
                 parent = node,
                 modifier = Modifier,
                 textAlign = node.alignment.toTextAlign(),
-                textStyle = if (isHeader) theme.tableHeader else theme.tableCell,
+                textStyle = if (isHeader) theme.tableTheme.headerTextStyle else theme.tableTheme.cellTextStyle,
             )
         }
     }

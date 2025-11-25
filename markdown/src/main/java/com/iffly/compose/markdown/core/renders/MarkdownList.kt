@@ -32,10 +32,10 @@ open class ListBlockRenderer : IBlockRenderer<ListBlock> {
             val theme = currentTheme()
             var child = node.firstChild
             val spacerHeight =
-                if (node.isLoose) theme.spaceHeight else theme.listTightSpaceSize
+                if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
             while (child != null) {
                 MarkdownContent(child, Modifier)
-                if (child.next != null && theme.showSpace) {
+                if (child.next != null && theme.spacerTheme.showSpacer) {
                     Spacer(Modifier.height(spacerHeight))
                 }
                 child = child.next
@@ -64,17 +64,17 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
             Text(
                 marker,
                 modifier = Modifier,
-                style = theme.textStyle,
+                style = theme.listTheme.markerTextStyle ?: theme.textStyle,
                 textAlign = TextAlign.End,
             )
-            Spacer(modifier = Modifier.width(theme.listMarkerSpaceSize))
+            Spacer(modifier = Modifier.width(theme.listTheme.markerSpacerWidth))
             val spacerHeight =
-                if (node.isLoose) theme.spaceHeight else theme.listTightSpaceSize
+                if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
             Column(verticalArrangement = Arrangement.Top, modifier = Modifier.wrapContentSize()) {
                 var child = node.firstChild
                 while (child != null) {
                     MarkdownContent(child, Modifier)
-                    if (child.next != null && theme.showSpace) {
+                    if (child.next != null && theme.spacerTheme.showSpacer) {
                         Spacer(Modifier.height(spacerHeight))
                     }
                     child = child.next

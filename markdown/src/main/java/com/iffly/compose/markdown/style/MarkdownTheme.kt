@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.style
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift.Companion.Subscript
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -22,8 +24,6 @@ import androidx.compose.ui.unit.sp
 
 @Stable
 data class MarkdownTheme(
-    val showSpace: Boolean = true,
-    val spaceHeight: Dp = 8.dp,
     val breakLineHeight: Dp = 1.dp,
     val breakLineColor: Color = Color(0xFFE0E0E0),
     val textStyle: TextStyle = TextStyle(
@@ -72,22 +72,6 @@ data class MarkdownTheme(
             textDecoration = TextDecoration.Underline
         ),
     ),
-    val tableHeader: TextStyle = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Default,
-    ),
-    val tableCell: TextStyle = TextStyle(
-        fontFamily = FontFamily.Default,
-    ),
-    val tableBorderColor: Color = Color.Gray,
-    val tableTitleBackgroundColor: Color = Color.LightGray,
-    val tableHeaderBackgroundColor: Color = Color.White,
-    val tableRowHeaderBackgroundColor: Color = Color.White,
-    val tableCopyStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontFamily = FontFamily.Monospace,
-        color = Color.Black,
-    ),
     val codeTitleBackgroundColor: Color = Color.LightGray,
     val codeTitleStyle: TextStyle = TextStyle(
         fontSize = 12.sp,
@@ -99,8 +83,6 @@ data class MarkdownTheme(
         fontFamily = FontFamily.Monospace,
         color = Color.Blue,
     ),
-    val blockQuoteContentBackgroundColor: Color = Color.LightGray,
-    val blockQuoteBorderColor: Color = Color.Gray,
     val headStyle: Map<Int, TextStyle> = mapOf(
         HEAD1 to TextStyle(
             fontSize = 32.sp,
@@ -145,9 +127,11 @@ data class MarkdownTheme(
             color = Color.Black,
         ),
     ),
-    val listMarkerSpaceSize: Dp = 4.dp,
-    val listTightSpaceSize: Dp = 4.dp,
+    val listTheme: ListTheme = ListTheme(),
     val imageTheme: ImageTheme = ImageTheme(),
+    val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
+    val spacerTheme: SpacerTheme = SpacerTheme(),
+    val tableTheme: TableTheme = TableTheme(),
 ) {
     companion object {
         const val HEAD1 = 1
@@ -168,4 +152,52 @@ data class ImageTheme(
     val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
 )
 
-val DefaultMarkdownTheme by lazy { MarkdownTheme() }
+@Immutable
+data class BlockQuoteTheme(
+    val borderColor: Color = Color.LightGray,
+    val borderWidth: Dp = 5.dp,
+    val backgroundColor: Color = Color(0xFFF5F5F5),
+    val shape: Shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
+    val padding: PaddingValues = PaddingValues(horizontal = 12.dp),
+)
+
+@Immutable
+data class SpacerTheme(
+    val showSpacer: Boolean = true,
+    val spacerHeight: Dp = 12.dp,
+)
+
+@Immutable
+data class ListTheme(
+    val markerSpacerWidth: Dp = 4.dp,
+    val showSpacerInTightList: Boolean = true,
+    val tightListSpacerHeight: Dp = 4.dp,
+    val markerTextStyle: TextStyle? = TextStyle(
+        lineHeight = 24.sp,
+        fontSize = 17.sp,
+        textAlign = TextAlign.End,
+    )
+)
+
+data class TableTheme(
+    val borderColor: Color = Color.Gray,
+    val titleBackgroundColor: Color = Color.LightGray,
+    val tableHeaderBackgroundColor: Color = Color.White,
+    val tableCellBackgroundColor: Color = Color.White,
+    val cellTextStyle: TextStyle? = TextStyle(
+        fontSize = 14.sp,
+        fontFamily = FontFamily.Default,
+        color = Color.Black,
+    ),
+    val headerTextStyle: TextStyle? = TextStyle(
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Default,
+        color = Color.Black,
+    ),
+    val copyTextStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = FontFamily.Monospace,
+        color = Color.Black,
+    ),
+)

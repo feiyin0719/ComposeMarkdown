@@ -21,8 +21,8 @@ fun Document(node: Document, modifier: Modifier) {
         var child = node.firstChild
         while (child != null) {
             MarkdownContent(child, Modifier)
-            if (child.next != null && theme.showSpace) {
-                Spacer(Modifier.height(theme.spaceHeight))
+            if (child.next != null && theme.spacerTheme.showSpacer) {
+                Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
             }
             child = child.next
         }

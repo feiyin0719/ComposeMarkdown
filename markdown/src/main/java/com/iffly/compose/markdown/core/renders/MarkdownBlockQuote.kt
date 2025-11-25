@@ -9,9 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
@@ -31,35 +30,36 @@ private fun MarkdownBlockQuote(
     modifier: Modifier, node: BlockQuote
 ) {
     val theme = currentTheme()
-    // Content
+    val blockQuoteTheme = theme.blockQuoteTheme
+    val borderColor = blockQuoteTheme.borderColor
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(
-                color = theme.blockQuoteContentBackgroundColor,
-            )
-            .drawWithContent {
-                drawContent()
-                val strokeWidthPx = 4.dp.toPx()
-                drawRect(
-                    color = theme.blockQuoteBorderColor,
-                    size = Size(strokeWidthPx, size.height)
+            .background(color = blockQuoteTheme.backgroundColor, shape = blockQuoteTheme.shape)
+            .drawBehind {
+                val borderWidth = blockQuoteTheme.borderWidth.toPx()
+                drawLine(
+                    color = borderColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, size.height),
+                    strokeWidth = borderWidth,
                 )
             }
-            .padding(12.dp, bottom = 0.dp, top = 0.dp, end = 12.dp)
+            .padding(blockQuoteTheme.padding),
     ) {
+        Spacer(modifier = Modifier.height(theme.spacerTheme.spacerHeight))
         var child = node.firstChild
-        Spacer(modifier = Modifier.height(theme.spaceHeight))
         while (child != null) {
-            MarkdownContent(child, Modifier)
-            if (child.next != null && theme.showSpace) {
-                Spacer(modifier = Modifier.height(theme.spaceHeight))
-            }
+            MarkdownContent(
+                node = child,
+                modifier = Modifier,
+            )
             child = child.next
         }
         if (node.lastChild !is BlockQuote) {
-            Spacer(modifier = Modifier.height(theme.spaceHeight))
+            Spacer(modifier = Modifier.height(theme.spacerTheme.spacerHeight))
         }
     }
 }
