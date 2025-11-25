@@ -1,12 +1,18 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
@@ -24,50 +30,74 @@ fun MarkdownText(
     textAlign: TextAlign = TextAlign.Start,
     textStyle: TextStyle? = null,
 ) {
-    val theme = currentTheme()
-    val renderRegistry = currentRenderRegistry()
-    val actionHandler = currentActionHandler()
-    val isShowNotSupported = isShowNotSupported()
-    val (text, inlineContent) = remember(
-        parent,
-        theme,
-        renderRegistry,
-        isShowNotSupported,
-        actionHandler,
-    ) {
-        markdownText(
+    BoxWithConstraints(modifier = modifier) {
+        val theme = currentTheme()
+        val renderRegistry = currentRenderRegistry()
+        val actionHandler = currentActionHandler()
+        val isShowNotSupported = isShowNotSupported()
+        val measureContext = rememberTextMeasureContext(
+            maxTextWidth = this.maxWidth,
+        )
+        val (text, inlineContent) = remember(
             parent,
             theme,
             renderRegistry,
-            actionHandler,
-            1,
             isShowNotSupported,
+            actionHandler,
+            measureContext,
+        ) {
+            markdownText(
+                parent,
+                theme,
+                renderRegistry,
+                actionHandler,
+                1,
+                isShowNotSupported,
+                measureContext,
+            )
+        }
+        val inlineContentMap = remember(inlineContent) {
+            inlineContent.mapNotNull { (key, value) ->
+                (value as? MarkdownInlineView.MarkdownInlineTextContent)?.let {
+                    key to value.toInlineTextContent()
+                }
+            }.toMap()
+        }
+
+        val standaloneInlineTextContent = remember(inlineContent) {
+            inlineContent.mapNotNull { (key, value) ->
+                (value as? MarkdownInlineView.MarkdownStandaloneInlineView)?.let {
+                    key to it.toStandaloneInlineTextContent()
+                }
+            }.toMap()
+        }
+
+        RichText(
+            text = text,
+            inlineContent = inlineContentMap,
+            modifier = Modifier
+                .wrapContentHeight()
+                .widthIn(minWidth, maxWidth),
+            textAlign = textAlign,
+            style = textStyle ?: theme.textStyle,
+            standaloneInlineTextContent = standaloneInlineTextContent,
         )
     }
-    val inlineContentMap = remember(inlineContent) {
-        inlineContent.mapNotNull { (key, value) ->
-            (value as? MarkdownInlineView.MarkdownInlineTextContent)?.let {
-                key to value.toInlineTextContent()
-            }
-        }.toMap()
-    }
+}
 
-    val standaloneInlineTextContent = remember(inlineContent) {
-        inlineContent.mapNotNull { (key, value) ->
-            (value as? MarkdownInlineView.MarkdownStandaloneInlineView)?.let {
-                key to it.toStandaloneInlineTextContent()
-            }
-        }.toMap()
+@Composable
+private fun rememberTextMeasureContext(
+    maxTextWidth: Dp
+): TextMeasureContext {
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+    return remember(density, textMeasurer, maxTextWidth) {
+        TextMeasureContext(
+            density = density,
+            textMeasurer = textMeasurer,
+            maxTextWidth = maxTextWidth,
+        )
     }
-
-    RichText(
-        text = text,
-        inlineContent = inlineContentMap,
-        modifier = modifier,
-        textAlign = textAlign,
-        style = textStyle ?: theme.textStyle,
-        standaloneInlineTextContent = standaloneInlineTextContent,
-    )
 }
 
 fun markdownText(
@@ -77,6 +107,7 @@ fun markdownText(
     actionHandler: ActionHandler? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
+    measureContext: TextMeasureContext,
 ): Pair<AnnotatedString, Map<String, MarkdownInlineView>> {
     val inlineContentMap = mutableMapOf<String, MarkdownInlineView>()
 
@@ -92,6 +123,7 @@ fun markdownText(
                 renderRegistry,
                 isShowNotSupported,
                 this,
+                measureContext,
             )
         } else {
             if (isShowNotSupported) {

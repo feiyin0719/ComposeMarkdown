@@ -39,6 +39,7 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.parser.InlineParser
 import com.vladsch.flexmark.parser.InlineParserExtension
@@ -424,6 +425,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         withStyle(
             SpanStyle(
@@ -446,6 +448,7 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)) {
             append("#${node.hashtag}")
@@ -462,6 +465,7 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         withStyle(
             SpanStyle(
@@ -484,6 +488,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         val (bg, fg) = when (node.badgeType.lowercase()) {
             "primary" -> Color(0xFF1976D2) to Color.White

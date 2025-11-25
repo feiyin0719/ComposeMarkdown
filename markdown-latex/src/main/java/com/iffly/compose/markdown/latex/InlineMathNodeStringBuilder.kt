@@ -16,6 +16,7 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
@@ -41,7 +42,8 @@ class InlineMathNodeStringBuilder(
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
+        renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext
     ) {
         val latexBody = node.text.toString()
         val placeholderId =

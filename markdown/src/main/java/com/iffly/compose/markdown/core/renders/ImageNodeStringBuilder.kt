@@ -10,6 +10,7 @@ import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.LoadingView
 import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
@@ -54,7 +55,8 @@ class ImageNodeStringBuilder(
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
+        renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext
     ) {
         val imageId = "image_$${System.identityHashCode(node)}"
         inlineContentMap[imageId] = MarkdownInlineView.MarkdownStandaloneInlineView(

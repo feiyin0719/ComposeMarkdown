@@ -8,6 +8,7 @@ import com.iffly.compose.markdown.MarkdownLinkInteractionListener
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ast.Link
@@ -21,6 +22,7 @@ private fun AnnotatedString.Builder.buildStyleString(
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler?,
     isShowNotSupported: Boolean,
+    measureContext: TextMeasureContext,
 ) {
     buildChildNodeAnnotatedString(
         node,
@@ -30,6 +32,7 @@ private fun AnnotatedString.Builder.buildStyleString(
         renderRegistry,
         actionHandler,
         isShowNotSupported,
+        measureContext,
     )
 }
 
@@ -41,7 +44,8 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
+        renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext
     ) {
         val linkNode = node
         val linkInteractionListener = actionHandler?.let {
@@ -61,6 +65,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
                 renderRegistry,
                 actionHandler,
                 isShowNotSupported,
+                measureContext,
             )
         }
     }

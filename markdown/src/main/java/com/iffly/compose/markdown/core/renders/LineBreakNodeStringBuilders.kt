@@ -5,6 +5,7 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.SoftLineBreak
@@ -17,7 +18,8 @@ class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
+        renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext
     ) {
         append(" ")
     }
@@ -31,7 +33,8 @@ class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
         actionHandler: ActionHandler?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
-        renderRegistry: RenderRegistry
+        renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext
     ) {
         append("\n")
     }

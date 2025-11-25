@@ -17,6 +17,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler? = null,
     isShowNotSupported: Boolean,
+    measureContext: TextMeasureContext,
 ) {
     var node = parent.firstChild
     while (node != null) {
@@ -31,6 +32,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
             renderRegistry,
             isShowNotSupported,
             this,
+            measureContext,
 
             ) ?: run {
             if (isShowNotSupported) {
@@ -91,6 +93,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         withParagraphStyle(node = node, markdownTheme = markdownTheme) {
             withSpanStyle(node = node, markdownTheme = markdownTheme) {
@@ -102,6 +105,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
                     renderRegistry = renderRegistry,
                     actionHandler = actionHandler,
                     isShowNotSupported = isShowNotSupported,
+                    measureContext = measureContext,
                 )
             }
         }

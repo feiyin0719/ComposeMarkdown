@@ -16,6 +16,7 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.MarkdownTheme
 
@@ -35,6 +36,7 @@ class InlineLatexNodeStringBuilder(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
+        measureContext: TextMeasureContext,
     ) {
         val latexBody = node.formula
         val placeholderId =
