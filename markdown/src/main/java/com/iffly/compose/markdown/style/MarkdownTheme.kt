@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.style
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift.Companion.Subscript
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,17 +74,6 @@ data class MarkdownTheme(
             textDecoration = TextDecoration.Underline
         ),
     ),
-    val codeTitleBackgroundColor: Color = Color.LightGray,
-    val codeTitleStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontFamily = FontFamily.Monospace,
-        color = Color.Black,
-    ),
-    val codeCopyStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontFamily = FontFamily.Monospace,
-        color = Color.Blue,
-    ),
     val headStyle: Map<Int, TextStyle> = mapOf(
         HEAD1 to TextStyle(
             fontSize = 32.sp,
@@ -132,6 +123,7 @@ data class MarkdownTheme(
     val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
     val spacerTheme: SpacerTheme = SpacerTheme(),
     val tableTheme: TableTheme = TableTheme(),
+    val codeBlockTheme: CodeBlockTheme = CodeBlockTheme(),
 ) {
     companion object {
         const val HEAD1 = 1
@@ -204,3 +196,87 @@ data class TableTheme(
     val shape: Shape = RoundedCornerShape(8.dp),
     val cellPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 )
+
+/**
+ * Theme for code blocks.
+ * @param backgroundColor The background color of the code block.
+ * @param shape The shape of the code block.
+ * @param borderColor The border color of the code block.
+ * @param borderWidth The border width of the code block.
+ * @param contentTheme The theme for the code content.
+ * @param codeTitleTextStyle The text style for the code title.
+ * @param codeCopyTextStyle The text style for the code copy button.
+ * @param blockModifier The modifier for the code block.
+ * @param headerModifier The modifier for the code block header.
+ * @param showHeader Whether to show the header.
+ * @param showCopyButton Whether to show the copy button.
+ * @see CodeContentTheme
+ */
+@Immutable
+data class CodeBlockTheme(
+    val backgroundColor: Color = Color.White,
+    val shape: Shape = RoundedCornerShape(size = 16.dp),
+    val borderColor: Color = Color.LightGray,
+    val borderWidth: Dp = 0.5.dp,
+    val contentTheme: CodeContentTheme = CodeContentTheme(),
+    val codeTitleTextStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Gray,
+    ),
+    val codeCopyTextStyle: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Blue,
+    ),
+    val blockModifier: Modifier = Modifier.padding(
+        vertical = 12.dp,
+    ),
+    val headerModifier: Modifier = Modifier.padding(horizontal = 17.dp),
+    val showHeader: Boolean = true,
+    val showCopyButton: Boolean = true,
+) {
+    /**
+     * Theme for the code content within a code block.
+     * @param showLineNumber Whether to show line numbers.
+     * @param softWrap Whether to enable soft wrapping.
+     * If false, horizontal scrolling will be enabled.
+     * @param maxLines The maximum number of lines to display.
+     * @param minLines The minimum number of lines to display.
+     * @param contentPadding The padding around the code content.
+     * @param lineNumberPadding The padding around the line numbers.
+     * @param overflow The overflow behavior for the code content.
+     * @param codeTextStyle The text style for the code content.
+     * @param lineNumberTextStyle The text style for the line numbers.
+     * @param modifier The modifier for the code content.
+     * @param height The fixed height for the code content, if has fixed height,
+     * it will support scrolling.
+     */
+    @Immutable
+    data class CodeContentTheme(
+        val showLineNumber: Boolean = true,
+        val softWrap: Boolean = true,
+        val maxLines: Int = Int.MAX_VALUE,
+        val minLines: Int = 1,
+        val contentPadding: PaddingValues = PaddingValues(4.dp),
+        val lineNumberPadding: PaddingValues = PaddingValues(
+            start = 4.dp,
+            top = 4.dp,
+            bottom = 4.dp,
+            end = 16.dp,
+        ),
+        val overflow: TextOverflow = TextOverflow.Clip,
+        val codeTextStyle: TextStyle = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+        ),
+        val lineNumberTextStyle: TextStyle = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.End,
+        ),
+        val modifier: Modifier = Modifier.padding(start = 17.dp, end = 17.dp, top = 17.dp),
+        val height: Dp? = null,
+    )
+}
