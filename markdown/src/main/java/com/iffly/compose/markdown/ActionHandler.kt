@@ -8,6 +8,10 @@ interface ActionHandler {
     fun handleUrlClick(url: String, node: Node) {
         // Default implementation does nothing
     }
+
+    fun handleCopyClick(node: Node) {
+        // Default implementation does nothing
+    }
 }
 
 internal class MarkdownLinkInteractionListener(

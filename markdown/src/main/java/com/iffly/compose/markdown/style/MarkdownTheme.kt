@@ -181,6 +181,7 @@ data class ListTheme(
 
 data class TableTheme(
     val borderColor: Color = Color.Gray,
+    val borderThickness: Dp = 1.dp,
     val titleBackgroundColor: Color = Color.LightGray,
     val tableHeaderBackgroundColor: Color = Color.White,
     val tableCellBackgroundColor: Color = Color.White,
@@ -200,4 +201,6 @@ data class TableTheme(
         fontFamily = FontFamily.Monospace,
         color = Color.Black,
     ),
+    val shape: Shape = RoundedCornerShape(8.dp),
+    val cellPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 )

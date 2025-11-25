@@ -1,6 +1,5 @@
 package com.iffly.compose.markdown.core.renders
 
-import android.content.ClipData
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,20 +20,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.config.currentHtmlRenderer
+import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
@@ -52,14 +46,37 @@ import com.vladsch.flexmark.ext.tables.TableCell
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.ext.tables.TableRow
 import com.vladsch.flexmark.util.ast.Node
-import kotlinx.coroutines.launch
 
-class TableRenderer : IBlockRenderer<TableBlock> {
+fun interface TableWidgetRenderer {
+    @Composable
+    operator fun invoke(
+        tableBlock: TableBlock,
+        modifier: Modifier
+    )
+}
+
+class TableTitleRenderer : TableWidgetRenderer {
+    @Composable
+    override fun invoke(
+        tableBlock: TableBlock,
+        modifier: Modifier
+    ) {
+        TableTitle(tableBlock = tableBlock, modifier = modifier)
+    }
+}
+
+class TableRenderer(
+    private val tableTitleRenderer: TableWidgetRenderer = TableTitleRenderer()
+) : IBlockRenderer<TableBlock> {
     @Composable
     override fun Invoke(
         node: TableBlock, modifier: Modifier
     ) {
-        MarkdownTable(tableBlock = node, modifier = modifier)
+        MarkdownTable(
+            tableBlock = node,
+            modifier = modifier,
+            tableTitleRenderer = tableTitleRenderer
+        )
     }
 
 }
@@ -69,7 +86,9 @@ class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
 
 @Composable
 fun MarkdownTable(
-    tableBlock: TableBlock, modifier: Modifier = Modifier
+    tableBlock: TableBlock,
+    tableTitleRenderer: TableWidgetRenderer,
+    modifier: Modifier = Modifier
 ) {
     val cells = tableBlock.cells()
     val columnsCount = cells.firstOrNull()?.size ?: 0
@@ -81,17 +100,19 @@ fun MarkdownTable(
     Column(
         modifier = modifier
             .wrapContentSize()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(theme.tableTheme.shape)
             .border(
-                1.dp, borderColor, RoundedCornerShape(8.dp)
+                theme.tableTheme.borderThickness,
+                borderColor,
+                theme.tableTheme.shape
             )
     ) {
 
-        TableTitle(tableBlock, cells, Modifier.fillMaxWidth())
+        tableTitleRenderer(tableBlock, Modifier.fillMaxWidth())
         Spacer(
             Modifier
                 .fillMaxWidth()
-                .height(1.dp)
+                .height(theme.tableTheme.borderThickness)
                 .background(borderColor)
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -105,16 +126,22 @@ fun MarkdownTable(
                 Table(
                     modifier = Modifier.tableModifier(columnsCount),
                     widthWeights = widthWeights,
-                    cellPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    cellPadding = theme.tableTheme.cellPadding,
                     border = TableBorder.solid(
-                        mode = TableBorderMode.ALL, color = borderColor, width = 1.dp
+                        mode = TableBorderMode.ALL,
+                        color = borderColor,
+                        width = theme.tableTheme.borderThickness
                     ),
                     cellAlignment = Alignment.TopStart
                 ) {
-                    Header(cells.first(), cellModifier, theme.tableTheme.tableHeaderBackgroundColor)
+                    tableHeader(
+                        cells.first(),
+                        cellModifier,
+                        theme.tableTheme.tableHeaderBackgroundColor
+                    )
                     val bodyCells = if (cells.size > 1) cells.subList(1, cells.size) else null
                     bodyCells?.let {
-                        Body(it, cellModifier, theme.tableTheme.tableCellBackgroundColor)
+                        tableBody(it, cellModifier, theme.tableTheme.tableCellBackgroundColor)
                     }
                 }
             }
@@ -127,13 +154,10 @@ fun MarkdownTable(
 @Composable
 private fun TableTitle(
     tableBlock: TableBlock,
-    cells: List<List<TableCell>>,
     modifier: Modifier = Modifier,
 ) {
-    val clipboardManager = LocalClipboard.current
     val theme = currentTheme()
-    val htmlRenderer = currentHtmlRenderer()
-    val scope = rememberCoroutineScope()
+    val actionHandler = currentActionHandler()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -147,12 +171,7 @@ private fun TableTitle(
             text = "Copy table",
             style = theme.tableTheme.copyTextStyle,
             modifier = Modifier.clickable {
-                scope.launch {
-                    val clipData = ClipData.newHtmlText(
-                        "", buildTableText(cells), htmlRenderer.render(tableBlock)
-                    )
-                    clipboardManager.setClipEntry(clipData.toClipEntry())
-                }
+                actionHandler?.handleCopyClick(tableBlock)
             })
     }
 }
@@ -182,33 +201,37 @@ private fun Modifier.tableModifier(columnsCount: Int): Modifier {
     }
 }
 
-private fun TableScope.Header(
+private fun TableScope.tableHeader(
     headerCells: List<TableCell>, modifier: Modifier, backgroundColor: Color
 ) {
     header(modifier = Modifier.background(backgroundColor)) {
-        Cells(headerCells, modifier, isHeader = true)
+        tableCell(headerCells, modifier, isHeader = true)
     }
 }
 
-private fun TableScope.Body(
+private fun TableScope.tableBody(
     rows: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
 ) {
     body {
-        Rows(rows, modifier, backgroundColor)
+        tableRow(rows, modifier, backgroundColor)
     }
 }
 
-private fun BodyScope.Rows(
+private fun BodyScope.tableRow(
     cells: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
 ) {
     cells.forEach { rowCells ->
         row(Modifier.background(backgroundColor)) {
-            Cells(rowCells, modifier)
+            tableCell(rowCells, modifier)
         }
     }
 }
 
-private fun RowScope.Cells(nodes: List<TableCell>, modifier: Modifier, isHeader: Boolean = false) {
+private fun RowScope.tableCell(
+    nodes: List<TableCell>,
+    modifier: Modifier,
+    isHeader: Boolean = false
+) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
             val theme = currentTheme()
@@ -268,15 +291,4 @@ private fun TableRow.cells(): List<TableCell> {
             cell = cell.next
         }
     }
-}
-
-private fun buildTableText(cells: List<List<TableCell>>): String {
-    val stringBuilder = StringBuilder()
-    cells.forEach { rowCells ->
-        val rowText = rowCells.joinToString("   ") { cell ->
-            cell.childChars.toString().trim()
-        }
-        stringBuilder.append(rowText).append("\n")
-    }
-    return stringBuilder.toString().trim()
 }
