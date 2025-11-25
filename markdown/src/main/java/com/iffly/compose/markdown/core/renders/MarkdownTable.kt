@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.widget.DisableSelectionWrapper
 import com.iffly.compose.markdown.widget.table.BodyScope
 import com.iffly.compose.markdown.widget.table.RowScope
 import com.iffly.compose.markdown.widget.table.Table
@@ -47,26 +49,46 @@ import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.ext.tables.TableRow
 import com.vladsch.flexmark.util.ast.Node
 
-fun interface TableWidgetRenderer {
+fun interface TableWidgetRenderer<T : Node> {
     @Composable
     operator fun invoke(
-        tableBlock: TableBlock,
+        node: T,
         modifier: Modifier
     )
 }
 
-class TableTitleRenderer : TableWidgetRenderer {
+class TableTitleRenderer : TableWidgetRenderer<TableBlock> {
     @Composable
     override fun invoke(
-        tableBlock: TableBlock,
+        node: TableBlock,
         modifier: Modifier
     ) {
-        TableTitle(tableBlock = tableBlock, modifier = modifier)
+        TableTitle(tableBlock = node, modifier = modifier)
+    }
+}
+
+class TableCellRenderer : TableWidgetRenderer<TableCell> {
+    @Composable
+    override fun invoke(
+        node: TableCell,
+        modifier: Modifier
+    ) {
+        val theme = currentTheme()
+        val isHeader = node.parent is TableRow && node.parent?.parent is TableHead
+        SelectionContainer {
+            MarkdownText(
+                parent = node,
+                modifier = Modifier,
+                textAlign = node.alignment.toTextAlign(),
+                textStyle = if (isHeader) theme.tableTheme.headerTextStyle else theme.tableTheme.cellTextStyle,
+            )
+        }
     }
 }
 
 class TableRenderer(
-    private val tableTitleRenderer: TableWidgetRenderer = TableTitleRenderer()
+    private val tableTitleRenderer: TableWidgetRenderer<TableBlock> = TableTitleRenderer(),
+    private val tableCellRenderer: TableWidgetRenderer<TableCell> = TableCellRenderer()
 ) : IBlockRenderer<TableBlock> {
     @Composable
     override fun Invoke(
@@ -75,7 +97,8 @@ class TableRenderer(
         MarkdownTable(
             tableBlock = node,
             modifier = modifier,
-            tableTitleRenderer = tableTitleRenderer
+            tableTitleRenderer = tableTitleRenderer,
+            tableCellRenderer = tableCellRenderer,
         )
     }
 
@@ -87,7 +110,8 @@ class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
 @Composable
 fun MarkdownTable(
     tableBlock: TableBlock,
-    tableTitleRenderer: TableWidgetRenderer,
+    tableTitleRenderer: TableWidgetRenderer<TableBlock>,
+    tableCellRenderer: TableWidgetRenderer<TableCell>,
     modifier: Modifier = Modifier
 ) {
     val cells = tableBlock.cells()
@@ -135,18 +159,23 @@ fun MarkdownTable(
                     cellAlignment = Alignment.TopStart
                 ) {
                     tableHeader(
-                        cells.first(),
-                        cellModifier,
-                        theme.tableTheme.tableHeaderBackgroundColor
+                        headerCells = cells.first(),
+                        modifier = cellModifier,
+                        backgroundColor = theme.tableTheme.tableHeaderBackgroundColor,
+                        cellContent = tableCellRenderer,
                     )
                     val bodyCells = if (cells.size > 1) cells.subList(1, cells.size) else null
                     bodyCells?.let {
-                        tableBody(it, cellModifier, theme.tableTheme.tableCellBackgroundColor)
+                        tableBody(
+                            rows = it,
+                            modifier = cellModifier,
+                            backgroundColor = theme.tableTheme.tableCellBackgroundColor,
+                            cellContent = tableCellRenderer
+                        )
                     }
                 }
             }
         }
-
     }
 }
 
@@ -158,21 +187,23 @@ private fun TableTitle(
 ) {
     val theme = currentTheme()
     val actionHandler = currentActionHandler()
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(theme.tableTheme.titleBackgroundColor)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Copy button
-        Text(
-            text = "Copy table",
-            style = theme.tableTheme.copyTextStyle,
-            modifier = Modifier.clickable {
-                actionHandler?.handleCopyClick(tableBlock)
-            })
+    DisableSelectionWrapper(disabled = true) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(theme.tableTheme.titleBackgroundColor)
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Copy button
+            Text(
+                text = "Copy table",
+                style = theme.tableTheme.copyTextStyle,
+                modifier = Modifier.clickable {
+                    actionHandler?.handleCopyClick(tableBlock)
+                })
+        }
     }
 }
 
@@ -202,27 +233,49 @@ private fun Modifier.tableModifier(columnsCount: Int): Modifier {
 }
 
 private fun TableScope.tableHeader(
-    headerCells: List<TableCell>, modifier: Modifier, backgroundColor: Color
+    headerCells: List<TableCell>,
+    modifier: Modifier,
+    backgroundColor: Color,
+    cellContent: TableWidgetRenderer<TableCell>,
 ) {
     header(modifier = Modifier.background(backgroundColor)) {
-        tableCell(headerCells, modifier, isHeader = true)
+        tableCell(
+            nodes = headerCells,
+            modifier = modifier,
+            cellContent = cellContent
+        )
     }
 }
 
 private fun TableScope.tableBody(
-    rows: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
+    rows: List<List<TableCell>>,
+    modifier: Modifier,
+    backgroundColor: Color,
+    cellContent: TableWidgetRenderer<TableCell>,
 ) {
     body {
-        tableRow(rows, modifier, backgroundColor)
+        tableRow(
+            cells = rows,
+            modifier = modifier,
+            backgroundColor = backgroundColor,
+            cellContent = cellContent
+        )
     }
 }
 
 private fun BodyScope.tableRow(
-    cells: List<List<TableCell>>, modifier: Modifier, backgroundColor: Color
+    cells: List<List<TableCell>>,
+    modifier: Modifier,
+    backgroundColor: Color,
+    cellContent: TableWidgetRenderer<TableCell>
 ) {
     cells.forEach { rowCells ->
         row(Modifier.background(backgroundColor)) {
-            tableCell(rowCells, modifier)
+            tableCell(
+                nodes = rowCells,
+                modifier = modifier,
+                cellContent = cellContent
+            )
         }
     }
 }
@@ -230,17 +283,11 @@ private fun BodyScope.tableRow(
 private fun RowScope.tableCell(
     nodes: List<TableCell>,
     modifier: Modifier,
-    isHeader: Boolean = false
+    cellContent: TableWidgetRenderer<TableCell>
 ) {
     nodes.forEach { node ->
         cell(alignment = node.alignment.toTableAlignment(), modifier = modifier) {
-            val theme = currentTheme()
-            MarkdownText(
-                parent = node,
-                modifier = Modifier,
-                textAlign = node.alignment.toTextAlign(),
-                textStyle = if (isHeader) theme.tableTheme.headerTextStyle else theme.tableTheme.cellTextStyle,
-            )
+            cellContent(node, Modifier)
         }
     }
 }
