@@ -54,7 +54,7 @@ fun RichText(
         textSegments.forEach {
             when (it) {
                 is RichTextSegment.Text -> {
-                    Text(
+                    AutoLineHeightText(
                         text = it.text,
                         color = color,
                         fontSize = fontSize,
