@@ -13,9 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.MarkdownView
@@ -27,14 +28,13 @@ fun LatexMathExample(paddingValues: PaddingValues) {
     val mathConfig = MarkdownRenderConfig.Builder()
         .addPlugin(
             MarkdownMathPlugin(
-                mathStyle = SpanStyle(
+                mathStyle = TextStyle(
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center
                 ),
-                width = 300.sp,
-                height = 40.sp,
             )
         )
         .build()

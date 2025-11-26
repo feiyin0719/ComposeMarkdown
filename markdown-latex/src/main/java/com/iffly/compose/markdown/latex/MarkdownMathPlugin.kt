@@ -1,9 +1,10 @@
 package com.iffly.compose.markdown.latex
 
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -18,10 +19,11 @@ import com.vladsch.flexmark.util.misc.Extension
  * using custom Flexmark parser extensions, plus (optionally) the GitLab extension if desired.
  */
 class MarkdownMathPlugin(
-    private val mathStyle: SpanStyle = SpanStyle(fontStyle = FontStyle.Italic),
-    private val width: TextUnit,
-    private val height: TextUnit,
-    private val align: TextAlign = TextAlign.Center,
+    private val mathStyle: TextStyle = TextStyle(
+        fontStyle = FontStyle.Italic,
+        textAlign = TextAlign.Center
+    ),
+    private val paddingValues: PaddingValues = PaddingValues(0.dp),
     /** Whether to also enable GitLabExtension (kept for backward compatibility). */
     private val enableGitLabExtension: Boolean = false,
 ) : AbstractMarkdownRenderPlugin() {
@@ -42,20 +44,16 @@ class MarkdownMathPlugin(
                 InlineLatexNode::class.java,
                 InlineLatexNodeStringBuilder(
                     mathStyle,
-                    width,
-                    height,
-                    align
+                    paddingValues,
                 )
             )
             // Backwards compatibility: still support GitLabInlineMath if extension enabled
             if (enableGitLabExtension) {
                 put(
                     GitLabInlineMath::class.java,
-                    InlineMathNodeStringBuilder(
+                    GitLabInlineMathNodeStringBuilder(
                         mathStyle,
-                        width,
-                        height,
-                        align
+                        paddingValues,
                     )
                 )
             }
@@ -65,7 +63,7 @@ class MarkdownMathPlugin(
         mapOf(
             LatexBlock::class.java to LatexBlockRenderer(
                 style = mathStyle,
-                align = align,
+                paddingValues = paddingValues,
             )
         )
 

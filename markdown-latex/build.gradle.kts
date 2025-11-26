@@ -40,6 +40,7 @@ android {
 dependencies {
     compileOnly(project(":markdown"))
     api(libs.flexmark.ext.gitlab)
+    implementation(libs.coil3.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

@@ -1,17 +1,14 @@
 package com.iffly.compose.markdown.latex
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.text.TextStyle
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
@@ -20,23 +17,19 @@ import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
+import com.vladsch.flexmark.util.ast.Node
 
 /**
  * Inline math renderer using jlatexmath to draw a LaTeX formula to a bitmap.
  */
-class InlineMathNodeStringBuilder(
-    private val mathStyle: SpanStyle,
-    private val width: TextUnit,
-    private val height: TextUnit,
-    private val align: TextAlign,
+open class InlineMathNodeStringBuilder<T : Node>(
+    private val textStyle: TextStyle,
+    private val paddingValues: PaddingValues,
 ) :
-    IInlineNodeStringBuilder<GitLabInlineMath> {
-    private val paragraphStyle = ParagraphStyle(
-        lineHeight = height,
-    )
+    IInlineNodeStringBuilder<T> {
 
     override fun AnnotatedString.Builder.buildInlineNodeString(
-        node: GitLabInlineMath,
+        node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
         actionHandler: ActionHandler?,
@@ -45,9 +38,20 @@ class InlineMathNodeStringBuilder(
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext
     ) {
-        val latexBody = node.text.toString()
+        val latexBody = when (node) {
+            is GitLabInlineMath -> node.text.toString()
+            is InlineLatexNode -> node.formula
+            else -> return
+        }
         val placeholderId =
             "inline_math_${node.startOffset}_${node.endOffset}_${latexBody.hashCode()}"
+        val latexConfig = textStyle.toLatexConfig(measureContext.density, paddingValues)
+        val drawable = LatexBitmapLoader.createDrawable(
+            latexBody,
+            latexConfig
+        )
+        val width = with(measureContext.density) { drawable.intrinsicWidth.toSp() }
+        val height = with(measureContext.density) { drawable.intrinsicHeight.toSp() }
         inlineContentMap[placeholderId] = InlineTextContent(
             placeholder = Placeholder(
                 width = width,
@@ -55,15 +59,22 @@ class InlineMathNodeStringBuilder(
                 placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
             )
         ) {
-            LatexImageBox(
+            LatexImage(
                 latex = latexBody,
-                style = mathStyle,
-                align = align,
-                modifier = Modifier.fillMaxSize()
+                latexConfig = latexConfig,
+                modifier = Modifier.fillMaxWidth()
             )
         }.toFixedSizeMarkdownInlineTextContent()
-        withStyle(paragraphStyle) {
-            appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
-        }
+        appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
     }
 }
+
+class InlineLatexNodeStringBuilder(
+    textStyle: TextStyle,
+    paddingValues: PaddingValues,
+) : InlineMathNodeStringBuilder<InlineLatexNode>(textStyle, paddingValues)
+
+class GitLabInlineMathNodeStringBuilder(
+    textStyle: TextStyle,
+    paddingValues: PaddingValues
+) : InlineMathNodeStringBuilder<GitLabInlineMath>(textStyle, paddingValues)
