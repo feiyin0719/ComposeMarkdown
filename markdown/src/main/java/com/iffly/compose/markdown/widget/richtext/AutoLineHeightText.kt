@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
@@ -75,7 +76,7 @@ fun AutoLineHeightText(
     style: TextStyle = LocalTextStyle.current,
 ) {
     var adjustLineHeightRequestList by remember {
-        mutableStateOf<List<AdjustLineHeightRequest>>(listOf())
+        mutableStateOf<List<AdjustLineHeightRequest>>(emptyList())
     }
     val inlineContentAnnotations =
         remember(text) {
@@ -92,27 +93,14 @@ fun AutoLineHeightText(
         snapshotFlow {
             Pair(adjustedText, adjustLineHeightRequestList)
         }.distinctUntilChanged()
-            .collect { (currentText, requests) ->
+            .collectLatest { (currentText, requests) ->
                 if (requests.isEmpty()) {
-                    return@collect
+                    return@collectLatest
                 }
-                val sortedRequests = requests.sortedByDescending { it.startIndex }
                 val newText =
-                    buildAnnotatedString {
-                        append(currentText)
-                        for (request in sortedRequests) {
-                            addStyle(
-                                style =
-                                    ParagraphStyle(
-                                        lineHeight = request.lineHeight,
-                                    ),
-                                start = request.startIndex,
-                                end = request.endIndex,
-                            )
-                        }
-                    }
+                    buildAdjustLineHeightText(requests, currentText)
                 adjustedText = newText
-                adjustLineHeightRequestList = listOf()
+                adjustLineHeightRequestList = emptyList()
             }
     }
 
@@ -145,6 +133,43 @@ fun AutoLineHeightText(
         modifier = modifier,
         style = style,
     )
+}
+
+private fun buildAdjustLineHeightText(
+    requests: List<AdjustLineHeightRequest>,
+    currentText: AnnotatedString,
+): AnnotatedString {
+    val sortedRequests = requests.sortedByDescending { it.startIndex }
+    val newText =
+        buildAnnotatedString {
+            var lastIndex = 0
+            sortedRequests.forEach {
+                if (it.startIndex > lastIndex) {
+                    append(currentText.subSequence(lastIndex, it.startIndex))
+                }
+                with(
+                    ParagraphStyle(
+                        lineHeight = it.lineHeight,
+                    ),
+                ) {
+                    val segment =
+                        currentText.subSequence(it.startIndex, it.endIndex)
+                    if (segment.lastOrNull() == '\n') {
+                        // Apply paragraph style will make the text as a single line,
+                        // If it already ends with a new line character,
+                        // exclude the last new line character to avoid extra line
+                        append(segment.subSequence(0, segment.length - 1))
+                    } else {
+                        append(segment)
+                    }
+                }
+                lastIndex = it.endIndex
+            }
+            if (lastIndex < currentText.length) {
+                append(currentText.subSequence(lastIndex, currentText.length))
+            }
+        }
+    return newText
 }
 
 private const val INLINE_CONTENT_TAG = "androidx.compose.foundation.text.inlineContent"

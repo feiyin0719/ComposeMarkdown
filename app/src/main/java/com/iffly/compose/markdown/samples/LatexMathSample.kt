@@ -79,17 +79,19 @@ fun LatexMathExample(
                 """
                 # Inline LaTeX Math Examples
                 
-                Basic formula: ${'$'}`a^2 + b^2 = c^2`$ shows the Pythagorean theorem.
+                Basic formula: ${'$'}a^2 + b^2 = c^2$\
+                shows the Pythagorean theorem.
                 
-                Physics relation: The famous equation ${'$'}E=mc^2$ connects mass and energy.
+                Physics relation: The famous equation ${'$'}E=mc^2$ connects mass and energy. This implies that mass can be converted into energy and vice versa.
                 
                 Fractions & roots: $\frac{1}{2}$, $\sqrt{2}$, and $\sqrt{a^2 + b^2}$.
                 
-                Greek symbols: $\alpha + \beta = \gamma$.
+                Greek symbols: $\alpha + \beta = \gamma$\
+                .
                 
                 Combined example:
-                The quadratic formula is 
-                ${'$'}x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ 
+                The quadratic formula is
+                ${'$'}x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$\
                 which solves ${'$'}ax^2 + bx + c = 0$.
                 
                 Multiple math segments in one line: Speed is ${'$'}v=\frac{d}{t}$, force is ${'$'}F=ma$, energy is ${'$'}E=mc^2$.
