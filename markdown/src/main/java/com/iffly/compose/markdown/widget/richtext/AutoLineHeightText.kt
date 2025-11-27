@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
@@ -68,16 +70,17 @@ fun AutoLineHeightText(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    inlineContent: Map<String, InlineTextContent> = mapOf(),
+    inlineContent: ImmutableMap<String, InlineTextContent> = persistentMapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
     var adjustLineHeightRequestList by remember {
         mutableStateOf<List<AdjustLineHeightRequest>>(listOf())
     }
-    val inlineContentAnnotations = remember(text) {
-        text.getInlineContentAnnotations()
-    }
+    val inlineContentAnnotations =
+        remember(text) {
+            text.getInlineContentAnnotations()
+        }
 
     var adjustedText by remember {
         mutableStateOf(text)
@@ -94,18 +97,20 @@ fun AutoLineHeightText(
                     return@collect
                 }
                 val sortedRequests = requests.sortedByDescending { it.startIndex }
-                val newText = buildAnnotatedString {
-                    append(currentText)
-                    for (request in sortedRequests) {
-                        addStyle(
-                            style = ParagraphStyle(
-                                lineHeight = request.lineHeight,
-                            ),
-                            start = request.startIndex,
-                            end = request.endIndex,
-                        )
+                val newText =
+                    buildAnnotatedString {
+                        append(currentText)
+                        for (request in sortedRequests) {
+                            addStyle(
+                                style =
+                                    ParagraphStyle(
+                                        lineHeight = request.lineHeight,
+                                    ),
+                                start = request.startIndex,
+                                end = request.endIndex,
+                            )
+                        }
                     }
-                }
                 adjustedText = newText
                 adjustLineHeightRequestList = listOf()
             }
@@ -128,25 +133,24 @@ fun AutoLineHeightText(
         minLines = minLines,
         inlineContent = inlineContent,
         onTextLayout = { layoutResult: TextLayoutResult ->
-            adjustLineHeightRequestList = calculateAdjustLineHeightRequests(
-                inlineTextContentAnnotations = inlineContentAnnotations,
-                layoutResult = layoutResult,
-                inlineContent = inlineContent,
-                density = density,
-            )
+            adjustLineHeightRequestList =
+                calculateAdjustLineHeightRequests(
+                    inlineTextContentAnnotations = inlineContentAnnotations,
+                    layoutResult = layoutResult,
+                    inlineContent = inlineContent,
+                    density = density,
+                )
             onTextLayout(layoutResult)
         },
         modifier = modifier,
         style = style,
     )
-
 }
 
 private const val INLINE_CONTENT_TAG = "androidx.compose.foundation.text.inlineContent"
 
-private fun AnnotatedString.getInlineContentAnnotations(): List<AnnotatedString.Range<String>> {
-    return this.getStringAnnotations(tag = INLINE_CONTENT_TAG, start = 0, end = this.length)
-}
+private fun AnnotatedString.getInlineContentAnnotations(): List<AnnotatedString.Range<String>> =
+    this.getStringAnnotations(tag = INLINE_CONTENT_TAG, start = 0, end = this.length)
 
 private fun calculateAdjustLineHeightRequests(
     inlineTextContentAnnotations: List<AnnotatedString.Range<String>>,
@@ -172,17 +176,19 @@ private fun calculateAdjustLineHeightRequests(
         val existingLineHeight = existingRequest?.lineHeight ?: 0.sp
         val inlineContentLineHeight = inlineContentItem.placeholder.height
         // get the max of line height and existing line height
-        val finalLineHeight = if (lineHeightSp > existingLineHeight) {
-            lineHeightSp
-        } else {
-            existingLineHeight
-        }
+        val finalLineHeight =
+            if (lineHeightSp > existingLineHeight) {
+                lineHeightSp
+            } else {
+                existingLineHeight
+            }
         if (inlineContentLineHeight > finalLineHeight) {
-            adjustLineHeightRequestMap[startLineNumber] = AdjustLineHeightRequest(
-                startIndex = layoutResult.getLineStart(startLineNumber),
-                endIndex = layoutResult.getLineEnd(startLineNumber),
-                lineHeight = inlineContentLineHeight,
-            )
+            adjustLineHeightRequestMap[startLineNumber] =
+                AdjustLineHeightRequest(
+                    startIndex = layoutResult.getLineStart(startLineNumber),
+                    endIndex = layoutResult.getLineEnd(startLineNumber),
+                    lineHeight = inlineContentLineHeight,
+                )
         }
     }
     return adjustLineHeightRequestMap.values.toList()

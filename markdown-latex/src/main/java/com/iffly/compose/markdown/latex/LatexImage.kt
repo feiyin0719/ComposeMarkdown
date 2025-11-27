@@ -7,14 +7,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 
-
 @Composable
 fun LatexImage(
     latex: String,
     latexConfig: LatexConfig,
     modifier: Modifier = Modifier,
 ) {
-
     val drawable =
         remember(latexConfig, latex) {
             LatexBitmapLoader.createDrawable(latex, latexConfig)

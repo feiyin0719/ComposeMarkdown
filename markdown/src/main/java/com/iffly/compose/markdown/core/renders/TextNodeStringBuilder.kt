@@ -19,10 +19,8 @@ class TextNodeStringBuilder : IInlineNodeStringBuilder<Text> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         append(node.contentText())
     }
 }
-
-

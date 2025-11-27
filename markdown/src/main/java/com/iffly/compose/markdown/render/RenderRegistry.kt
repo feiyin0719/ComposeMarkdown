@@ -5,13 +5,12 @@ import com.vladsch.flexmark.util.ast.Node
 
 class RenderRegistry(
     private val blockRenderers: Map<Class<out Block>, IBlockRenderer<*>>,
-    private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>
+    private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>,
 ) {
-    fun getBlockRenderer(blockClass: Class<out Block>): IBlockRenderer<Block>? {
-        return blockRenderers[blockClass] as? IBlockRenderer<Block>
-    }
+    @Suppress("UNCHECKED_CAST")
+    fun getBlockRenderer(blockClass: Class<out Block>): IBlockRenderer<Block>? = blockRenderers[blockClass] as? IBlockRenderer<Block>
 
-    fun getInlineNodeStringBuilder(nodeClass: Class<out Node>): IInlineNodeStringBuilder<Node>? {
-        return inlineNodeStringBuilders[nodeClass] as? IInlineNodeStringBuilder<Node>
-    }
+    @Suppress("UNCHECKED_CAST")
+    fun getInlineNodeStringBuilder(nodeClass: Class<out Node>): IInlineNodeStringBuilder<Node>? =
+        inlineNodeStringBuilders[nodeClass] as? IInlineNodeStringBuilder<Node>
 }

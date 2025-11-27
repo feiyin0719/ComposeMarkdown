@@ -7,13 +7,12 @@ import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.widget.richtext.StandaloneInlineTextContent
 
 sealed interface MarkdownInlineView {
-
     sealed interface MarkdownInlineTextContent : MarkdownInlineView {
         fun toInlineTextContent(): InlineTextContent
 
         @Immutable
         data class FixedSizeMarkdownInlineView(
-            val inlineTextContent: InlineTextContent
+            val inlineTextContent: InlineTextContent,
         ) : MarkdownInlineTextContent {
             override fun toInlineTextContent(): InlineTextContent = inlineTextContent
         }
@@ -21,19 +20,15 @@ sealed interface MarkdownInlineView {
 
     data class MarkdownStandaloneInlineView(
         val modifier: Modifier,
-        val content: @Composable (modifier: Modifier) -> Unit
+        val content: @Composable (modifier: Modifier) -> Unit,
     ) : MarkdownInlineView {
-        fun toStandaloneInlineTextContent(): StandaloneInlineTextContent {
-            return StandaloneInlineTextContent(
+        fun toStandaloneInlineTextContent(): StandaloneInlineTextContent =
+            StandaloneInlineTextContent(
                 modifier = modifier,
                 content = content,
             )
-        }
     }
-
-
 }
 
-fun InlineTextContent.toFixedSizeMarkdownInlineTextContent(): MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView {
-    return MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView(this)
-}
+fun InlineTextContent.toFixedSizeMarkdownInlineTextContent(): MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView =
+    MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView(this)

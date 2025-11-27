@@ -7,15 +7,11 @@ import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.misc.Extension
 
-class TaskMarkdownRenderPlugin() : AbstractMarkdownRenderPlugin() {
-    override fun extensions(): List<Extension> {
-        return listOf(TaskListExtension.create())
-    }
+class TaskMarkdownRenderPlugin : AbstractMarkdownRenderPlugin() {
+    override fun extensions(): List<Extension> = listOf(TaskListExtension.create())
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> {
-        return mapOf(
-            TaskListItem::class.java to TaskListItemRenderer()
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
+        mapOf(
+            TaskListItem::class.java to TaskListItemRenderer(),
         )
-    }
-
 }

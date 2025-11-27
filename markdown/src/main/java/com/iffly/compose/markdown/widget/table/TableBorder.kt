@@ -17,12 +17,16 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Border drawing modes for table
  */
 enum class TableBorderMode {
-    NONE, HORIZONTAL, VERTICAL, ALL
+    NONE,
+    HORIZONTAL,
+    VERTICAL,
+    ALL,
 }
 
 /**
@@ -31,21 +35,21 @@ enum class TableBorderMode {
 data class TableBorder(
     val mode: TableBorderMode,
     val brush: Brush,
-    val width: Dp
+    val width: Dp,
 ) {
     companion object {
         // Default solid color border constructor
         fun solid(
             mode: TableBorderMode = TableBorderMode.NONE,
             color: Color = Color.Gray,
-            width: Dp = 1.dp
+            width: Dp = 1.dp,
         ) = TableBorder(mode, SolidColor(color), width)
 
         // Brush-based border constructor
         fun brush(
             mode: TableBorderMode = TableBorderMode.NONE,
             brush: Brush,
-            width: Dp = 1.dp
+            width: Dp = 1.dp,
         ) = TableBorder(mode, brush, width)
     }
 }
@@ -56,9 +60,9 @@ data class TableBorder(
 @Composable
 internal fun TableBorderCanvas(
     border: TableBorder,
-    columnWidths: List<Int>,
-    rowHeights: List<Int>,
-    density: Density
+    columnWidths: ImmutableList<Int>,
+    rowHeights: ImmutableList<Int>,
+    density: Density,
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         when (border.mode) {
@@ -76,7 +80,12 @@ internal fun TableBorderCanvas(
 
             TableBorderMode.ALL -> {
                 drawAllBorders(
-                    border, columnWidths, rowHeights, density, size.width, size.height
+                    border,
+                    columnWidths,
+                    rowHeights,
+                    density,
+                    size.width,
+                    size.height,
                 )
             }
         }
@@ -90,7 +99,7 @@ private fun DrawScope.drawHorizontalBorders(
     border: TableBorder,
     rowHeights: List<Int>,
     density: Density,
-    totalWidth: Float
+    totalWidth: Float,
 ) {
     val strokeWidth = with(density) { border.width.toPx() }
     var yOffset = 0f
@@ -102,7 +111,7 @@ private fun DrawScope.drawHorizontalBorders(
             brush = border.brush,
             start = Offset(0f, yOffset),
             end = Offset(totalWidth, yOffset),
-            strokeWidth = strokeWidth
+            strokeWidth = strokeWidth,
         )
     }
 }
@@ -114,7 +123,7 @@ private fun DrawScope.drawVerticalBorders(
     border: TableBorder,
     columnWidths: List<Int>,
     density: Density,
-    totalHeight: Float
+    totalHeight: Float,
 ) {
     val strokeWidth = with(density) { border.width.toPx() }
     var xOffset = 0f
@@ -126,7 +135,7 @@ private fun DrawScope.drawVerticalBorders(
             brush = border.brush,
             start = Offset(xOffset, 0f),
             end = Offset(xOffset, totalHeight),
-            strokeWidth = strokeWidth
+            strokeWidth = strokeWidth,
         )
     }
 }
@@ -140,7 +149,7 @@ private fun DrawScope.drawAllBorders(
     rowHeights: List<Int>,
     density: Density,
     totalWidth: Float,
-    totalHeight: Float
+    totalHeight: Float,
 ) {
     drawHorizontalBorders(border, rowHeights, density, totalWidth)
     drawVerticalBorders(border, columnWidths, density, totalHeight)
@@ -149,33 +158,57 @@ private fun DrawScope.drawAllBorders(
 /**
  * Calculate the X offset for border drawing based on the column index
  */
-internal fun calculateBorderOffsetX(border: TableBorder, density: Density): Int {
-    return when (border.mode) {
-        TableBorderMode.NONE -> 0
-        TableBorderMode.HORIZONTAL -> 0
-        TableBorderMode.VERTICAL -> with(density) {
-            border.width.toPx().toInt()
+internal fun calculateBorderOffsetX(
+    border: TableBorder,
+    density: Density,
+): Int =
+    when (border.mode) {
+        TableBorderMode.NONE -> {
+            0
         }
 
-        TableBorderMode.ALL -> with(density) {
-            border.width.toPx().toInt()
+        TableBorderMode.HORIZONTAL -> {
+            0
+        }
+
+        TableBorderMode.VERTICAL -> {
+            with(density) {
+                border.width.toPx().toInt()
+            }
+        }
+
+        TableBorderMode.ALL -> {
+            with(density) {
+                border.width.toPx().toInt()
+            }
         }
     }
-}
 
 /**
  * Calculate the Y offset for border drawing based on the row index
  */
-internal fun calculateBorderOffsetY(border: TableBorder, density: Density): Int {
-    return when (border.mode) {
-        TableBorderMode.NONE -> 0
-        TableBorderMode.VERTICAL -> 0
-        TableBorderMode.HORIZONTAL -> with(density) {
-            border.width.toPx().toInt()
+internal fun calculateBorderOffsetY(
+    border: TableBorder,
+    density: Density,
+): Int =
+    when (border.mode) {
+        TableBorderMode.NONE -> {
+            0
         }
 
-        TableBorderMode.ALL -> with(density) {
-            border.width.toPx().toInt()
+        TableBorderMode.VERTICAL -> {
+            0
+        }
+
+        TableBorderMode.HORIZONTAL -> {
+            with(density) {
+                border.width.toPx().toInt()
+            }
+        }
+
+        TableBorderMode.ALL -> {
+            with(density) {
+                border.width.toPx().toInt()
+            }
         }
     }
-}

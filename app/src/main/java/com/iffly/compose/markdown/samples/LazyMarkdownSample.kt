@@ -20,7 +20,10 @@ import java.io.File
 import java.io.FileOutputStream
 
 @Composable
-fun LazyMarkdownExample(paddingValues: PaddingValues) {
+fun LazyMarkdownExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     var markdownFile by remember { mutableStateOf<File?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -44,9 +47,10 @@ fun LazyMarkdownExample(paddingValues: PaddingValues) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues),
     ) {
         errorMessage?.let { error ->
             Text(text = error)
@@ -56,9 +60,10 @@ fun LazyMarkdownExample(paddingValues: PaddingValues) {
             LazyMarkdownView(
                 file = file,
                 markdownRenderConfig = config,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
             )
         }
     }

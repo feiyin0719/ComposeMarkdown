@@ -21,6 +21,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
 import kotlin.math.min
 
@@ -114,7 +116,7 @@ fun Table(
     cellAlignment: Alignment = Alignment.CenterStart,
     border: TableBorder = TableBorder.solid(mode = TableBorderMode.NONE),
     shape: Shape? = null,
-    widthWeights: List<Float>? = null,
+    widthWeights: ImmutableList<Float>? = null,
     content: TableScope.() -> Unit,
 ) {
     val tableBuilder = TableScopeImpl(cellAlignment).apply(content)
@@ -142,15 +144,16 @@ private fun measureAndLayoutTable(
     border: TableBorder,
     widthWeights: List<Float>? = null,
 ) = with(measureScope) {
-    val measureResult = measureTable(
-        measureScope = this,
-        tableBuilder = tableBuilder,
-        cellPadding = cellPadding,
-        density = density,
-        constraints = constraints,
-        border = border,
-        widthWeights = widthWeights,
-    )
+    val measureResult =
+        measureTable(
+            measureScope = this,
+            tableBuilder = tableBuilder,
+            cellPadding = cellPadding,
+            density = density,
+            constraints = constraints,
+            border = border,
+            widthWeights = widthWeights,
+        )
 
     layoutTable(
         measureScope = this,
@@ -225,11 +228,12 @@ private fun measureTable(
     val totalWidth = columnWidths.sum() + borderWith * (columnCount - 1)
     val totalHeight = rowHeights.sum() + borderHeight * (allRows.size - 1)
     // adjust size based on constraints
-    val (adjustedTotalWidth, adjustedTotalHeight) = adjustedSize(
-        constraints,
-        totalWidth,
-        totalHeight
-    )
+    val (adjustedTotalWidth, adjustedTotalHeight) =
+        adjustedSize(
+            constraints,
+            totalWidth,
+            totalHeight,
+        )
 
     return TableMeasureResult(
         allRows = allRows,
@@ -250,16 +254,18 @@ private fun adjustedSize(
     totalWidth: Int,
     totalHeight: Int,
 ): Pair<Int, Int> {
-    val adjustedTotalWidth = if (constraints.hasBoundedWidth) {
-        min(constraints.maxWidth, totalWidth)
-    } else {
-        totalWidth
-    }
-    val adjustedTotalHeight = if (constraints.hasBoundedHeight) {
-        min(constraints.maxHeight, totalHeight)
-    } else {
-        totalHeight
-    }
+    val adjustedTotalWidth =
+        if (constraints.hasBoundedWidth) {
+            min(constraints.maxWidth, totalWidth)
+        } else {
+            totalWidth
+        }
+    val adjustedTotalHeight =
+        if (constraints.hasBoundedHeight) {
+            min(constraints.maxHeight, totalHeight)
+        } else {
+            totalHeight
+        }
     return Pair(adjustedTotalWidth, adjustedTotalHeight)
 }
 
@@ -270,13 +276,14 @@ private fun getColumnWeightWidths(
     border: TableBorder,
     density: Density,
 ): List<Int> {
-    val columnWeightWidths = if (!widthWeights.isNullOrEmpty()) {
-        // Weight mode: distribute available width according to weights
-        calculateWeightBasedColumnWidths(widthWeights, columnCount, constraints, border, density)
-    } else {
-        // Content mode: measure cells to determine widths
-        List(columnCount) { -1 }
-    }
+    val columnWeightWidths =
+        if (!widthWeights.isNullOrEmpty()) {
+            // Weight mode: distribute available width according to weights
+            calculateWeightBasedColumnWidths(widthWeights, columnCount, constraints, border, density)
+        } else {
+            // Content mode: measure cells to determine widths
+            List(columnCount) { -1 }
+        }
     return columnWeightWidths
 }
 
@@ -331,16 +338,18 @@ private fun measureSingleCell(
     cellData: List<MutableList<CellImpl?>>,
 ) = with(measureScope) {
     // Create constraints for this specific column width
-    val cellConstraints = if (columnWeightWidths[columnIndex] != -1) {
-        Constraints.fixedWidth(columnWeightWidths[columnIndex])
-    } else {
-        constraints
-    }
+    val cellConstraints =
+        if (columnWeightWidths[columnIndex] != -1) {
+            Constraints.fixedWidth(columnWeightWidths[columnIndex])
+        } else {
+            constraints
+        }
 
     // Only apply padding and content-related modifiers, not background modifiers
-    val placeable = subcompose("cell_${rowIndex}_$columnIndex") {
-        CellBox(cellPadding, cell.modifier, contentAlignment = cell.alignment, cell.content)
-    }[0].measure(cellConstraints)
+    val placeable =
+        subcompose("cell_${rowIndex}_$columnIndex") {
+            CellBox(cellPadding, cell.modifier, contentAlignment = cell.alignment, cell.content)
+        }[0].measure(cellConstraints)
 
     // Update data structures
     cellPlaceableMap[rowIndex][columnIndex] = placeable
@@ -419,14 +428,18 @@ private fun Placeable.PlacementScope.placeRowBackground(
     density: Density,
 ) {
     if (row.modifier != Modifier) {
-        val rowBackground = measureScope.subcompose("bg_$rowIndex") {
-            Box(
-                modifier = row.modifier.size(
-                    width = totalWidth.toDp(density),
-                    height = rowHeight.toDp(density),
-                ),
-            )
-        }[0].measure(Constraints.fixed(totalWidth, rowHeight))
+        val rowBackground =
+            measureScope
+                .subcompose("bg_$rowIndex") {
+                    Box(
+                        modifier =
+                            row.modifier.size(
+                                width = totalWidth.toDp(density),
+                                height = rowHeight.toDp(density),
+                            ),
+                    )
+                }[0]
+                .measure(Constraints.fixed(totalWidth, rowHeight))
         rowBackground.place(0, yOffset)
     }
 }
@@ -468,15 +481,16 @@ private fun Placeable.PlacementScope.placeCellsInRow(
             )
 
             // Calculate position based on cell alignment
-            val (cellX, cellY) = calculateCellPosition(
-                alignment = cell.alignment,
-                cellWidth = placeable.width,
-                cellHeight = placeable.height,
-                availableWidth = columnWidth,
-                availableHeight = rowHeight,
-                baseX = xOffset,
-                baseY = yOffset,
-            )
+            val (cellX, cellY) =
+                calculateCellPosition(
+                    alignment = cell.alignment,
+                    cellWidth = placeable.width,
+                    cellHeight = placeable.height,
+                    availableWidth = columnWidth,
+                    availableHeight = rowHeight,
+                    baseX = xOffset,
+                    baseY = yOffset,
+                )
 
             placeable.place(cellX, cellY)
         }
@@ -497,14 +511,17 @@ private fun Placeable.PlacementScope.placeTableBorders(
     density: Density,
 ) {
     if (border.mode != TableBorderMode.NONE) {
-        val borderCanvas = measureScope.subcompose(BORDER_COMPOSE) {
-            TableBorderCanvas(
-                border = border,
-                columnWidths = measureResult.columnWidths,
-                rowHeights = measureResult.rowHeights,
-                density = density,
-            )
-        }[0].measure(Constraints.fixed(measureResult.totalWidth, measureResult.totalHeight))
+        val borderCanvas =
+            measureScope
+                .subcompose(BORDER_COMPOSE) {
+                    TableBorderCanvas(
+                        border = border,
+                        columnWidths = measureResult.columnWidths.toImmutableList(),
+                        rowHeights = measureResult.rowHeights.toImmutableList(),
+                        density = density,
+                    )
+                }[0]
+                .measure(Constraints.fixed(measureResult.totalWidth, measureResult.totalHeight))
         borderCanvas.place(0, 0)
     }
 }
@@ -524,14 +541,18 @@ private fun Placeable.PlacementScope.placeCellBackground(
     density: Density,
 ) {
     if (cell.cellBackground != null && cell.cellBackground != Modifier) {
-        val cellBackground = measureScope.subcompose("cell_bg_${rowIndex}_$columnIndex") {
-            Box(
-                modifier = cell.cellBackground.size(
-                    width = cellWidth.toDp(density),
-                    height = cellHeight.toDp(density),
-                ),
-            )
-        }[0].measure(Constraints.fixed(cellWidth, cellHeight))
+        val cellBackground =
+            measureScope
+                .subcompose("cell_bg_${rowIndex}_$columnIndex") {
+                    Box(
+                        modifier =
+                            cell.cellBackground.size(
+                                width = cellWidth.toDp(density),
+                                height = cellHeight.toDp(density),
+                            ),
+                    )
+                }[0]
+                .measure(Constraints.fixed(cellWidth, cellHeight))
         cellBackground.place(xOffset, yOffset)
     }
 }
@@ -564,20 +585,22 @@ private fun calculateCellPosition(
     baseY: Int,
 ): Pair<Int, Int> {
     // Calculate X position based on horizontal alignment
-    val x: Int = when (alignment) {
-        Alignment.TopStart, Alignment.CenterStart, Alignment.BottomStart -> baseX
-        Alignment.TopCenter, Alignment.Center, Alignment.BottomCenter -> baseX + (availableWidth - cellWidth) / 2
-        Alignment.TopEnd, Alignment.CenterEnd, Alignment.BottomEnd -> baseX + availableWidth - cellWidth
-        else -> baseX // Fallback to start if undefined
-    }
+    val x: Int =
+        when (alignment) {
+            Alignment.TopStart, Alignment.CenterStart, Alignment.BottomStart -> baseX
+            Alignment.TopCenter, Alignment.Center, Alignment.BottomCenter -> baseX + (availableWidth - cellWidth) / 2
+            Alignment.TopEnd, Alignment.CenterEnd, Alignment.BottomEnd -> baseX + availableWidth - cellWidth
+            else -> baseX // Fallback to start if undefined
+        }
 
     // Calculate Y position based on vertical alignment
-    val y: Int = when (alignment) {
-        Alignment.TopStart, Alignment.TopCenter, Alignment.TopEnd -> baseY
-        Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd -> baseY + (availableHeight - cellHeight) / 2
-        Alignment.BottomStart, Alignment.BottomCenter, Alignment.BottomEnd -> baseY + availableHeight - cellHeight
-        else -> baseY // Fallback to top if undefined
-    }
+    val y: Int =
+        when (alignment) {
+            Alignment.TopStart, Alignment.TopCenter, Alignment.TopEnd -> baseY
+            Alignment.CenterStart, Alignment.Center, Alignment.CenterEnd -> baseY + (availableHeight - cellHeight) / 2
+            Alignment.BottomStart, Alignment.BottomCenter, Alignment.BottomEnd -> baseY + availableHeight - cellHeight
+            else -> baseY // Fallback to top if undefined
+        }
 
     return Pair(x, y)
 }
@@ -593,22 +616,23 @@ private fun calculateWeightBasedColumnWidths(
     density: Density,
 ): List<Int> {
     // Process weights according to column count
-    val processedWeights = when {
-        widthWeights.size > columnCount -> {
-            // If weights are more than columns, take only the first columnCount weights
-            widthWeights.take(columnCount)
-        }
+    val processedWeights =
+        when {
+            widthWeights.size > columnCount -> {
+                // If weights are more than columns, take only the first columnCount weights
+                widthWeights.take(columnCount)
+            }
 
-        widthWeights.size < columnCount -> {
-            // If weights are less than columns, pad with 1.0f for remaining columns
-            widthWeights + List(columnCount - widthWeights.size) { 1.0f }
-        }
+            widthWeights.size < columnCount -> {
+                // If weights are less than columns, pad with 1.0f for remaining columns
+                widthWeights + List(columnCount - widthWeights.size) { 1.0f }
+            }
 
-        else -> {
-            // If weights match column count exactly, use as is
-            widthWeights
+            else -> {
+                // If weights match column count exactly, use as is
+                widthWeights
+            }
         }
-    }
 
     // Calculate total weight
     val totalWeight = processedWeights.sum()
@@ -634,9 +658,10 @@ private fun calculateWeightBasedColumnWidths(
     return columnWidths
 }
 
-private fun Int.toDp(density: Density): Dp = with(density) {
-    this@toDp.toDp()
-}
+private fun Int.toDp(density: Density): Dp =
+    with(density) {
+        this@toDp.toDp()
+    }
 
 // Implementation classes
 internal class TableScopeImpl(
@@ -652,11 +677,12 @@ internal class TableScopeImpl(
         cellAlignment: Alignment?,
         content: RowScope.() -> Unit,
     ) {
-        header = RowScopeImpl(
-            modifier = modifier,
-            rowDefaultAlignment = cellAlignment,
-            tableDefaultAlignment = this@TableScopeImpl.cellAlignment,
-        ).apply(content)
+        header =
+            RowScopeImpl(
+                modifier = modifier,
+                rowDefaultAlignment = cellAlignment,
+                tableDefaultAlignment = this@TableScopeImpl.cellAlignment,
+            ).apply(content)
     }
 
     override fun body(content: BodyScope.() -> Unit) {
@@ -664,12 +690,11 @@ internal class TableScopeImpl(
     }
 }
 
-private fun TableScopeImpl.rows(): List<RowScopeImpl> {
-    return buildList {
+private fun TableScopeImpl.rows(): List<RowScopeImpl> =
+    buildList {
         header?.let { add(it) }
         body?.let { addAll(it.rows) }
     }
-}
 
 internal class BodyScopeImpl(
     private val tableDefaultAlignment: Alignment,

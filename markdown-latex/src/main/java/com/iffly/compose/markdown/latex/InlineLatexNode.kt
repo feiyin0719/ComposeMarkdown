@@ -10,12 +10,16 @@ import com.vladsch.flexmark.util.sequence.BasedSequence
 /**
  * Custom inline LaTeX node representing a `$ ... $` math expression.
  */
-class InlineLatexNode(private val seq: BasedSequence, val formula: String) : Node() {
+class InlineLatexNode(
+    private val seq: BasedSequence,
+    val formula: String,
+) : Node() {
     override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
 private abstract class BaseInlineLatexExt : InlineParserExtension {
     override fun finalizeDocument(inlineParser: InlineParser) {}
+
     override fun finalizeBlock(inlineParser: InlineParser) {}
 }
 
@@ -55,11 +59,12 @@ private class InlineLatexParserExtension : BaseInlineLatexExt() {
 
 class InlineLatexParserFactory : InlineParserExtensionFactory {
     override fun getCharacters(): CharSequence = "$" // Trigger on dollar sign
-    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
-        InlineLatexParserExtension()
+
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension = InlineLatexParserExtension()
 
     override fun affectsGlobalScope(): Boolean = false
+
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
 }
-

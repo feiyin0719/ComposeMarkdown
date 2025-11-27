@@ -9,13 +9,13 @@ import com.iffly.compose.markdown.util.getNodeSpanStyle
 import com.vladsch.flexmark.ast.Heading
 
 class HeadingNodeStringBuilder : CompositeChildNodeStringBuilder<Heading>() {
-    override fun getSpanStyle(node: Heading, markdownTheme: MarkdownTheme): SpanStyle? {
-        return markdownTheme.getNodeSpanStyle(node)
-    }
+    override fun getSpanStyle(
+        node: Heading,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = markdownTheme.getNodeSpanStyle(node)
 
     override fun getParagraphStyle(
-        node: Heading, markdownTheme: MarkdownTheme
-    ): ParagraphStyle? {
-        return markdownTheme.getNodeParagraphStyle(node)
-    }
+        node: Heading,
+        markdownTheme: MarkdownTheme,
+    ): ParagraphStyle? = markdownTheme.getNodeParagraphStyle(node)
 }

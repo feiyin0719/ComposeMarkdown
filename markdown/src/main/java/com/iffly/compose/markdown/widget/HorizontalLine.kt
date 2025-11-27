@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun HorizontalLine(
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
         val strokeWidth = size.height
@@ -18,7 +18,7 @@ fun HorizontalLine(
             start = Offset(0f, size.height / 2),
             end = Offset(size.width, size.height / 2),
             strokeWidth = strokeWidth,
-            cap = androidx.compose.ui.graphics.StrokeCap.Round
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
         )
     }
 }

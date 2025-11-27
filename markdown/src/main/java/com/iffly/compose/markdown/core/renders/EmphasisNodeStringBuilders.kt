@@ -9,26 +9,29 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
 
 class StrikethroughNodeStringBuilder : CompositeChildNodeStringBuilder<Strikethrough>() {
-    override fun getSpanStyle(node: Strikethrough, markdownTheme: MarkdownTheme): SpanStyle? {
-        return markdownTheme.strikethrough
-    }
+    override fun getSpanStyle(
+        node: Strikethrough,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = markdownTheme.strikethrough
 }
 
 class SubscriptNodeStringBuilder : CompositeChildNodeStringBuilder<Subscript>() {
-    override fun getSpanStyle(node: Subscript, markdownTheme: MarkdownTheme): SpanStyle? {
-        return markdownTheme.subscript
-    }
+    override fun getSpanStyle(
+        node: Subscript,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = markdownTheme.subscript
 }
 
 class StrongEmphasisNodeStringBuilder : CompositeChildNodeStringBuilder<StrongEmphasis>() {
-    override fun getSpanStyle(node: StrongEmphasis, markdownTheme: MarkdownTheme): SpanStyle? {
-        return markdownTheme.strongEmphasis
-    }
+    override fun getSpanStyle(
+        node: StrongEmphasis,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = markdownTheme.strongEmphasis
 }
 
 class EmphasisNodeStringBuilder : CompositeChildNodeStringBuilder<Emphasis>() {
-    override fun getSpanStyle(node: Emphasis, markdownTheme: MarkdownTheme): SpanStyle? {
-        return markdownTheme.emphasis
-    }
+    override fun getSpanStyle(
+        node: Emphasis,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = markdownTheme.emphasis
 }
-

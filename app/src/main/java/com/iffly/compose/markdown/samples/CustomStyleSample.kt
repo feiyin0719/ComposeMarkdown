@@ -21,58 +21,74 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.style.MarkdownTheme
 
 @Composable
-fun CustomStyleExample(paddingValues: PaddingValues) {
-    val customTypography = MarkdownTheme(
-        textStyle = TextStyle(
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            color = Color(0xFF2E7D32)
-        ),
-        strongEmphasis = SpanStyle(
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1976D2)
-        ),
-        emphasis = SpanStyle(
-            fontStyle = FontStyle.Italic,
-            color = Color(0xFF9C27B0)
-        ),
-        code = TextStyle(
-            fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp,
-            color = Color(0xFF37474F),
-            background = Color(0xFFE8F5E8)
-        ),
-        headStyle = mapOf(
-            1 to TextStyle(
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1976D2)
-            ),
-            2 to TextStyle(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF388E3C)
-            ),
-            3 to TextStyle(
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF7B1FA2)
-            )
+fun CustomStyleExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
+    val customTypography =
+        MarkdownTheme(
+            textStyle =
+                TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    color = Color(0xFF2E7D32),
+                ),
+            strongEmphasis =
+                SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1976D2),
+                ),
+            emphasis =
+                SpanStyle(
+                    fontStyle = FontStyle.Italic,
+                    color = Color(0xFF9C27B0),
+                ),
+            code =
+                TextStyle(
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp,
+                    color = Color(0xFF37474F),
+                    background = Color(0xFFE8F5E8),
+                ),
+            headStyle =
+                mapOf(
+                    1 to
+                        TextStyle(
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1976D2),
+                        ),
+                    2 to
+                        TextStyle(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF388E3C),
+                        ),
+                    3 to
+                        TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF7B1FA2),
+                        ),
+                ),
         )
-    )
 
-    val config = MarkdownRenderConfig.Builder()
-        .markdownTheme(customTypography)
-        .build()
+    val config =
+        MarkdownRenderConfig
+            .Builder()
+            .markdownTheme(customTypography)
+            .build()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         MarkdownView(
-            content = """
+            content =
+                """
                 # Custom Style Example
                 
                 This example demonstrates how to customize Markdown typography styles.
@@ -94,9 +110,9 @@ fun CustomStyleExample(paddingValues: PaddingValues) {
                 val customStyle = "beautiful"
                 println("Custom style: ${'$'}customStyle")
                 ```
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = config,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

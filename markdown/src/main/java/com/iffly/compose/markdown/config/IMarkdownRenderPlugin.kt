@@ -14,7 +14,6 @@ import com.vladsch.flexmark.util.misc.Extension
  * block renderers, and inline node string builders.
  */
 interface IMarkdownRenderPlugin {
-
     /**
      * Returns a list of custom block parser factories.
      */
@@ -35,9 +34,7 @@ interface IMarkdownRenderPlugin {
      * Returns a map of inline node string builders.
      * The key is the class of the inline node, and the value is the corresponding string builder.
      */
-    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
-        emptyMap()
+    fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> = emptyMap()
 
     fun extensions(): List<Extension> = emptyList()
-
 }

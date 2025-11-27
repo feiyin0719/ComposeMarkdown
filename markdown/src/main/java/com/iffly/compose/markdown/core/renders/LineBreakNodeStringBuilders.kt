@@ -19,7 +19,7 @@ class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         append(" ")
     }
@@ -34,9 +34,8 @@ class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         append("\n")
     }
 }
-

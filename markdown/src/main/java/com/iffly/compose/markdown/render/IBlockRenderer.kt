@@ -10,12 +10,14 @@ import com.vladsch.flexmark.util.ast.Block
  * @param T The type of the block node, must be a subclass of [Block].
  */
 interface IBlockRenderer<in T> where T : Block {
-
     /**
      * Composable function to render the given block node.
      * @param node The block node to render.
      * @param modifier Modifier to be applied to the rendered content.
      */
     @Composable
-    fun Invoke(node: T, modifier: Modifier)
+    fun Invoke(
+        node: T,
+        modifier: Modifier,
+    )
 }

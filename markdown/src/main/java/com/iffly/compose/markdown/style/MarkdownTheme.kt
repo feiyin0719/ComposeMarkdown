@@ -28,96 +28,114 @@ import androidx.compose.ui.unit.sp
 data class MarkdownTheme(
     val breakLineHeight: Dp = 1.dp,
     val breakLineColor: Color = Color(0xFFE0E0E0),
-    val textStyle: TextStyle = TextStyle(
-        fontSize = 18.sp,
-        fontFamily = FontFamily.Default,
-        color = Color.Black,
-        lineHeight = 20.sp,
-    ),
-    val strongEmphasis: SpanStyle = SpanStyle(
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Default,
-    ),
-    val emphasis: SpanStyle = SpanStyle(
-        fontStyle = FontStyle.Italic,
-        fontFamily = FontFamily.Default,
-    ),
-    val code: TextStyle = TextStyle(
-        fontFamily = FontFamily.Monospace,
-        fontSize = 14.sp,
-        color = Color(0xFF37474F),
-        background = Color(0xFFF5F5F5),
-    ),
-    val strikethrough: SpanStyle = SpanStyle(
-        textDecoration = TextDecoration.LineThrough,
-        fontFamily = FontFamily.Default,
-    ),
-    val subscript: SpanStyle = SpanStyle(
-        fontFamily = FontFamily.Default,
-        baselineShift = Subscript
-    ),
-    val link: TextLinkStyles = TextLinkStyles(
-        style = SpanStyle(
-            color = Color(0xFF1976D2),
-            textDecoration = TextDecoration.Underline
-        ),
-        hoveredStyle = SpanStyle(
-            color = Color(0xFF1565C0),
-            textDecoration = TextDecoration.Underline
-        ),
-        focusedStyle = SpanStyle(
-            color = Color(0xFF0D47A1),
-            textDecoration = TextDecoration.Underline
-        ),
-        pressedStyle = SpanStyle(
-            color = Color(0xFF0D47A1),
-            textDecoration = TextDecoration.Underline
-        ),
-    ),
-    val headStyle: Map<Int, TextStyle> = mapOf(
-        HEAD1 to TextStyle(
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            lineHeight = 36.sp,
-            color = Color.Black,
-        ),
-        HEAD2 to TextStyle(
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            lineHeight = 32.sp,
-            color = Color.Black,
-        ),
-        HEAD3 to TextStyle(
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            lineHeight = 28.sp,
-            color = Color.Black,
-        ),
-        HEAD4 to TextStyle(
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            lineHeight = 24.sp,
-            color = Color.Black,
-        ),
-        HEAD5 to TextStyle(
+    val textStyle: TextStyle =
+        TextStyle(
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Default,
-            lineHeight = 22.sp,
             color = Color.Black,
-        ),
-        HEAD6 to TextStyle(
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
             lineHeight = 20.sp,
-            color = Color.Black,
         ),
-    ),
+    val strongEmphasis: SpanStyle =
+        SpanStyle(
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Default,
+        ),
+    val emphasis: SpanStyle =
+        SpanStyle(
+            fontStyle = FontStyle.Italic,
+            fontFamily = FontFamily.Default,
+        ),
+    val code: TextStyle =
+        TextStyle(
+            fontFamily = FontFamily.Monospace,
+            fontSize = 14.sp,
+            color = Color(0xFF37474F),
+            background = Color(0xFFF5F5F5),
+        ),
+    val strikethrough: SpanStyle =
+        SpanStyle(
+            textDecoration = TextDecoration.LineThrough,
+            fontFamily = FontFamily.Default,
+        ),
+    val subscript: SpanStyle =
+        SpanStyle(
+            fontFamily = FontFamily.Default,
+            baselineShift = Subscript,
+        ),
+    val link: TextLinkStyles =
+        TextLinkStyles(
+            style =
+                SpanStyle(
+                    color = Color(0xFF1976D2),
+                    textDecoration = TextDecoration.Underline,
+                ),
+            hoveredStyle =
+                SpanStyle(
+                    color = Color(0xFF1565C0),
+                    textDecoration = TextDecoration.Underline,
+                ),
+            focusedStyle =
+                SpanStyle(
+                    color = Color(0xFF0D47A1),
+                    textDecoration = TextDecoration.Underline,
+                ),
+            pressedStyle =
+                SpanStyle(
+                    color = Color(0xFF0D47A1),
+                    textDecoration = TextDecoration.Underline,
+                ),
+        ),
+    val headStyle: Map<Int, TextStyle> =
+        mapOf(
+            HEAD1 to
+                TextStyle(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 36.sp,
+                    color = Color.Black,
+                ),
+            HEAD2 to
+                TextStyle(
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 32.sp,
+                    color = Color.Black,
+                ),
+            HEAD3 to
+                TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 28.sp,
+                    color = Color.Black,
+                ),
+            HEAD4 to
+                TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 24.sp,
+                    color = Color.Black,
+                ),
+            HEAD5 to
+                TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 22.sp,
+                    color = Color.Black,
+                ),
+            HEAD6 to
+                TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Default,
+                    lineHeight = 20.sp,
+                    color = Color.Black,
+                ),
+        ),
     val listTheme: ListTheme = ListTheme(),
     val imageTheme: ImageTheme = ImageTheme(),
     val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
@@ -164,11 +182,12 @@ data class ListTheme(
     val markerSpacerWidth: Dp = 4.dp,
     val showSpacerInTightList: Boolean = true,
     val tightListSpacerHeight: Dp = 4.dp,
-    val markerTextStyle: TextStyle? = TextStyle(
-        lineHeight = 24.sp,
-        fontSize = 17.sp,
-        textAlign = TextAlign.End,
-    )
+    val markerTextStyle: TextStyle? =
+        TextStyle(
+            lineHeight = 24.sp,
+            fontSize = 17.sp,
+            textAlign = TextAlign.End,
+        ),
 )
 
 data class TableTheme(
@@ -177,24 +196,27 @@ data class TableTheme(
     val titleBackgroundColor: Color = Color.LightGray,
     val tableHeaderBackgroundColor: Color = Color.White,
     val tableCellBackgroundColor: Color = Color.White,
-    val cellTextStyle: TextStyle? = TextStyle(
-        fontSize = 14.sp,
-        fontFamily = FontFamily.Default,
-        color = Color.Black,
-    ),
-    val headerTextStyle: TextStyle? = TextStyle(
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Default,
-        color = Color.Black,
-    ),
-    val copyTextStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontFamily = FontFamily.Monospace,
-        color = Color.Black,
-    ),
+    val cellTextStyle: TextStyle? =
+        TextStyle(
+            fontSize = 14.sp,
+            fontFamily = FontFamily.Default,
+            color = Color.Black,
+        ),
+    val headerTextStyle: TextStyle? =
+        TextStyle(
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Default,
+            color = Color.Black,
+        ),
+    val copyTextStyle: TextStyle =
+        TextStyle(
+            fontSize = 12.sp,
+            fontFamily = FontFamily.Monospace,
+            color = Color.Black,
+        ),
     val shape: Shape = RoundedCornerShape(8.dp),
-    val cellPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    val cellPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
 )
 
 /**
@@ -219,19 +241,22 @@ data class CodeBlockTheme(
     val borderColor: Color = Color.LightGray,
     val borderWidth: Dp = 0.5.dp,
     val contentTheme: CodeContentTheme = CodeContentTheme(),
-    val codeTitleTextStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        color = Color.Gray,
-    ),
-    val codeCopyTextStyle: TextStyle = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        color = Color.Blue,
-    ),
-    val blockModifier: Modifier = Modifier.padding(
-        vertical = 12.dp,
-    ),
+    val codeTitleTextStyle: TextStyle =
+        TextStyle(
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Gray,
+        ),
+    val codeCopyTextStyle: TextStyle =
+        TextStyle(
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Blue,
+        ),
+    val blockModifier: Modifier =
+        Modifier.padding(
+            vertical = 12.dp,
+        ),
     val headerModifier: Modifier = Modifier.padding(horizontal = 17.dp),
     val showHeader: Boolean = true,
     val showCopyButton: Boolean = true,
@@ -259,23 +284,26 @@ data class CodeBlockTheme(
         val maxLines: Int = Int.MAX_VALUE,
         val minLines: Int = 1,
         val contentPadding: PaddingValues = PaddingValues(4.dp),
-        val lineNumberPadding: PaddingValues = PaddingValues(
-            start = 4.dp,
-            top = 4.dp,
-            bottom = 4.dp,
-            end = 16.dp,
-        ),
+        val lineNumberPadding: PaddingValues =
+            PaddingValues(
+                start = 4.dp,
+                top = 4.dp,
+                bottom = 4.dp,
+                end = 16.dp,
+            ),
         val overflow: TextOverflow = TextOverflow.Clip,
-        val codeTextStyle: TextStyle = TextStyle(
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-        ),
-        val lineNumberTextStyle: TextStyle = TextStyle(
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.End,
-        ),
+        val codeTextStyle: TextStyle =
+            TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+            ),
+        val lineNumberTextStyle: TextStyle =
+            TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.End,
+            ),
         val modifier: Modifier = Modifier.padding(start = 17.dp, end = 17.dp, top = 17.dp),
         val height: Dp? = null,
     )

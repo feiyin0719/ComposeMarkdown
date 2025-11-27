@@ -23,27 +23,35 @@ import com.iffly.compose.markdown.plugin.CustomMarkdownPlugin
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun CustomPluginExample(paddingValues: PaddingValues) {
+fun CustomPluginExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     // Create configuration with custom plugins
-    val customConfig = MarkdownRenderConfig.Builder()
-        .addPlugin(CustomMarkdownPlugin())
-        .build()
+    val customConfig =
+        MarkdownRenderConfig
+            .Builder()
+            .addPlugin(CustomMarkdownPlugin())
+            .build()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         // Description card
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f)),
         ) {
             Text(
-                text = "💡 Custom Plugin Features Demo\n" +
+                text =
+                    "💡 Custom Plugin Features Demo\n" +
                         "• Alert blocks: :::info, :::warning, :::success, :::error\n" +
                         "• User mentions: @username\n" +
                         "• Hashtags: #hashtag\n" +
@@ -51,12 +59,13 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
                         "• Badges: !!type:text!!",
                 modifier = Modifier.padding(16.dp),
                 color = Color.Blue,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
 
         MarkdownView(
-            content = """
+            content =
+                """
                 # Custom Plugin Example
                 
                 This example demonstrates various custom Markdown plugin features.
@@ -156,15 +165,18 @@ fun CustomPluginExample(paddingValues: PaddingValues) {
                 ```
                 
                 These plugins demonstrate how to extend Markdown syntax and add application-specific features.
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = customConfig,
             modifier = Modifier.padding(16.dp),
-            actionHandler = object : ActionHandler {
-                override fun handleUrlClick(url: String, node: Node) {
-                    Log.d("BasicSyntax", "Clicked link: $url")
-
-                }
-            }
+            actionHandler =
+                object : ActionHandler {
+                    override fun handleUrlClick(
+                        url: String,
+                        node: Node,
+                    ) {
+                        Log.d("BasicSyntax", "Clicked link: $url")
+                    }
+                },
         )
     }
 }

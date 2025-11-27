@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 data class MarkdownExample(
     val title: String,
     val description: String,
-    val content: @Composable (PaddingValues) -> Unit
+    val content: @Composable (PaddingValues) -> Unit,
 )

@@ -13,15 +13,20 @@ import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 
 @Composable
-fun TableAndCodeExample(paddingValues: PaddingValues) {
+fun TableAndCodeExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         MarkdownView(
-            content = """
+            content =
+                """
                 # Table and Code Examples
                 
                 ## Complex Table
@@ -145,9 +150,9 @@ fun TableAndCodeExample(paddingValues: PaddingValues) {
                    | Code Highlighting | ✅ | ❌ | ✅ | Syntax highlighting display |
                    | Image Rendering | ✅ | ✅ | ✅ | Local and network images |
                    | Custom Styling | ✅ | ✅ | ✅ | Fully customizable |
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

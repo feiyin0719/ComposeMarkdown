@@ -10,22 +10,23 @@ import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.util.ast.Node
 
-fun MarkdownTheme.getNodeSpanStyle(node: Node): SpanStyle {
-    return when (node) {
+fun MarkdownTheme.getNodeSpanStyle(node: Node): SpanStyle =
+    when (node) {
         is Heading -> this.headStyle[node.level]?.toSpanStyle() ?: this.textStyle.toSpanStyle()
-
         else -> this.textStyle.toSpanStyle()
     }
-}
 
-fun MarkdownTheme.getNodeParagraphStyle(node: Node?): ParagraphStyle {
-    return when (node) {
-        is Heading -> this.headStyle[node.level]?.toParagraphStyle()
-            ?: this.textStyle.toParagraphStyle()
+fun MarkdownTheme.getNodeParagraphStyle(node: Node?): ParagraphStyle =
+    when (node) {
+        is Heading -> {
+            this.headStyle[node.level]?.toParagraphStyle()
+                ?: this.textStyle.toParagraphStyle()
+        }
 
-        else -> this.textStyle.toParagraphStyle()
+        else -> {
+            this.textStyle.toParagraphStyle()
+        }
     }
-}
 
 private fun Node.isInTableHeader(): Boolean {
     var parent = this.parent
@@ -36,14 +37,16 @@ private fun Node.isInTableHeader(): Boolean {
     return false
 }
 
-fun Node.contentText(): String {
-    return chars.toString()
-}
+fun Node.contentText(): String = chars.toString()
 
 const val BULLET_POINT = "•"
-fun ListItem.getMarkerText(): String {
-    return when (this.parent) {
-        is BulletList -> BULLET_POINT
+
+fun ListItem.getMarkerText(): String =
+    when (this.parent) {
+        is BulletList -> {
+            BULLET_POINT
+        }
+
         is OrderedList -> {
             var max = 1
             var index = 1
@@ -61,9 +64,10 @@ fun ListItem.getMarkerText(): String {
             "${StringExt.FIGURE_SPACE.repeat(maxLength - indexLength)}$indexString"
         }
 
-        else -> ""
+        else -> {
+            ""
+        }
     }
-}
 
 fun ListItem.getIndentLevel(): Int {
     var level = 0

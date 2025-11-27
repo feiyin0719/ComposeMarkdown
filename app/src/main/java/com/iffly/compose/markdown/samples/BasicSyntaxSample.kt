@@ -16,15 +16,20 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun BasicSyntaxExample(paddingValues: PaddingValues) {
+fun BasicSyntaxExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         MarkdownView(
-            content = """
+            content =
+                """
                 # Basic Syntax Example
                 
                 This is an example demonstrating basic Markdown syntax.
@@ -107,16 +112,19 @@ fun BasicSyntaxExample(paddingValues: PaddingValues) {
                 }
                 
                 greetUser("Compose")
-             
-            """.trimIndent(),
+                
+                """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),
-            actionHandler = object : ActionHandler {
-                override fun handleUrlClick(url: String, node: Node) {
-                    Log.d("BasicSyntax", "Clicked link: $url")
-
-                }
-            }
+            actionHandler =
+                object : ActionHandler {
+                    override fun handleUrlClick(
+                        url: String,
+                        node: Node,
+                    ) {
+                        Log.d("BasicSyntax", "Clicked link: $url")
+                    }
+                },
         )
     }
 }

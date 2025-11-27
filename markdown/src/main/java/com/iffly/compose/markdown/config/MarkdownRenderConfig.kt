@@ -16,7 +16,6 @@ import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.util.misc.Extension
 
 class MarkdownRenderConfig {
-
     var markdownTheme: MarkdownTheme
         private set
 
@@ -42,16 +41,18 @@ class MarkdownRenderConfig {
     }
 
     companion object {
-        private val internalPlugins = listOf<IMarkdownRenderPlugin>(
-            // Add internal plugins here if needed
-            CorePlugin()
-        )
+        private val internalPlugins =
+            listOf<IMarkdownRenderPlugin>(
+                // Add internal plugins here if needed
+                CorePlugin(),
+            )
     }
 
     class Builder {
-        private val plugins = mutableListOf(
-            *internalPlugins.toTypedArray()
-        )
+        private val plugins =
+            mutableListOf(
+                *internalPlugins.toTypedArray(),
+            )
 
         private var markdownTheme: MarkdownTheme? = null
 
@@ -82,7 +83,7 @@ class MarkdownRenderConfig {
 
         fun addInlineNodeStringBuilder(
             nodeClass: Class<out Node>,
-            builder: IInlineNodeStringBuilder<*>
+            builder: IInlineNodeStringBuilder<*>,
         ): Builder {
             inlineNodeStringBuilders[nodeClass] = builder
             return this
@@ -90,7 +91,7 @@ class MarkdownRenderConfig {
 
         fun addBlockRenderer(
             blockClass: Class<out Block>,
-            renderer: IBlockRenderer<*>
+            renderer: IBlockRenderer<*>,
         ): Builder {
             blockRenderers[blockClass] = renderer
             return this
@@ -121,7 +122,7 @@ class MarkdownRenderConfig {
             val pluginExtensions = plugins.flatMap { it.extensions() }
             options.set(
                 Parser.EXTENSIONS,
-                pluginExtensions.plus(extensions)
+                pluginExtensions.plus(extensions),
             )
             val parserBuilder = Parser.builder(options)
             val htmlRendererBuilder = HtmlRenderer.builder(options)
@@ -157,10 +158,10 @@ class MarkdownRenderConfig {
                 markdownTheme ?: MarkdownTheme(),
                 RenderRegistry(
                     blockRenderers.toMap(),
-                    inlineNodeStringBuilders.toMap()
+                    inlineNodeStringBuilders.toMap(),
                 ),
                 parserBuilder.build(),
-                htmlRendererBuilder.build()
+                htmlRendererBuilder.build(),
             )
         }
     }

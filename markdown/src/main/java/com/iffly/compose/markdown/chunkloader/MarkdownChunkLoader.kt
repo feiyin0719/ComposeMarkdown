@@ -23,7 +23,7 @@ data class ChunkLoaderConfig(
     val minRemovedBatchSize: Int = 10,
     val chunkSize: Int = 5,
     val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 )
 
 /**
@@ -31,7 +31,11 @@ data class ChunkLoaderConfig(
  */
 sealed class LoadResult {
     object Success : LoadResult()
-    data class Error(val message: String, val cause: Throwable? = null) : LoadResult()
+
+    data class Error(
+        val message: String,
+        val cause: Throwable? = null,
+    ) : LoadResult()
 }
 
 /**
@@ -41,30 +45,31 @@ sealed class LoadResult {
 class MarkdownChunkLoader(
     fileSource: File,
     renderConfig: MarkdownRenderConfig,
-    private val config: ChunkLoaderConfig = ChunkLoaderConfig()
+    private val config: ChunkLoaderConfig = ChunkLoaderConfig(),
 ) {
     private var visibleLineRange: IntRange = IntRange.EMPTY
     private val chunkCache = ChunkCache(config.maxCachedChunks, config.minRemovedBatchSize)
     private val nodeToChunkMap = NodeToChunkMapper()
-    private val fileReader = CachedMarkdownFileReader(
-        fileSource,
-        maxCacheSize = config.maxCachedFileLines,
-        dispatcher = config.ioDispatcher
-    )
+    private val fileReader =
+        CachedMarkdownFileReader(
+            fileSource,
+            maxCacheSize = config.maxCachedFileLines,
+            dispatcher = config.ioDispatcher,
+        )
     private val markdownChunkParser = MarkdownChunkParser(renderConfig, config.parserDispatcher)
 
     // nodes flow
     private val _nodesFlow = MutableStateFlow<List<Block>>(emptyList())
-    val nodes: StateFlow<List<Block>> = _nodesFlow.asStateFlow()
+    val nodesFlow: StateFlow<List<Block>> = _nodesFlow.asStateFlow()
 
     private val _loadingFlow = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _loadingFlow.asStateFlow()
+    val loadingFlow: StateFlow<Boolean> = _loadingFlow.asStateFlow()
 
     /**
      * Load initial chunks
      */
-    suspend fun loadInitialChunks(): LoadResult {
-        return try {
+    suspend fun loadInitialChunks(): LoadResult =
+        try {
             _loadingFlow.value = true
             updateVisibleLineRange(0..config.initialLines, ScrollDirection.NONE)
             LoadResult.Success
@@ -73,7 +78,6 @@ class MarkdownChunkLoader(
         } finally {
             _loadingFlow.value = false
         }
-    }
 
     /**
      * Load more chunks based on visible nodes
@@ -81,7 +85,7 @@ class MarkdownChunkLoader(
     suspend fun loadMoreChunksIfNeeded(
         firstVisibleNode: Node,
         lastVisibleNode: Node,
-        scrollDirection: ScrollDirection = ScrollDirection.NONE
+        scrollDirection: ScrollDirection = ScrollDirection.NONE,
     ): LoadResult {
         return try {
             _loadingFlow.value = true
@@ -106,7 +110,7 @@ class MarkdownChunkLoader(
     private fun calculateNewRange(
         firstVisibleNode: Node,
         lastVisibleNode: Node,
-        scrollDirection: ScrollDirection
+        scrollDirection: ScrollDirection,
     ): IntRange {
         val startLineNumber = nodeToChunkMap.getChunk(firstVisibleNode)?.startLineNumber ?: 0
         val endLineNumber = nodeToChunkMap.getChunk(lastVisibleNode)?.endLineNumber ?: 0
@@ -135,7 +139,7 @@ class MarkdownChunkLoader(
      */
     private suspend fun updateVisibleLineRange(
         newRange: IntRange,
-        scrollDirection: ScrollDirection
+        scrollDirection: ScrollDirection,
     ) {
         // Load content before current range
         if (newRange.first < visibleLineRange.first) {
@@ -159,7 +163,10 @@ class MarkdownChunkLoader(
     /**
      * Load chunks before current range
      */
-    private suspend fun loadChunksBeforeCurrent(startLine: Int, endLine: Int) {
+    private suspend fun loadChunksBeforeCurrent(
+        startLine: Int,
+        endLine: Int,
+    ) {
         var currentStart = startLine.coerceAtLeast(0)
         val currentEnd = endLine.coerceAtLeast(0)
 
@@ -181,17 +188,21 @@ class MarkdownChunkLoader(
     /**
      * Load chunks after current range
      */
-    private suspend fun loadChunksAfterCurrent(startLine: Int, endLine: Int) {
+    private suspend fun loadChunksAfterCurrent(
+        startLine: Int,
+        endLine: Int,
+    ) {
         val currentStart = startLine
         var currentEnd = endLine
 
         while (currentStart <= currentEnd) {
-            val chunks = markdownChunkParser.parseRange(
-                fileReader,
-                currentStart,
-                currentEnd,
-                dropFirst = false
-            )
+            val chunks =
+                markdownChunkParser.parseRange(
+                    fileReader,
+                    currentStart,
+                    currentEnd,
+                    dropFirst = false,
+                )
             if (chunks == null || chunks.isNotEmpty()) { // Allow null to indicate read failure
                 chunks?.let {
                     chunkCache.addChunksAtEnd(chunks)
@@ -220,20 +231,17 @@ class MarkdownChunkLoader(
     /**
      * Get all current nodes
      */
-    fun getNodes(): List<Block> {
-        return chunkCache.getAllChunks().flatMap { it.nodes }
-    }
+    fun getNodes(): List<Block> = chunkCache.getAllChunks().flatMap { it.nodes }
 
     /**
      * Get cache information
      */
-    fun getCacheInfo(): MarkdownChunkCacheInfo {
-        return MarkdownChunkCacheInfo(
+    fun getCacheInfo(): MarkdownChunkCacheInfo =
+        MarkdownChunkCacheInfo(
             chunkCacheSize = chunkCache.size(),
             visibleLineRange = visibleLineRange,
-            fileReaderCache = fileReader.getCacheInfo()
+            fileReaderCache = fileReader.getCacheInfo(),
         )
-    }
 
     /**
      * Clean up resources
@@ -250,7 +258,7 @@ class MarkdownChunkLoader(
     data class MarkdownChunkCacheInfo(
         val chunkCacheSize: Int,
         val visibleLineRange: IntRange,
-        val fileReaderCache: FileCacheInfo
+        val fileReaderCache: FileCacheInfo,
     )
 }
 
@@ -271,7 +279,7 @@ internal data class MarkdownChunk(
  */
 private class ChunkCache(
     private val maxSize: Int,
-    private val minRemovedBatchSize: Int = 10
+    private val minRemovedBatchSize: Int = 10,
 ) {
     private val chunks = mutableListOf<MarkdownChunk>()
 
@@ -289,21 +297,31 @@ private class ChunkCache(
 
     fun recycleCacheIfNeeded(
         scrollDirection: ScrollDirection,
-        onRecycleChunk: ((MarkdownChunk) -> Unit)? = null
+        onRecycleChunk: ((MarkdownChunk) -> Unit)? = null,
     ) {
         if (chunks.size <= maxSize) return
 
         val toRemove = chunks.size - maxSize
         if (toRemove < minRemovedBatchSize) return
         repeat(toRemove) { num ->
-            val chunk = when (scrollDirection) {
-                ScrollDirection.UP -> chunks.removeLastOrNull()
-                ScrollDirection.DOWN -> chunks.removeFirstOrNull()
-                ScrollDirection.NONE -> {
-                    if (num % 2 == 0) chunks.removeFirstOrNull()
-                    else chunks.removeLastOrNull()
+            val chunk =
+                when (scrollDirection) {
+                    ScrollDirection.UP -> {
+                        chunks.removeLastOrNull()
+                    }
+
+                    ScrollDirection.DOWN -> {
+                        chunks.removeFirstOrNull()
+                    }
+
+                    ScrollDirection.NONE -> {
+                        if (num % 2 == 0) {
+                            chunks.removeFirstOrNull()
+                        } else {
+                            chunks.removeLastOrNull()
+                        }
+                    }
                 }
-            }
             chunk?.let { onRecycleChunk?.invoke(it) }
         }
     }
@@ -343,56 +361,59 @@ private class NodeToChunkMapper {
  */
 private class MarkdownChunkParser(
     private val renderConfig: MarkdownRenderConfig,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
 ) {
     suspend fun parseRange(
         fileReader: CachedMarkdownFileReader,
         startLine: Int,
         endLine: Int,
         chunkSize: Int = 5,
-        dropFirst: Boolean = true
-    ): List<MarkdownChunk>? = withContext(dispatcher) {
-        try {
-            val result = fileReader.readLines(startLine, endLine)
-            val lines = (result as? ReadResult.Success)?.data ?: return@withContext null
-            if (lines.isEmpty()) return@withContext null
+        dropFirst: Boolean = true,
+    ): List<MarkdownChunk>? =
+        withContext(dispatcher) {
+            try {
+                val result = fileReader.readLines(startLine, endLine)
+                val lines = (result as? ReadResult.Success)?.data ?: return@withContext null
+                if (lines.isEmpty()) return@withContext null
 
-            val document = renderConfig.parser.parse(lines.joinToString("\n"))
-            val chunks = mutableListOf<MarkdownChunk>()
-            val blocks = mutableListOf<Block>()
+                val document = renderConfig.parser.parse(lines.joinToString("\n"))
+                val chunks = mutableListOf<MarkdownChunk>()
+                val blocks = mutableListOf<Block>()
 
-            var node = if (dropFirst) document.firstChild?.next else document.firstChild
+                var node = if (dropFirst) document.firstChild?.next else document.firstChild
 
-            while (node != null) {
-                if (!dropFirst && node == document.lastChild) break
+                while (node != null) {
+                    if (!dropFirst && node == document.lastChild) break
 
-                if (node is Block) {
-                    blocks.add(node)
+                    if (node is Block) {
+                        blocks.add(node)
+                    }
+
+                    if (blocks.size >= chunkSize) {
+                        chunks.add(createChunk(blocks.toList(), startLine))
+                        blocks.clear()
+                    }
+
+                    node = node.next
                 }
 
-                if (blocks.size >= chunkSize) {
-                    chunks.add(createChunk(blocks.toList(), startLine))
-                    blocks.clear()
+                if (blocks.isNotEmpty()) {
+                    chunks.add(createChunk(blocks, startLine))
                 }
 
-                node = node.next
+                chunks.filter { it.isValid }
+            } catch (e: Exception) {
+                emptyList()
             }
-
-            if (blocks.isNotEmpty()) {
-                chunks.add(createChunk(blocks, startLine))
-            }
-
-            chunks.filter { it.isValid }
-        } catch (e: Exception) {
-            emptyList()
         }
-    }
 
-    private fun createChunk(blocks: List<Block>, baseLineNumber: Int): MarkdownChunk {
-        return MarkdownChunk(
+    private fun createChunk(
+        blocks: List<Block>,
+        baseLineNumber: Int,
+    ): MarkdownChunk =
+        MarkdownChunk(
             nodes = blocks,
             startLineNumber = baseLineNumber + blocks.first().startLineNumber,
-            endLineNumber = baseLineNumber + blocks.last().endLineNumber
+            endLineNumber = baseLineNumber + blocks.last().endLineNumber,
         )
-    }
 }

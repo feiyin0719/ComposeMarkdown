@@ -35,8 +35,12 @@ import com.vladsch.flexmark.util.ast.Block
  * @param T The type of the code block.
  */
 fun interface CodeWidgetRenderer<T : Block> {
+    @Suppress("ComposableNaming")
     @Composable
-    operator fun invoke(block: T, modifier: Modifier)
+    operator fun invoke(
+        block: T,
+        modifier: Modifier,
+    )
 }
 
 /**
@@ -46,16 +50,21 @@ fun interface CodeWidgetRenderer<T : Block> {
  * @see CodeWidgetRenderer
  */
 class CopyRenderer<T : Block> : CodeWidgetRenderer<T> {
+    @Suppress("ComposableNaming")
     @Composable
-    override fun invoke(block: T, modifier: Modifier) {
+    override fun invoke(
+        block: T,
+        modifier: Modifier,
+    ) {
         val actionHandler = currentActionHandler()
         val codeBlockTheme = currentTheme().codeBlockTheme
         Text(
             "Copy",
             style = codeBlockTheme.codeCopyTextStyle,
-            modifier = modifier.clickable {
-                actionHandler?.handleCopyClick(block)
-            },
+            modifier =
+                modifier.clickable {
+                    actionHandler?.handleCopyClick(block)
+                },
         )
     }
 }
@@ -73,24 +82,30 @@ class CodeHeaderRenderer<T : Block>(
     private val renderCopy: CodeWidgetRenderer<T>,
     private val disableSelection: Boolean = true,
 ) : CodeWidgetRenderer<T> {
+    @Suppress("ComposableNaming")
     @Composable
-    override fun invoke(block: T, modifier: Modifier) {
+    override fun invoke(
+        block: T,
+        modifier: Modifier,
+    ) {
         if (block !is FencedCodeBlock && block !is IndentedCodeBlock) {
             return
         }
-        val language = if (block is FencedCodeBlock) {
-            block.info.toString()
-        } else {
-            "Text"
-        }
+        val language =
+            if (block is FencedCodeBlock) {
+                block.info.toString()
+            } else {
+                "Text"
+            }
         val codeBlockTheme = currentTheme().codeBlockTheme
         DisableSelectionWrapper(disabled = disableSelection) {
             Column(modifier = modifier) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .then(codeBlockTheme.headerModifier),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .then(codeBlockTheme.headerModifier),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -107,9 +122,10 @@ class CodeHeaderRenderer<T : Block>(
                 HorizontalDivider(
                     color = codeBlockTheme.borderColor,
                     thickness = codeBlockTheme.borderWidth,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 9.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 9.dp),
                 )
                 // add invisible \n in header for selection-copy purpose
                 SelectionFormatText("\n")
@@ -126,25 +142,31 @@ class CodeHeaderRenderer<T : Block>(
  * @see CodeWidgetRenderer
  */
 class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
+    @Suppress("ComposableNaming")
     @Composable
-    override fun invoke(block: T, modifier: Modifier) {
+    override fun invoke(
+        block: T,
+        modifier: Modifier,
+    ) {
         if (block !is FencedCodeBlock && block !is IndentedCodeBlock) {
             return
         }
         val contentTheme = currentTheme().codeBlockTheme.contentTheme
-        val codeText = when (block) {
-            is FencedCodeBlock -> block.contentChars.toString()
-            is IndentedCodeBlock -> block.contentChars.toString()
-            else -> return
-        }
-        val scrollModifier = if (contentTheme.height != null) {
-            val scrollState = rememberScrollState()
-            Modifier
-                .height(contentTheme.height)
-                .verticalScroll(scrollState)
-        } else {
-            Modifier
-        }
+        val codeText =
+            when (block) {
+                is FencedCodeBlock -> block.contentChars.toString()
+                is IndentedCodeBlock -> block.contentChars.toString()
+                else -> return
+            }
+        val scrollModifier =
+            if (contentTheme.height != null) {
+                val scrollState = rememberScrollState()
+                Modifier
+                    .height(contentTheme.height)
+                    .verticalScroll(scrollState)
+            } else {
+                Modifier
+            }
         LineNumberText(
             text = codeText,
             textStyle = contentTheme.codeTextStyle,
@@ -155,9 +177,10 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
             softWrap = contentTheme.softWrap,
             maxLines = contentTheme.maxLines,
             minLines = contentTheme.minLines,
-            modifier = modifier
-                .then(contentTheme.modifier)
-                .then(scrollModifier),
+            modifier =
+                modifier
+                    .then(contentTheme.modifier)
+                    .then(scrollModifier),
         )
         // add invisible \n in code content for selection-copy purpose
         SelectionFormatText("\n")
@@ -189,35 +212,40 @@ class CodeRenderer<T : Block>(
         renderHeaderOverride ?: CodeHeaderRenderer(renderCopy = renderCopy)
 
     @Composable
-    override fun Invoke(block: T, modifier: Modifier) {
+    override fun Invoke(
+        node: T,
+        modifier: Modifier,
+    ) {
         val codeBlockTheme = currentTheme().codeBlockTheme
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .background(codeBlockTheme.backgroundColor, shape = codeBlockTheme.shape)
-                .border(
-                    width = codeBlockTheme.borderWidth,
-                    color = codeBlockTheme.borderColor,
-                    shape = codeBlockTheme.shape,
-                )
-                .then(
-                    codeBlockTheme.blockModifier,
-                ),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .background(codeBlockTheme.backgroundColor, shape = codeBlockTheme.shape)
+                    .border(
+                        width = codeBlockTheme.borderWidth,
+                        color = codeBlockTheme.borderColor,
+                        shape = codeBlockTheme.shape,
+                    ).then(
+                        codeBlockTheme.blockModifier,
+                    ),
         ) {
             if (codeBlockTheme.showHeader) {
                 renderHeader(
-                    block = block,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
+                    block = node,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                 )
             }
             renderContent(
-                block = block,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
+                block = node,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
             )
         }
     }
@@ -237,10 +265,10 @@ class FencedCodeBlockRenderer(
     renderContentOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
     renderHeaderOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
 ) : IBlockRenderer<FencedCodeBlock> by CodeRenderer(
-    renderCopyOverride,
-    renderContentOverride,
-    renderHeaderOverride,
-)
+        renderCopyOverride,
+        renderContentOverride,
+        renderHeaderOverride,
+    )
 
 /**
  * Renderer for indented code blocks.
@@ -256,8 +284,7 @@ class IndentedCodeBlockRenderer(
     renderContentOverride: CodeWidgetRenderer<IndentedCodeBlock>? = null,
     renderHeaderOverride: CodeWidgetRenderer<IndentedCodeBlock>? = null,
 ) : IBlockRenderer<IndentedCodeBlock> by CodeRenderer(
-    renderCopyOverride,
-    renderContentOverride,
-    renderHeaderOverride,
-)
-
+        renderCopyOverride,
+        renderContentOverride,
+        renderHeaderOverride,
+    )

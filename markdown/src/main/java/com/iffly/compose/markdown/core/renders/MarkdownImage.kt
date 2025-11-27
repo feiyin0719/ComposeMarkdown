@@ -24,19 +24,20 @@ fun MarkdownImage(
     errorView: @Composable (image: Image, modifier: Modifier) -> Unit = { image, modifier ->
         MarkdownImageErrorView(
             modifier = modifier,
-            altText = image.text?.toString() ?: image.title?.toString()
+            altText = image.text?.toString() ?: image.title?.toString(),
         )
     },
     loadingView: @Composable (image: Image, modifier: Modifier) -> Unit = { image, modifier ->
         LoadingView(modifier = modifier)
-    }
+    },
 ) {
     val url = node.url
     val altText = node.text?.toString() ?: node.title?.toString() ?: ""
     val context = LocalPlatformContext.current
 
     SubcomposeAsyncImage(
-        ImageRequest.Builder(context)
+        ImageRequest
+            .Builder(context)
             .data(url.toString())
             .crossfade(true)
             .memoryCachePolicy(CachePolicy.ENABLED)
@@ -49,7 +50,7 @@ fun MarkdownImage(
         loading = {
             loadingView(
                 node,
-                Modifier
+                Modifier,
             )
         },
         error = {
@@ -57,7 +58,7 @@ fun MarkdownImage(
                 node,
                 Modifier,
             )
-        }
+        },
     )
 }
 
@@ -75,5 +76,4 @@ fun MarkdownImageErrorView(
         contentScale = contentScale,
         alignment = alignment,
     )
-
 }

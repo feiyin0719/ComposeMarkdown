@@ -4,11 +4,8 @@ import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.data.MutableDataHolder
 
 class LatexExtension private constructor() : Parser.ParserExtension {
-
     companion object {
-        fun create(): LatexExtension {
-            return LatexExtension()
-        }
+        fun create(): LatexExtension = LatexExtension()
     }
 
     override fun parserOptions(options: MutableDataHolder?) {

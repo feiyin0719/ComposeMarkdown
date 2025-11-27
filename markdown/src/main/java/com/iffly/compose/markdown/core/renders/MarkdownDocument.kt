@@ -13,9 +13,13 @@ import com.iffly.compose.markdown.render.MarkdownContent
 import com.vladsch.flexmark.util.ast.Document
 
 @Composable
-fun Document(node: Document, modifier: Modifier) {
+fun Document(
+    node: Document,
+    modifier: Modifier = Modifier,
+) {
     Column(
-        verticalArrangement = Arrangement.Top, modifier = modifier.wrapContentSize()
+        verticalArrangement = Arrangement.Top,
+        modifier = modifier.wrapContentSize(),
     ) {
         val theme = currentTheme()
         var child = node.firstChild
@@ -31,7 +35,10 @@ fun Document(node: Document, modifier: Modifier) {
 
 class DocumentRenderer : IBlockRenderer<Document> {
     @Composable
-    override fun Invoke(node: Document, modifier: Modifier) {
+    override fun Invoke(
+        node: Document,
+        modifier: Modifier,
+    ) {
         Document(node, modifier)
     }
 }

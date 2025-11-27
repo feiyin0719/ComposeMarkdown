@@ -22,45 +22,55 @@ import com.iffly.compose.markdown.task.TaskMarkdownRenderPlugin
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun TaskListExample(paddingValues: PaddingValues) {
+fun TaskListExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     // Create configuration with TaskListItem plugin
-    val taskConfig = MarkdownRenderConfig.Builder()
-        .addPlugin(
-            TaskMarkdownRenderPlugin()
-        )
-        .build()
+    val taskConfig =
+        MarkdownRenderConfig
+            .Builder()
+            .addPlugin(
+                TaskMarkdownRenderPlugin(),
+            ).build()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         // Description card
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                    alpha = 0.3f
-                )
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        MaterialTheme.colorScheme.primaryContainer.copy(
+                            alpha = 0.3f,
+                        ),
+                ),
         ) {
             Text(
-                text = "📋 Task List Features Demo\n" +
+                text =
+                    "📋 Task List Features Demo\n" +
                         "• Checked tasks: [x] Completed task\n" +
                         "• Unchecked tasks: [ ] Pending task\n" +
                         "• Nested task lists supported\n" +
                         "• Custom styling for task items",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
 
         MarkdownView(
-            content = """
+            content =
+                """
                 # Task List Example
                 
                 This example demonstrates GitHub-style task lists using the TaskMarkdownRenderPlugin.
@@ -142,15 +152,18 @@ fun TaskListExample(paddingValues: PaddingValues) {
                 - Use `[ ]` for pending tasks  
                 - Tasks can be nested within other list items
                 - Custom styling can be applied via the TaskMarkdownRenderPlugin
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = taskConfig,
             modifier = Modifier.padding(16.dp),
-            actionHandler = object : ActionHandler {
-                override fun handleUrlClick(url: String, node: Node) {
-                    Log.d("BasicSyntax", "Clicked link: $url")
-
-                }
-            }
+            actionHandler =
+                object : ActionHandler {
+                    override fun handleUrlClick(
+                        url: String,
+                        node: Node,
+                    ) {
+                        Log.d("BasicSyntax", "Clicked link: $url")
+                    }
+                },
         )
     }
 }

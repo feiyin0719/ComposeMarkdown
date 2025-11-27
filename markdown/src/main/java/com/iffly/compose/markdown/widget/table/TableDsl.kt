@@ -27,7 +27,7 @@ interface TableScope {
     fun header(
         modifier: Modifier = Modifier,
         cellAlignment: Alignment? = null,
-        content: RowScope.() -> Unit
+        content: RowScope.() -> Unit,
     )
 
     /**
@@ -51,7 +51,7 @@ interface BodyScope {
     fun row(
         modifier: Modifier = Modifier,
         cellAlignment: Alignment? = null,
-        content: RowScope.() -> Unit
+        content: RowScope.() -> Unit,
     )
 }
 
@@ -71,6 +71,6 @@ interface RowScope {
         modifier: Modifier = Modifier,
         cellBackground: Modifier = Modifier,
         alignment: Alignment? = null,
-        content: @Composable () -> Unit
+        content: @Composable () -> Unit,
     )
 }

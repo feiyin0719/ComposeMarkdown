@@ -5,7 +5,10 @@ import androidx.compose.ui.text.LinkInteractionListener
 import com.vladsch.flexmark.util.ast.Node
 
 interface ActionHandler {
-    fun handleUrlClick(url: String, node: Node) {
+    fun handleUrlClick(
+        url: String,
+        node: Node,
+    ) {
         // Default implementation does nothing
     }
 
@@ -23,5 +26,4 @@ internal class MarkdownLinkInteractionListener(
             actionHandler.handleUrlClick(link.url, node)
         }
     }
-
 }

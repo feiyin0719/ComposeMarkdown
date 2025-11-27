@@ -20,56 +20,63 @@ data class LatexConfig(
     val color: Int,
     val backgroundColor: Int,
     val align: Int,
-    val padding: android.graphics.Rect
+    val padding: android.graphics.Rect,
 )
 
 fun TextStyle.toLatexConfig(
     density: Density,
     paddingValues: PaddingValues,
-): LatexConfig {
-    return LatexConfig(
+): LatexConfig =
+    LatexConfig(
         textSize = with(density) { if (fontSize.isUnspecified) 16.sp.toPx() else fontSize.toPx() },
         color = this.color.toArgb(),
         backgroundColor = this.background.toArgb(),
         align = this.textAlign.toJLatexMathAlign(),
-        padding = android.graphics.Rect(
-            with(density) {
-                paddingValues.calculateLeftPadding(LayoutDirection.Ltr).toPx().toInt()
-            },
-            with(density) { paddingValues.calculateTopPadding().toPx().toInt() },
-            with(density) {
-                paddingValues.calculateRightPadding(LayoutDirection.Ltr).toPx().toInt()
-            },
-            with(density) { paddingValues.calculateBottomPadding().toPx().toInt() },
-        )
+        padding =
+            android.graphics.Rect(
+                with(density) {
+                    paddingValues.calculateLeftPadding(LayoutDirection.Ltr).toPx().toInt()
+                },
+                with(density) { paddingValues.calculateTopPadding().toPx().toInt() },
+                with(density) {
+                    paddingValues.calculateRightPadding(LayoutDirection.Ltr).toPx().toInt()
+                },
+                with(density) { paddingValues.calculateBottomPadding().toPx().toInt() },
+            ),
     )
-}
 
-private fun TextAlign.toJLatexMathAlign(): Int {
-    return when (this) {
+private fun TextAlign.toJLatexMathAlign(): Int =
+    when (this) {
         TextAlign.Left -> ALIGN_LEFT
         TextAlign.Start -> ALIGN_RIGHT
         TextAlign.Center -> ALIGN_CENTER
         else -> ALIGN_CENTER
     }
-}
 
 object LatexBitmapLoader {
     private val cache: LRUCache<String, Bitmap> = LRUCache(50)
 
     private val drawableCache = LRUCache<String, JLatexMathDrawable>(50)
 
-    fun createDrawable(mathExpression: String, config: LatexConfig): JLatexMathDrawable {
-        return drawableCache[mathExpression] ?: run {
-            val drawable = JLatexMathDrawable.builder(mathExpression).textSize(config.textSize)
-                .color(config.color).background(config.backgroundColor).align(config.align).padding(
-                    config.padding.left,
-                    config.padding.top,
-                    config.padding.right,
-                    config.padding.bottom
-                ).build()
+    fun createDrawable(
+        mathExpression: String,
+        config: LatexConfig,
+    ): JLatexMathDrawable =
+        drawableCache[mathExpression] ?: run {
+            val drawable =
+                JLatexMathDrawable
+                    .builder(mathExpression)
+                    .textSize(config.textSize)
+                    .color(config.color)
+                    .background(config.backgroundColor)
+                    .align(config.align)
+                    .padding(
+                        config.padding.left,
+                        config.padding.top,
+                        config.padding.right,
+                        config.padding.bottom,
+                    ).build()
             drawableCache[mathExpression] = drawable
             drawable
         }
-    }
 }

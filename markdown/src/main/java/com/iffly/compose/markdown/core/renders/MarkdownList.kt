@@ -25,9 +25,13 @@ import com.vladsch.flexmark.ast.OrderedListItem
 
 open class ListBlockRenderer : IBlockRenderer<ListBlock> {
     @Composable
-    override fun Invoke(node: ListBlock, modifier: Modifier) {
+    override fun Invoke(
+        node: ListBlock,
+        modifier: Modifier,
+    ) {
         Column(
-            verticalArrangement = Arrangement.Top, modifier = modifier.wrapContentSize()
+            verticalArrangement = Arrangement.Top,
+            modifier = modifier.wrapContentSize(),
         ) {
             val theme = currentTheme()
             var child = node.firstChild
@@ -52,14 +56,17 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
     abstract fun getMarker(node: T): String
 
     @Composable
-    override fun Invoke(node: T, modifier: Modifier) {
+    override fun Invoke(
+        node: T,
+        modifier: Modifier,
+    ) {
         val theme = currentTheme()
         val marker = getMarker(node)
         Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
         ) {
             Text(
                 marker,
@@ -79,7 +86,6 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
                     }
                     child = child.next
                 }
-
             }
         }
     }
@@ -88,15 +94,10 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
 class OrderedListItemRenderer : ListItemRenderer<OrderedListItem>() {
     override fun getMarker(node: OrderedListItem): String {
         val delimiter = (node.parent as? OrderedList)?.delimiter ?: "."
-        return "${node.getMarkerText()}${delimiter}"
+        return "${node.getMarkerText()}$delimiter"
     }
-
 }
 
 class BulletListItemRenderer : ListItemRenderer<BulletListItem>() {
-    override fun getMarker(node: BulletListItem): String {
-        return node.getMarkerText()
-    }
-
+    override fun getMarker(node: BulletListItem): String = node.getMarkerText()
 }
-

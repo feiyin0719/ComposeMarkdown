@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -13,32 +14,34 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.MarkdownTheme
-import com.iffly.compose.markdown.util.MarkdownPreview
+import com.iffly.compose.markdown.util.PreviewMarkdown
 import com.iffly.compose.markdown.util.contentText
-import com.iffly.compose.markdown.widget.BasicStringText
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun MarkdownContent(node: Node, modifier: Modifier = Modifier) {
+fun MarkdownContent(
+    node: Node,
+    modifier: Modifier = Modifier,
+) {
     when (node) {
         is Block -> {
             MarkdownBlock(
                 node = node,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
-        else ->
+        else -> {
             MarkdownText(node, modifier = modifier)
+        }
     }
 }
-
 
 @Composable
 fun MarkdownBlock(
     node: Node,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val renderRegistry = currentRenderRegistry()
     if (node is Block) {
@@ -49,25 +52,25 @@ fun MarkdownBlock(
             // Fallback to rendering children if no renderer is found
             Log.i(
                 "MarkdownNode",
-                "No renderer found for ${node::class.java.simpleName}, rendering children."
+                "No renderer found for ${node::class.java.simpleName}, rendering children.",
             )
             val isShowNotSupported = isShowNotSupported()
             if (isShowNotSupported) {
-                BasicStringText(
+                Text(
                     text = "Unsupported block: ${node::class.java.simpleName}",
                 )
             } else {
-                BasicStringText(node.contentText())
+                Text(node.contentText())
             }
         }
     }
 }
 
-
-@MarkdownPreview
+@PreviewMarkdown
 @Composable
 private fun MarkdownContentPreview() {
-    val testText = """
+    val testText =
+        """
         # Sample Markdown Content
 
         This is a **bold text** and this is *italic text*.[baidu](https://www.baidu.com)
@@ -135,15 +138,21 @@ private fun MarkdownContentPreview() {
         
         
         ![Image](https://office.visualstudio.com/2003b897-e349-46b6-a733-61b32410d686/_apis/git/repositories/09de2423-725a-49cf-acff-a50529f2917f/pullRequests/4297383/attachments/image.png)
-    """.trimIndent()
-    val node = MarkdownRenderConfig.Builder().build().parser.parse(testText)
+        """.trimIndent()
+    val node =
+        MarkdownRenderConfig
+            .Builder()
+            .build()
+            .parser
+            .parse(testText)
     CompositionLocalProvider(
-        LocalMarkdownThemeProvider provides MarkdownTheme()
+        LocalMarkdownThemeProvider provides MarkdownTheme(),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(state = rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(state = rememberScrollState()),
         ) {
             MarkdownContent(node)
         }

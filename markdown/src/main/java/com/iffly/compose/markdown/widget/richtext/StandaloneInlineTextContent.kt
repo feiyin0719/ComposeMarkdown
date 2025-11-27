@@ -49,10 +49,12 @@ fun AnnotatedString.Builder.appendStandaloneInlineTextContent(
     pop()
 }
 
-fun AnnotatedString.getStandaloneInlineTextContentAnnotations(start: Int = 0, end: Int = this.length): List<Range<String>> {
-    return getStringAnnotations(
+fun AnnotatedString.getStandaloneInlineTextContentAnnotations(
+    start: Int = 0,
+    end: Int = this.length,
+): List<Range<String>> =
+    getStringAnnotations(
         tag = STANDALONE_INLINE_CONTENT_TAG,
         start = start,
         end = end,
     )
-}

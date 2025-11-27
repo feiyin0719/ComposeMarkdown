@@ -22,62 +22,78 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.style.MarkdownTheme
 
 @Composable
-fun DarkThemeExample(paddingValues: PaddingValues) {
-    val darkTypography = MarkdownTheme(
-        textStyle = TextStyle(
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            color = Color.White,
-        ),
-        strongEmphasis = SpanStyle(
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64B5F6)
-        ),
-        emphasis = SpanStyle(
-            fontStyle = FontStyle.Italic,
-            color = Color(0xFFBA68C8)
-        ),
-        code = TextStyle(
-            fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp,
-            color = Color(0xFF81C784),
-            background = Color(0xFF2E2E2E)
-        ),
-        headStyle = mapOf(
-            1 to TextStyle(
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF64B5F6)
-            ),
-            2 to TextStyle(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF81C784)
-            ),
-            3 to TextStyle(
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFBA68C8)
-            )
+fun DarkThemeExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
+    val darkTypography =
+        MarkdownTheme(
+            textStyle =
+                TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    color = Color.White,
+                ),
+            strongEmphasis =
+                SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF64B5F6),
+                ),
+            emphasis =
+                SpanStyle(
+                    fontStyle = FontStyle.Italic,
+                    color = Color(0xFFBA68C8),
+                ),
+            code =
+                TextStyle(
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp,
+                    color = Color(0xFF81C784),
+                    background = Color(0xFF2E2E2E),
+                ),
+            headStyle =
+                mapOf(
+                    1 to
+                        TextStyle(
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF64B5F6),
+                        ),
+                    2 to
+                        TextStyle(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF81C784),
+                        ),
+                    3 to
+                        TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFBA68C8),
+                        ),
+                ),
         )
-    )
 
-    val config = MarkdownRenderConfig.Builder()
-        .markdownTheme(darkTypography)
-        .build()
+    val config =
+        MarkdownRenderConfig
+            .Builder()
+            .markdownTheme(darkTypography)
+            .build()
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF121212)
+        modifier = modifier.fillMaxSize(),
+        color = Color(0xFF121212),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
         ) {
             MarkdownView(
-                content = """
+                content =
+                    """
                     # Dark Theme Example
                     
                     This example demonstrates Markdown styles specifically designed for dark mode.
@@ -113,9 +129,9 @@ fun DarkThemeExample(paddingValues: PaddingValues) {
                     - 🔋 Saves battery life (OLED screens)
                     - 🎨 Modern design style
                     - 📱 Matches system theme
-                """.trimIndent(),
+                    """.trimIndent(),
                 markdownRenderConfig = config,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
         }
     }

@@ -19,35 +19,37 @@ import com.vladsch.flexmark.ast.BlockQuote
 class BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
     @Composable
     override fun Invoke(
-        node: BlockQuote, modifier: Modifier
+        node: BlockQuote,
+        modifier: Modifier,
     ) {
-        MarkdownBlockQuote(modifier, node)
+        MarkdownBlockQuote(node = node, modifier = modifier)
     }
 }
 
 @Composable
 private fun MarkdownBlockQuote(
-    modifier: Modifier, node: BlockQuote
+    node: BlockQuote,
+    modifier: Modifier = Modifier,
 ) {
     val theme = currentTheme()
     val blockQuoteTheme = theme.blockQuoteTheme
     val borderColor = blockQuoteTheme.borderColor
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(color = blockQuoteTheme.backgroundColor, shape = blockQuoteTheme.shape)
-            .drawBehind {
-                val borderWidth = blockQuoteTheme.borderWidth.toPx()
-                drawLine(
-                    color = borderColor,
-                    start = Offset(0f, 0f),
-                    end = Offset(0f, size.height),
-                    strokeWidth = borderWidth,
-                )
-            }
-            .padding(blockQuoteTheme.padding),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(color = blockQuoteTheme.backgroundColor, shape = blockQuoteTheme.shape)
+                .drawBehind {
+                    val borderWidth = blockQuoteTheme.borderWidth.toPx()
+                    drawLine(
+                        color = borderColor,
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, size.height),
+                        strokeWidth = borderWidth,
+                    )
+                }.padding(blockQuoteTheme.padding),
     ) {
         Spacer(modifier = Modifier.height(theme.spacerTheme.spacerHeight))
         var child = node.firstChild

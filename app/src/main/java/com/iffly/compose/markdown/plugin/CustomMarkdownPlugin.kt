@@ -77,28 +77,40 @@ class AlertBlock : Block() {
 }
 
 // --- Inline custom nodes extend CustomNode ---
-class MentionNode(private val seq: BasedSequence) : Node() {
+class MentionNode(
+    private val seq: BasedSequence,
+) : Node() {
     var username: String = seq.subSequence(1, seq.length).toString()
+
     override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
-class HashtagNode(private val seq: BasedSequence) : Node() {
+class HashtagNode(
+    private val seq: BasedSequence,
+) : Node() {
     var hashtag: String = seq.subSequence(1, seq.length).toString()
+
     override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
 class HighlightNode : Node() {
     var highlightText: String = ""
+
     override fun getSegments(): Array<BasedSequence> = emptyArray()
 }
 
-class BadgeNode(private val seq: BasedSequence, var badgeType: String, var badgeText: String) :
-    Node() {
+class BadgeNode(
+    private val seq: BasedSequence,
+    var badgeType: String,
+    var badgeText: String,
+) : Node() {
     override fun getSegments(): Array<BasedSequence> = arrayOf(seq)
 }
 
 // --- Block Parser ---
-class AlertBlockParser(private val block: AlertBlock) : AbstractBlockParser() {
+class AlertBlockParser(
+    private val block: AlertBlock,
+) : AbstractBlockParser() {
     private var finished = false
     private val contentLines = mutableListOf<String>()
 
@@ -119,7 +131,10 @@ class AlertBlockParser(private val block: AlertBlock) : AbstractBlockParser() {
         return BlockContinue.atIndex(state.index)
     }
 
-    override fun addLine(state: ParserState, line: BasedSequence) {
+    override fun addLine(
+        state: ParserState,
+        line: BasedSequence,
+    ) {
         // Only add content when not finished
         if (!finished) {
             contentLines.add(line.toString())
@@ -133,33 +148,38 @@ class AlertBlockParser(private val block: AlertBlock) : AbstractBlockParser() {
 
             block.title = firstLine
             // Remaining lines as content, need inline parsing
-            val remainingContent = if (contentLines.size > 1) {
-                contentLines.drop(1).joinToString("\n")
-            } else {
-                ""
-            }
+            val remainingContent =
+                if (contentLines.size > 1) {
+                    contentLines.drop(1).joinToString("\n")
+                } else {
+                    ""
+                }
 
             if (remainingContent.isNotEmpty()) {
                 // Parse content as child nodes
                 parseContentAsChildren(state, remainingContent)
             }
-
         }
     }
 
-    private fun parseContentAsChildren(state: ParserState, content: String) {
+    private fun parseContentAsChildren(
+        state: ParserState,
+        content: String,
+    ) {
         // Directly use basic Parser to parse content
         val inlineParser = state.inlineParser
         inlineParser.parse(BasedSequence.of(content), block)
     }
 }
 
-class AlertBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension {
+class AlertBlockParserFactory :
+    CustomBlockParserFactory,
+    Parser.ParserExtension {
     override fun apply(options: DataHolder): BlockParserFactory =
         object : AbstractBlockParserFactory(options) {
             override fun tryStart(
                 state: ParserState,
-                matchedBlockParser: MatchedBlockParser
+                matchedBlockParser: MatchedBlockParser,
             ): BlockStart? {
                 val nextNonSpace = state.nextNonSpaceIndex
                 val line = state.line
@@ -168,13 +188,14 @@ class AlertBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension
                     val marker = line.subSequence(nextNonSpace, nextNonSpace + 3).toString()
                     if (marker == ":::") {
                         val rest = line.subSequence(nextNonSpace + 3, line.length).toString().trim()
-                        val alertType = when {
-                            rest.startsWith("info") -> AlertBlock.TYPE_INFO
-                            rest.startsWith("warning") -> AlertBlock.TYPE_WARNING
-                            rest.startsWith("success") -> AlertBlock.TYPE_SUCCESS
-                            rest.startsWith("error") -> AlertBlock.TYPE_ERROR
-                            else -> AlertBlock.TYPE_INFO
-                        }
+                        val alertType =
+                            when {
+                                rest.startsWith("info") -> AlertBlock.TYPE_INFO
+                                rest.startsWith("warning") -> AlertBlock.TYPE_WARNING
+                                rest.startsWith("success") -> AlertBlock.TYPE_SUCCESS
+                                rest.startsWith("error") -> AlertBlock.TYPE_ERROR
+                                else -> AlertBlock.TYPE_INFO
+                            }
                         val alertBlock = AlertBlock().apply { this.alertType = alertType }
                         val parser = AlertBlockParser(alertBlock)
                         // Fix index calculation: skip the entire start line
@@ -186,9 +207,13 @@ class AlertBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension
         }
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
+
     override fun parserOptions(options: MutableDataHolder) {}
+
     override fun extend(parserBuilder: Parser.Builder) {
         parserBuilder.customBlockParserFactory(this)
     }
@@ -199,6 +224,7 @@ private fun isCjk(char: Char): Boolean = char.code in 0x4e00..0x9fff
 
 abstract class BaseInlineExt : InlineParserExtension {
     override fun finalizeDocument(inlineParser: InlineParser) {}
+
     override fun finalizeBlock(inlineParser: InlineParser) {}
 }
 
@@ -225,11 +251,13 @@ class MentionInlineParserExtension : BaseInlineExt() {
 
 class MentionInlineParserFactory : InlineParserExtensionFactory {
     override fun getCharacters(): CharSequence = "@"
-    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
-        MentionInlineParserExtension()
+
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension = MentionInlineParserExtension()
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
 }
 
@@ -260,11 +288,13 @@ class HashtagInlineParserExtension : BaseInlineExt() {
 
 class HashtagInlineParserFactory : InlineParserExtensionFactory {
     override fun getCharacters(): CharSequence = "#"
-    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
-        HashtagInlineParserExtension()
+
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension = HashtagInlineParserExtension()
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
 }
 
@@ -278,7 +308,8 @@ class BadgeInlineParserExtension : BaseInlineExt() {
         var found = false
         while (i < input.length - 1) {
             if (input[i] == '!' && input[i + 1] == '!') {
-                found = true; break
+                found = true
+                break
             }
             i++
         }
@@ -297,11 +328,13 @@ class BadgeInlineParserExtension : BaseInlineExt() {
 
 class BadgeInlineParserFactory : InlineParserExtensionFactory {
     override fun getCharacters(): CharSequence = "!"
-    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
-        BadgeInlineParserExtension()
+
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension = BadgeInlineParserExtension()
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
 }
 
@@ -344,58 +377,77 @@ class HighlightInlineParserExtension : BaseInlineExt() {
 
 class HighlightInlineParserFactory : InlineParserExtensionFactory {
     override fun getCharacters(): CharSequence = "="
-    override fun apply(inlineParser: LightInlineParser): InlineParserExtension =
-        HighlightInlineParserExtension()
+
+    override fun apply(inlineParser: LightInlineParser): InlineParserExtension = HighlightInlineParserExtension()
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
 }
 
 // --- Renderers & Builders ----------------
 class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
     @Composable
-    override fun Invoke(node: AlertBlock, modifier: Modifier) {
-        val (icon, containerColor, contentColor) = when (node.alertType) {
-            AlertBlock.TYPE_INFO -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
-            AlertBlock.TYPE_WARNING -> Triple(
-                Icons.Default.Warning,
-                Color(0xFFFFF8E1),
-                Color(0xFFF57C00)
-            )
+    override fun Invoke(
+        node: AlertBlock,
+        modifier: Modifier,
+    ) {
+        val (icon, containerColor, contentColor) =
+            when (node.alertType) {
+                AlertBlock.TYPE_INFO -> {
+                    Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
+                }
 
-            AlertBlock.TYPE_SUCCESS -> Triple(
-                Icons.Default.CheckCircle,
-                Color(0xFFE8F5E8),
-                Color(0xFF2E7D32)
-            )
+                AlertBlock.TYPE_WARNING -> {
+                    Triple(
+                        Icons.Default.Warning,
+                        Color(0xFFFFF8E1),
+                        Color(0xFFF57C00),
+                    )
+                }
 
-            AlertBlock.TYPE_ERROR -> Triple(
-                Icons.Default.Delete,
-                Color(0xFFFFEBEE),
-                Color(0xFFD32F2F)
-            )
+                AlertBlock.TYPE_SUCCESS -> {
+                    Triple(
+                        Icons.Default.CheckCircle,
+                        Color(0xFFE8F5E8),
+                        Color(0xFF2E7D32),
+                    )
+                }
 
-            else -> Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
-        }
+                AlertBlock.TYPE_ERROR -> {
+                    Triple(
+                        Icons.Default.Delete,
+                        Color(0xFFFFEBEE),
+                        Color(0xFFD32F2F),
+                    )
+                }
+
+                else -> {
+                    Triple(Icons.Default.Info, Color(0xFFE3F2FD), Color(0xFF1976D2))
+                }
+            }
         Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
             colors = CardDefaults.cardColors(containerColor = containerColor),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.Top
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                verticalAlignment = Alignment.Top,
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = node.alertType,
                     tint = contentColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
@@ -405,7 +457,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                             text = nodeTitle,
                             style = MaterialTheme.typography.titleMedium,
                             color = contentColor,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
@@ -431,8 +483,8 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
             SpanStyle(
                 color = Color(0xFF1976D2),
                 textDecoration = TextDecoration.Underline,
-                fontWeight = FontWeight.Medium
-            )
+                fontWeight = FontWeight.Medium,
+            ),
         ) {
             append("@${node.username}")
         }
@@ -471,8 +523,8 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
             SpanStyle(
                 background = Color(0xFFFFEB3B),
                 color = Color(0xFF212121),
-                fontWeight = FontWeight.Medium
-            )
+                fontWeight = FontWeight.Medium,
+            ),
         ) {
             append(node.highlightText)
         }
@@ -490,22 +542,23 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext,
     ) {
-        val (bg, fg) = when (node.badgeType.lowercase()) {
-            "primary" -> Color(0xFF1976D2) to Color.White
-            "success" -> Color(0xFF2E7D32) to Color.White
-            "warning" -> Color(0xFFF57C00) to Color.White
-            "error", "danger" -> Color(0xFFD32F2F) to Color.White
-            "info" -> Color(0xFF0288D1) to Color.White
-            else -> Color(0xFF616161) to Color.White
-        }
+        val (bg, fg) =
+            when (node.badgeType.lowercase()) {
+                "primary" -> Color(0xFF1976D2) to Color.White
+                "success" -> Color(0xFF2E7D32) to Color.White
+                "warning" -> Color(0xFFF57C00) to Color.White
+                "error", "danger" -> Color(0xFFD32F2F) to Color.White
+                "info" -> Color(0xFF0288D1) to Color.White
+                else -> Color(0xFF616161) to Color.White
+            }
         withStyle(
             SpanStyle(
                 background = bg,
                 color = fg,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = FontFamily.Default
-            )
+                fontFamily = FontFamily.Default,
+            ),
         ) {
             append(" " + node.badgeText + " ")
         }
@@ -514,18 +567,17 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
 
 // --- Plugin ----------------
 class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
-    override fun blockParserFactories(): List<CustomBlockParserFactory> =
-        listOf(AlertBlockParserFactory())
+    override fun blockParserFactories(): List<CustomBlockParserFactory> = listOf(AlertBlockParserFactory())
 
-    override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> = listOf(
-        MentionInlineParserFactory(),
-        HashtagInlineParserFactory(),
-        BadgeInlineParserFactory(),
-        HighlightInlineParserFactory()
-    )
+    override fun inlineContentParserFactories(): List<InlineParserExtensionFactory> =
+        listOf(
+            MentionInlineParserFactory(),
+            HashtagInlineParserFactory(),
+            BadgeInlineParserFactory(),
+            HighlightInlineParserFactory(),
+        )
 
-    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
-        mapOf(AlertBlock::class.java to AlertBlockRenderer())
+    override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> = mapOf(AlertBlock::class.java to AlertBlockRenderer())
 
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
@@ -533,6 +585,6 @@ class CustomMarkdownPlugin : AbstractMarkdownRenderPlugin() {
             MentionNode::class.java to MentionNodeStringBuilder(),
             HashtagNode::class.java to HashtagNodeStringBuilder(),
             HighlightNode::class.java to HighlightNodeStringBuilder(),
-            BadgeNode::class.java to BadgeNodeStringBuilder()
+            BadgeNode::class.java to BadgeNodeStringBuilder(),
         )
 }

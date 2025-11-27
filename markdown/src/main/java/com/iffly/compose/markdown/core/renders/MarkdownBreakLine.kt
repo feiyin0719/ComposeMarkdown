@@ -11,7 +11,10 @@ import com.vladsch.flexmark.ast.ThematicBreak
 
 class BreakLineRenderer : IBlockRenderer<ThematicBreak> {
     @Composable
-    override fun Invoke(node: ThematicBreak, modifier: Modifier) {
+    override fun Invoke(
+        node: ThematicBreak,
+        modifier: Modifier,
+    ) {
         BreakLine(node, modifier)
     }
 }
@@ -25,8 +28,9 @@ fun BreakLine(
     // show a horizontal line
     HorizontalLine(
         color = theme.breakLineColor,
-        modifier = modifier
-            .height(theme.breakLineHeight)
-            .fillMaxWidth()
+        modifier =
+            modifier
+                .height(theme.breakLineHeight)
+                .fillMaxWidth(),
     )
 }

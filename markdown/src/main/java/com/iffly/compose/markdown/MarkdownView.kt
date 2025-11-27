@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownContent
-import com.iffly.compose.markdown.util.MarkdownPreview
+import com.iffly.compose.markdown.util.PreviewMarkdown
 import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,8 +20,14 @@ import kotlinx.coroutines.withContext
 
 internal sealed class MarkdownState {
     object Loading : MarkdownState()
-    data class Success(val node: Document) : MarkdownState()
-    data class Error(val exception: Throwable) : MarkdownState()
+
+    data class Success(
+        val node: Document,
+    ) : MarkdownState()
+
+    data class Error(
+        val exception: Throwable,
+    ) : MarkdownState()
 }
 
 /**
@@ -45,16 +51,15 @@ fun MarkdownView(
     actionHandler: ActionHandler? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-
     val parser = markdownRenderConfig.parser
-    val markdownState = remember(content, parser) {
-        try {
-            MarkdownState.Success(parser.parse(content))
-        } catch (e: Exception) {
-            MarkdownState.Error(e)
+    val markdownState =
+        remember(content, parser) {
+            try {
+                MarkdownState.Success(parser.parse(content))
+            } catch (e: Exception) {
+                MarkdownState.Error(e)
+            }
         }
-    }
-
 
     when (markdownState) {
         is MarkdownState.Loading -> {
@@ -76,7 +81,6 @@ fun MarkdownView(
             onError?.invoke(markdownState.exception)
         }
     }
-
 }
 
 /**
@@ -103,22 +107,21 @@ fun MarkdownView(
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-
     val parser by rememberUpdatedState(markdownRenderConfig.parser)
     var markdownState by remember { mutableStateOf<MarkdownState>(MarkdownState.Loading) }
 
     LaunchedEffect(content, parser) {
         markdownState = MarkdownState.Loading
         try {
-            val parsedNode = withContext(parseDispatcher ?: MarkdownThreadPool.dispatcher) {
-                parser.parse(content)
-            }
+            val parsedNode =
+                withContext(parseDispatcher ?: MarkdownThreadPool.dispatcher) {
+                    parser.parse(content)
+                }
             markdownState = MarkdownState.Success(parsedNode)
         } catch (e: Exception) {
             markdownState = MarkdownState.Error(e)
         }
     }
-
 
     when (val state = markdownState) {
         is MarkdownState.Loading -> {
@@ -139,7 +142,6 @@ fun MarkdownView(
             onError?.invoke(state.exception)
         }
     }
-
 }
 
 /**
@@ -164,13 +166,16 @@ fun MarkdownView(
     }
 }
 
-@MarkdownPreview
+@PreviewMarkdown
 @Composable
 private fun MarkdownViewPreview() {
     MarkdownView(
         content = "# Hello, Markdown!\n\nThis is a **preview** of the Markdown view.",
         markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
         onLoading = { Text("test") },
-        onError = { error -> /* Show error message */ }
+        onError = { error ->
+            // Display error message
+            Text("Error: ${error.message}")
+        },
     )
 }

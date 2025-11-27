@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:compose:compositionlocal-allowlist")
+
 package com.iffly.compose.markdown.config
 
 import androidx.compose.runtime.Composable
@@ -12,6 +14,4 @@ internal val LocalHtmlRenderProvider =
 
 @Composable
 @ReadOnlyComposable
-internal fun currentHtmlRenderer(): HtmlRenderer {
-    return LocalHtmlRenderProvider.current
-}
+internal fun currentHtmlRenderer(): HtmlRenderer = LocalHtmlRenderProvider.current

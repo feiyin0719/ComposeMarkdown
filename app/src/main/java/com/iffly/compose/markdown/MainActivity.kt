@@ -32,15 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
-import coil3.SingletonImageLoader
-import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import coil3.request.crossfade
 import com.iffly.compose.markdown.samples.MarkdownExample
 import com.iffly.compose.markdown.samples.markdownExamples
 import com.iffly.compose.markdown.ui.theme.ComposeMarkdownTheme
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,13 +63,14 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MarkdownSampleApp() {
+fun MarkdownSampleApp(modifier: Modifier = Modifier) {
     var currentExample by remember { mutableStateOf<MarkdownExample?>(null) }
 
     if (currentExample == null) {
-        ExampleListScreen(onExampleSelected = { currentExample = it })
+        ExampleListScreen(modifier = modifier, onExampleSelect = { currentExample = it })
     } else {
         Scaffold(
+            modifier = modifier,
             topBar = {
                 TopAppBar(
                     title = { Text(currentExample!!.title) },
@@ -83,9 +78,9 @@ fun MarkdownSampleApp() {
                         IconButton(onClick = { currentExample = null }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) { paddingValues ->
             currentExample!!.content(paddingValues)
         }
@@ -94,37 +89,42 @@ fun MarkdownSampleApp() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExampleListScreen(onExampleSelected: (MarkdownExample) -> Unit) {
+fun ExampleListScreen(
+    onExampleSelect: (MarkdownExample) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(title = { Text("Compose Markdown Examples") })
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(markdownExamples) { example ->
                 Card(
-                    onClick = { onExampleSelected(example) },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = { onExampleSelect(example) },
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
                     ) {
                         Text(
                             text = example.title,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = example.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

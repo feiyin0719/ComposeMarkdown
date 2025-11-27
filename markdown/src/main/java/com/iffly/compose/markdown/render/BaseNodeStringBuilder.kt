@@ -33,8 +33,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
             isShowNotSupported,
             this,
             measureContext,
-
-            ) ?: run {
+        ) ?: run {
             if (isShowNotSupported) {
                 append("[Unsupported: ${node::class.java.simpleName}]")
             } else {
@@ -45,20 +44,21 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     }
 }
 
-open class CompositeChildNodeStringBuilder<T : Node> :
-    IInlineNodeStringBuilder<T> {
-    open fun getSpanStyle(node: T, markdownTheme: MarkdownTheme): SpanStyle? {
-        return null
-    }
+open class CompositeChildNodeStringBuilder<T : Node> : IInlineNodeStringBuilder<T> {
+    open fun getSpanStyle(
+        node: T,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? = null
 
-    open fun getParagraphStyle(node: T, markdownTheme: MarkdownTheme): ParagraphStyle? {
-        return null
-    }
+    open fun getParagraphStyle(
+        node: T,
+        markdownTheme: MarkdownTheme,
+    ): ParagraphStyle? = null
 
     fun <R : Any> AnnotatedString.Builder.withSpanStyle(
         node: T,
         markdownTheme: MarkdownTheme,
-        content: AnnotatedString.Builder.() -> R
+        content: AnnotatedString.Builder.() -> R,
     ) {
         val style = getSpanStyle(node, markdownTheme)
         if (style != null) {
@@ -73,7 +73,7 @@ open class CompositeChildNodeStringBuilder<T : Node> :
     fun <R : Any> AnnotatedString.Builder.withParagraphStyle(
         node: T,
         markdownTheme: MarkdownTheme,
-        content: AnnotatedString.Builder.() -> R
+        content: AnnotatedString.Builder.() -> R,
     ) {
         val style = getParagraphStyle(node, markdownTheme)
         if (style != null) {

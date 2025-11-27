@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/.editorconfig">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/.editorconfig" />
+              <option name="originalContent" value="root = true&#10;[*.{kt,kts}]&#10;ktlint_function_naming_ignore_when_annotated_with = Composable&#10;" />
+              <option name="updatedContent" value="root = true&#10;[*.{kt,kts}]&#10;ktlint_function_naming_ignore_when_annotated_with = Composable&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/COMPOSABLE_OPERATOR_INVOKE_FIX.md">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/COMPOSABLE_OPERATOR_INVOKE_FIX.md" />
+              <option name="updatedContent" value="# Solution: Composable Operator Invoke Functions&#10;&#10;## Problem&#10;Ktlint's Compose rules require Composable functions to start with an uppercase letter. However, `operator fun invoke()` is a special Kotlin operator function that **cannot** be renamed - it must be called `invoke`.&#10;&#10;## Error Message&#10;```&#10;Composable functions that return Unit should start with an uppercase letter.&#10;They are considered declarative entities that can be either present or absent &#10;in a composition and therefore follow the naming rules for classes.&#10;```&#10;&#10;## Solution&#10;Add `@Suppress(&quot;ComposableNaming&quot;)` annotation before the `@Composable` annotation for operator invoke functions.&#10;&#10;### Example:&#10;```kotlin&#10;fun interface ImageWidgetRenderer {&#10;    @Suppress(&quot;ComposableNaming&quot;)  // Add this to suppress the naming rule&#10;    @Composable&#10;    operator fun invoke(&#10;        node: Image,&#10;        modifier: Modifier,&#10;    )&#10;}&#10;```&#10;&#10;## Files Fixed&#10;1. ✅ `ImageNodeStringBuilder.kt` - ImageWidgetRenderer&#10;2. ✅ `MarkdownTable.kt` - TableWidgetRenderer&#10;3. ✅ `MarkdownCodeBlock.kt` - CodeWidgetRenderer&#10;&#10;## Why This Works&#10;- The `@Suppress(&quot;ComposableNaming&quot;)` annotation tells ktlint to skip the naming rule check for this specific function&#10;- This is the correct approach because `invoke` is a **reserved operator name** in Kotlin and cannot be changed&#10;- The suppress annotation is scoped only to the specific function, not the entire file&#10;&#10;## Alternative Approaches (Not Recommended)&#10;1. ❌ Disabling the rule globally - would miss legitimate naming issues&#10;2. ❌ Renaming to `Invoke()` - breaks the operator syntax&#10;3. ❌ Using a different function name - loses the nice `renderer(node, modifier)` call syntax&#10;&#10;## Usage&#10;These functional interfaces allow for clean syntax:&#10;```kotlin&#10;val renderer = ImageWidgetRenderer { node, modifier -&gt;&#10;    // Custom rendering logic&#10;}&#10;&#10;// Can be called as:&#10;renderer(imageNode, Modifier)&#10;// Instead of:&#10;renderer.invoke(imageNode, Modifier)&#10;```&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

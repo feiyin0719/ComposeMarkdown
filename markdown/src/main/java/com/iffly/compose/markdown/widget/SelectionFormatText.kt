@@ -27,23 +27,27 @@ fun SelectionFormatText(
         content = {
             BasicText(
                 text = text,
-                modifier = Modifier
-                    .invisible()
-                    .disableAccessibility(),
-                style = TextStyle(
-                    color = Color.Transparent,
-                ),
+                modifier =
+                    Modifier
+                        .invisible()
+                        .disableAccessibility(),
+                style =
+                    TextStyle(
+                        color = Color.Transparent,
+                    ),
             )
         },
-        modifier = modifier
-            .invisible()
-            .disableAccessibility(),
+        modifier =
+            modifier
+                .invisible()
+                .disableAccessibility(),
     ) { measurables, constraints ->
         // Measure the text with unconstrained size but don't use the result
         // This ensures the text is laid out for selection purposes
-        val placeable = measurables.map { measurable ->
-            measurable.measure(Constraints())
-        }
+        val placeable =
+            measurables.map { measurable ->
+                measurable.measure(Constraints())
+            }
 
         // Return zero size layout so it doesn't take up any space
         layout(0, 0) {
@@ -55,14 +59,16 @@ fun SelectionFormatText(
     }
 }
 
-private fun Modifier.invisible(): Modifier = this
-    .alpha(0f)
-    .size(0.dp)
+private fun Modifier.invisible(): Modifier =
+    this
+        .alpha(0f)
+        .size(0.dp)
 
-private fun Modifier.disableAccessibility(): Modifier = this.semantics {
-    hideFromAccessibility()
-    text = AnnotatedString("")
-    contentDescription = ""
-    disabled()
-    focused = false
-}
+private fun Modifier.disableAccessibility(): Modifier =
+    this.semantics {
+        hideFromAccessibility()
+        text = AnnotatedString("")
+        contentDescription = ""
+        disabled()
+        focused = false
+    }

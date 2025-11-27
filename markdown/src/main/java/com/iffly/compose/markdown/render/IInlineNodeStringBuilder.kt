@@ -5,7 +5,6 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.util.ast.Node
 
-
 /**
  * Interface for building an AnnotatedString for a specific inline node type.
  * Implement this interface for each inline node type you want to support.

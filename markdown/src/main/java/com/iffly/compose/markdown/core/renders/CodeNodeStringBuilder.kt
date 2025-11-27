@@ -20,11 +20,10 @@ class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         withStyle(markdownTheme.code.toSpanStyle()) {
             append(node.contentText())
         }
     }
 }
-

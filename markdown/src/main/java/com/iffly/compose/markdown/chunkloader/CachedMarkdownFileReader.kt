@@ -15,8 +15,15 @@ import java.io.IOException
  * Sealed class for read results, for better error handling
  */
 sealed class ReadResult<out T> {
-    data class Success<T>(val data: T) : ReadResult<T>()
-    data class Error(val exception: Throwable, val message: String) : ReadResult<Nothing>()
+    data class Success<T>(
+        val data: T,
+    ) : ReadResult<T>()
+
+    data class Error(
+        val exception: Throwable,
+        val message: String,
+    ) : ReadResult<Nothing>()
+
     object EndOfFile : ReadResult<Nothing>()
 }
 
@@ -24,10 +31,17 @@ sealed class ReadResult<out T> {
  * File reader interface for easy testing and extension
  */
 interface IMarkdownFileReader {
-    suspend fun readLines(startLine: Int, endLine: Int): ReadResult<List<String>>
+    suspend fun readLines(
+        startLine: Int,
+        endLine: Int,
+    ): ReadResult<List<String>>
+
     suspend fun readLine(lineNumber: Int): ReadResult<String>
+
     fun clearCache()
+
     fun getCacheInfo(): FileCacheInfo
+
     fun close()
 }
 
@@ -41,7 +55,7 @@ data class FileCacheInfo(
     val isReaderOpen: Boolean,
     val loadFactor: Float,
     val hitRate: Float = 0f,
-    val missRate: Float = 0f
+    val missRate: Float = 0f,
 )
 
 /**
@@ -55,9 +69,8 @@ data class FileCacheInfo(
 class CachedMarkdownFileReader(
     private val file: File,
     private val maxCacheSize: Int = 1000,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : IMarkdownFileReader {
-
     // Reader state management
     private var bufferedReader: BufferedReader? = null
     private var currentLineNumber = 0
@@ -80,7 +93,10 @@ class CachedMarkdownFileReader(
     /**
      * Read lines within specified range
      */
-    override suspend fun readLines(startLine: Int, endLine: Int): ReadResult<List<String>> =
+    override suspend fun readLines(
+        startLine: Int,
+        endLine: Int,
+    ): ReadResult<List<String>> =
         withContext(dispatcher) {
             require(startLine >= 1) { "Start line must be >= 1, got: $startLine" }
             require(endLine >= startLine) { "End line ($endLine) must be >= start line ($startLine)" }
@@ -107,13 +123,14 @@ class CachedMarkdownFileReader(
     /**
      * Read single line
      */
-    override suspend fun readLine(lineNumber: Int): ReadResult<String> = withContext(dispatcher) {
-        require(lineNumber >= 1) { "Line number must be >= 1, got: $lineNumber" }
+    override suspend fun readLine(lineNumber: Int): ReadResult<String> =
+        withContext(dispatcher) {
+            require(lineNumber >= 1) { "Line number must be >= 1, got: $lineNumber" }
 
-        mutex.withLock {
-            readLineInternal(lineNumber)
+            mutex.withLock {
+                readLineInternal(lineNumber)
+            }
         }
-    }
 
     /**
      * Internal single line read implementation, supports caching and smart BufferedReader management
@@ -149,23 +166,23 @@ class CachedMarkdownFileReader(
     /**
      * Determine if reader reset is needed
      */
-    private fun shouldResetReader(targetLine: Int): Boolean {
-        return targetLine < currentLineNumber && bufferedReader != null
-    }
+    private fun shouldResetReader(targetLine: Int): Boolean = targetLine < currentLineNumber && bufferedReader != null
 
     /**
      * Read until specified line number
      */
     private fun readUntilLine(targetLine: Int): ReadResult<String> {
-        val reader = bufferedReader ?: return ReadResult.Error(
-            IllegalStateException("BufferedReader not initialized"),
-            "Reader not available"
-        )
+        val reader =
+            bufferedReader ?: return ReadResult.Error(
+                IllegalStateException("BufferedReader not initialized"),
+                "Reader not available",
+            )
 
         try {
             while (currentLineNumber < targetLine) {
-                val line = reader.readLine()
-                    ?: return ReadResult.EndOfFile
+                val line =
+                    reader.readLine()
+                        ?: return ReadResult.EndOfFile
 
                 currentLineNumber++
                 cacheLine(currentLineNumber, line)
@@ -179,7 +196,6 @@ class CachedMarkdownFileReader(
             return lineCache[targetLine]?.let {
                 ReadResult.Success(it)
             } ?: ReadResult.EndOfFile
-
         } catch (e: IOException) {
             closeReader()
             return ReadResult.Error(e, "IO error reading line $targetLine")
@@ -189,7 +205,10 @@ class CachedMarkdownFileReader(
     /**
      * Cache line content
      */
-    private fun cacheLine(lineNumber: Int, content: String) {
+    private fun cacheLine(
+        lineNumber: Int,
+        content: String,
+    ) {
         lineCache[lineNumber] = content
     }
 
@@ -236,7 +255,7 @@ class CachedMarkdownFileReader(
             isReaderOpen = bufferedReader != null,
             loadFactor = lineCache.size.toFloat() / maxCacheSize,
             hitRate = if (totalRequests > 0) cacheHits.toFloat() / totalRequests else 0f,
-            missRate = if (totalRequests > 0) cacheMisses.toFloat() / totalRequests else 0f
+            missRate = if (totalRequests > 0) cacheMisses.toFloat() / totalRequests else 0f,
         )
     }
 

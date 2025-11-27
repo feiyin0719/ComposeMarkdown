@@ -17,36 +17,49 @@ import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextCont
 import com.vladsch.flexmark.ast.Image
 
 fun interface ImageWidgetRenderer {
+    @Suppress("ComposableNaming")
     @Composable
-    operator fun invoke(node: Image, modifier: Modifier)
+    operator fun invoke(
+        node: Image,
+        modifier: Modifier,
+    )
 }
 
 class LoadingImageWidgetRenderer : ImageWidgetRenderer {
+    @Suppress("ComposableNaming")
     @Composable
-    override fun invoke(node: Image, modifier: Modifier) {
+    override fun invoke(
+        node: Image,
+        modifier: Modifier,
+    ) {
         LoadingView(modifier)
     }
 }
 
 class ErrorImageWidgetRenderer : ImageWidgetRenderer {
+    @Suppress("ComposableNaming")
     @Composable
-    override fun invoke(node: Image, modifier: Modifier) {
+    override fun invoke(
+        node: Image,
+        modifier: Modifier,
+    ) {
         val theme = currentTheme()
         MarkdownImageErrorView(
-            modifier = modifier
-                .background(color = theme.imageTheme.errorPlaceholderColor)
-                .clip(theme.imageTheme.shape)
-                .then(theme.imageTheme.modifier),
+            modifier =
+                modifier
+                    .background(color = theme.imageTheme.errorPlaceholderColor)
+                    .clip(theme.imageTheme.shape)
+                    .then(theme.imageTheme.modifier),
             contentScale = theme.imageTheme.contentScale,
             alignment = theme.imageTheme.alignment,
-            altText = node.text?.toString() ?: node.title?.toString()
+            altText = node.text?.toString() ?: node.title?.toString(),
         )
     }
 }
 
 class ImageNodeStringBuilder(
     private val loadingView: ImageWidgetRenderer = LoadingImageWidgetRenderer(),
-    private val errorView: ImageWidgetRenderer = ErrorImageWidgetRenderer()
+    private val errorView: ImageWidgetRenderer = ErrorImageWidgetRenderer(),
 ) : IInlineNodeStringBuilder<Image> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Image,
@@ -56,29 +69,31 @@ class ImageNodeStringBuilder(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         val imageId = "image_$${System.identityHashCode(node)}"
-        inlineContentMap[imageId] = MarkdownInlineView.MarkdownStandaloneInlineView(
-            modifier = Modifier
-        ) { modifier ->
-            val theme = currentTheme()
-            MarkdownImage(
-                node,
-                modifier = modifier
-                    .clip(theme.imageTheme.shape)
-                    .then(theme.imageTheme.modifier),
-                contentScale = theme.imageTheme.contentScale,
-                alignment = theme.imageTheme.alignment,
-                loadingView = { image, modifier ->
-                    loadingView.invoke(image, modifier)
-                },
-                errorView = { image, modifier ->
+        inlineContentMap[imageId] =
+            MarkdownInlineView.MarkdownStandaloneInlineView(
+                modifier = Modifier,
+            ) { modifier ->
+                val theme = currentTheme()
+                MarkdownImage(
+                    node,
+                    modifier =
+                        modifier
+                            .clip(theme.imageTheme.shape)
+                            .then(theme.imageTheme.modifier),
+                    contentScale = theme.imageTheme.contentScale,
+                    alignment = theme.imageTheme.alignment,
+                    loadingView = { image, modifier ->
+                        loadingView.invoke(image, modifier)
+                    },
+                    errorView = { image, modifier ->
 
-                    errorView.invoke(image, modifier)
-                })
-        }
+                        errorView.invoke(image, modifier)
+                    },
+                )
+            }
         appendStandaloneInlineTextContent(imageId, "[${node.text ?: node.title ?: "Image"}]")
     }
 }
-

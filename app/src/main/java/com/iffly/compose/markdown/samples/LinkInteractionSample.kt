@@ -19,17 +19,22 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun LinkInteractionExample(paddingValues: PaddingValues) {
+fun LinkInteractionExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         MarkdownView(
-            content = """
+            content =
+                """
                 # Link Interaction Example
                 
                 This example demonstrates different types of link handling:
@@ -53,61 +58,63 @@ fun LinkInteractionExample(paddingValues: PaddingValues) {
                 [Open App](myapp://custom/action) - Custom protocol
                 
                 Different links will be handled in different ways!
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),
-            actionHandler = object : ActionHandler {
-                override fun handleUrlClick(url: String, node: Node) {
+            actionHandler =
+                object : ActionHandler {
+                    override fun handleUrlClick(
+                        url: String,
+                        node: Node,
+                    ) {
+                        Log.d("LinkInteraction", "Clicked link: $url")
 
-                    Log.d("LinkInteraction", "Clicked link: $url")
+                        // Extract URL string from LinkAnnotation
+                        val urlString = url
 
-                    // Extract URL string from LinkAnnotation
-                    val urlString = url
-
-                    when {
-                        urlString.startsWith("http") -> {
-                            // Open external link
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, urlString.toUri())
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("LinkInteraction", "Cannot open link: $urlString", e)
+                        when {
+                            urlString.startsWith("http") -> {
+                                // Open external link
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, urlString.toUri())
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Log.e("LinkInteraction", "Cannot open link: $urlString", e)
+                                }
                             }
-                        }
 
-                        urlString.startsWith("/internal") -> {
-                            // Handle internal navigation
-                            Log.i("LinkInteraction", "Navigate to internal page: $urlString")
-                            // Navigation component integration can go here
-                        }
-
-                        urlString.startsWith("mailto:") -> {
-                            // Handle email link
-                            try {
-                                val intent = Intent(Intent.ACTION_SENDTO, urlString.toUri())
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("LinkInteraction", "Cannot open email: $urlString", e)
+                            urlString.startsWith("/internal") -> {
+                                // Handle internal navigation
+                                Log.i("LinkInteraction", "Navigate to internal page: $urlString")
+                                // Navigation component integration can go here
                             }
-                        }
 
-                        urlString.startsWith("tel:") -> {
-                            // Handle phone link
-                            try {
-                                val intent = Intent(Intent.ACTION_DIAL, urlString.toUri())
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                Log.e("LinkInteraction", "Cannot dial phone: $urlString", e)
+                            urlString.startsWith("mailto:") -> {
+                                // Handle email link
+                                try {
+                                    val intent = Intent(Intent.ACTION_SENDTO, urlString.toUri())
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Log.e("LinkInteraction", "Cannot open email: $urlString", e)
+                                }
                             }
-                        }
 
-                        else -> {
-                            Log.i("LinkInteraction", "Other type of link: $urlString")
+                            urlString.startsWith("tel:") -> {
+                                // Handle phone link
+                                try {
+                                    val intent = Intent(Intent.ACTION_DIAL, urlString.toUri())
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Log.e("LinkInteraction", "Cannot dial phone: $urlString", e)
+                                }
+                            }
+
+                            else -> {
+                                Log.i("LinkInteraction", "Other type of link: $urlString")
+                            }
                         }
                     }
-                }
-
-            }
+                },
         )
     }
 }

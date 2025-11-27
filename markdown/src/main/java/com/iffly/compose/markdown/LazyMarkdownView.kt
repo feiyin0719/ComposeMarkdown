@@ -48,20 +48,23 @@ fun LazyMarkdownView(
     chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
     nestedPrefetchItemCount: Int = 3,
 ) {
-    val markdownChunkLoader = remember(file, markdownRenderConfig, chunkLoaderConfig) {
-        MarkdownChunkLoader(file, markdownRenderConfig, chunkLoaderConfig)
-    }
+    val markdownChunkLoader =
+        remember(file, markdownRenderConfig, chunkLoaderConfig) {
+            MarkdownChunkLoader(file, markdownRenderConfig, chunkLoaderConfig)
+        }
 
     // Use collectAsState to collect Flow state
-    val nodes by markdownChunkLoader.nodes.collectAsState()
+    val nodes by markdownChunkLoader.nodesFlow.collectAsState()
 
-    val prefetchStrategy = remember {
-        LazyListPrefetchStrategy(nestedPrefetchItemCount)
-    }
+    val prefetchStrategy =
+        remember {
+            LazyListPrefetchStrategy(nestedPrefetchItemCount)
+        }
     // Create LazyListState to track scroll state
-    val listState = rememberLazyListState(
-        prefetchStrategy = prefetchStrategy
-    )
+    val listState =
+        rememberLazyListState(
+            prefetchStrategy = prefetchStrategy,
+        )
 
     LaunchedEffect(file) {
         markdownChunkLoader.loadInitialChunks()
@@ -78,15 +81,15 @@ fun LazyMarkdownView(
             val currentScrollOffset = listState.firstVisibleItemScrollOffset
 
             Triple(firstVisibleIndex, lastVisibleIndex, currentScrollOffset)
-        }
-            .distinctUntilChanged()
+        }.distinctUntilChanged()
             .collect { (firstIndex, lastIndex, currentScrollOffset) ->
                 // Calculate scroll direction in collect to avoid modifying state in snapshotFlow
-                val scrollDirection = when {
-                    currentScrollOffset > previousScrollOffset -> ScrollDirection.DOWN
-                    currentScrollOffset < previousScrollOffset -> ScrollDirection.UP
-                    else -> ScrollDirection.NONE
-                }
+                val scrollDirection =
+                    when {
+                        currentScrollOffset > previousScrollOffset -> ScrollDirection.DOWN
+                        currentScrollOffset < previousScrollOffset -> ScrollDirection.UP
+                        else -> ScrollDirection.NONE
+                    }
 
                 previousScrollOffset = currentScrollOffset
 
@@ -98,7 +101,7 @@ fun LazyMarkdownView(
                     markdownChunkLoader.loadMoreChunksIfNeeded(
                         firstVisibleNode,
                         lastVisibleNode,
-                        scrollDirection
+                        scrollDirection,
                     )
                 }
             }
@@ -107,7 +110,7 @@ fun LazyMarkdownView(
     MarkdownLocalProviders(
         markdownRenderConfig,
         showNotSupportedText,
-        actionHandler = actionHandler
+        actionHandler = actionHandler,
     ) {
         LazyColumn(
             modifier = modifier,
@@ -116,7 +119,7 @@ fun LazyMarkdownView(
             items(nodes, key = { System.identityHashCode(it) }) { node ->
                 MarkdownContent(
                     node = node,
-                    modifier = Modifier
+                    modifier = Modifier,
                 )
             }
         }
@@ -127,5 +130,7 @@ fun LazyMarkdownView(
  * Scroll direction enumeration
  */
 enum class ScrollDirection {
-    UP, DOWN, NONE
+    UP,
+    DOWN,
+    NONE,
 }

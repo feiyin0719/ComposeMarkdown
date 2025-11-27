@@ -45,17 +45,19 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
         val linkNode = node
-        val linkInteractionListener = actionHandler?.let {
-            MarkdownLinkInteractionListener(actionHandler = it, node = linkNode)
-        }
-        val linkAnnotation = LinkAnnotation.Url(
-            url = linkNode.url.toString(),
-            styles = markdownTheme.link,
-            linkInteractionListener = linkInteractionListener,
-        )
+        val linkInteractionListener =
+            actionHandler?.let {
+                MarkdownLinkInteractionListener(actionHandler = it, node = linkNode)
+            }
+        val linkAnnotation =
+            LinkAnnotation.Url(
+                url = linkNode.url.toString(),
+                styles = markdownTheme.link,
+                linkInteractionListener = linkInteractionListener,
+            )
         withLink(linkAnnotation) {
             buildStyleString(
                 node,
@@ -70,4 +72,3 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         }
     }
 }
-

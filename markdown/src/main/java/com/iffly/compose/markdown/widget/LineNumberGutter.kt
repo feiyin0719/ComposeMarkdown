@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * A composable that displays a gutter of line numbers for text with soft wrapping.
@@ -29,46 +30,50 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun LineNumberGutter(
-    originalLineStartOffset: List<Int>,
-    visualLineStartOffset: List<Int>,
+    originalLineStartOffset: ImmutableList<Int>,
+    visualLineStartOffset: ImmutableList<Int>,
     modifier: Modifier = Modifier,
-    lineNumberStyle: TextStyle = MaterialTheme.typography.labelSmall.copy(
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        textAlign = TextAlign.Center,
-    ),
+    lineNumberStyle: TextStyle =
+        MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+        ),
     continuationPlaceholder: String = " ",
     paddingValues: PaddingValues = PaddingValues(horizontal = 4.dp),
     calculateGutterLineNumber: CalculateGutterLineNumber = CalculateGutterLineNumber.DefaultCalculateGutterLineNumber,
 ) {
-    val visualToOriginalLine = remember(originalLineStartOffset, visualLineStartOffset) {
-        calculateGutterLineNumber(
-            originalLineStartOffset = originalLineStartOffset,
-            visualLineStartOffset = visualLineStartOffset,
-        )
-    }
+    val visualToOriginalLine =
+        remember(originalLineStartOffset, visualLineStartOffset) {
+            calculateGutterLineNumber(
+                originalLineStartOffset = originalLineStartOffset,
+                visualLineStartOffset = visualLineStartOffset,
+            )
+        }
 
-    val gutterText = remember(visualToOriginalLine, continuationPlaceholder) {
-        if (visualToOriginalLine.isEmpty()) {
-            ""
-        } else {
-            buildString {
-                visualToOriginalLine.forEachIndexed { index, orig ->
-                    if (orig != CalculateGutterLineNumber.EMPTY_LINE_INDEX) {
-                        append(orig + 1)
-                    } else {
-                        append(continuationPlaceholder)
+    val gutterText =
+        remember(visualToOriginalLine, continuationPlaceholder) {
+            if (visualToOriginalLine.isEmpty()) {
+                ""
+            } else {
+                buildString {
+                    visualToOriginalLine.forEachIndexed { index, orig ->
+                        if (orig != CalculateGutterLineNumber.EMPTY_LINE_INDEX) {
+                            append(orig + 1)
+                        } else {
+                            append(continuationPlaceholder)
+                        }
+                        if (index < visualToOriginalLine.lastIndex) append('\n')
                     }
-                    if (index < visualToOriginalLine.lastIndex) append('\n')
                 }
             }
         }
-    }
     DisableSelection {
         Text(
             text = gutterText,
-            modifier = modifier
-                .padding(paddingValues = paddingValues),
+            modifier =
+                modifier
+                    .padding(paddingValues = paddingValues),
             style = lineNumberStyle,
         )
     }
@@ -121,6 +126,6 @@ fun interface CalculateGutterLineNumber {
      */
     operator fun invoke(
         originalLineStartOffset: List<Int>,
-        visualLineStartOffset: List<Int>
+        visualLineStartOffset: List<Int>,
     ): List<Int>
 }

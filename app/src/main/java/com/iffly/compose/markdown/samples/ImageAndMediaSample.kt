@@ -16,15 +16,20 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
-fun ImageAndMediaExample(paddingValues: PaddingValues) {
+fun ImageAndMediaExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         MarkdownView(
-            content = """
+            content =
+                """
                 # Image and Media Example
                 
                 ![Image 4](https://b.zol-img.com.cn/soft/6/614/ceaszSDde0JHA.jpg)
@@ -53,15 +58,18 @@ fun ImageAndMediaExample(paddingValues: PaddingValues) {
                 ![Image 3](https://failed.test)
                 
                 The image above is clickable and will navigate to the Android developer website.
-            """.trimIndent(),
+                """.trimIndent(),
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             modifier = Modifier.padding(16.dp),
-            actionHandler = object : ActionHandler {
-                override fun handleUrlClick(url: String, node: Node) {
-                    Log.d("BasicSyntax", "Clicked link: $url")
-
-                }
-            }
+            actionHandler =
+                object : ActionHandler {
+                    override fun handleUrlClick(
+                        url: String,
+                        node: Node,
+                    ) {
+                        Log.d("BasicSyntax", "Clicked link: $url")
+                    }
+                },
         )
     }
 }

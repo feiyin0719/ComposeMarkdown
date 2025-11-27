@@ -22,11 +22,15 @@ import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import kotlinx.coroutines.Dispatchers
 
 @Composable
-fun AsyncLoadingExample(paddingValues: PaddingValues) {
+fun AsyncLoadingExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     var content by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        content = """
+        content =
+            """
             # Async Loading Complete!
             
             This content was obtained through async loading, demonstrating how to handle:
@@ -42,30 +46,31 @@ fun AsyncLoadingExample(paddingValues: PaddingValues) {
             - Content that requires preprocessing
             
             **Tip**: Async parsing doesn't block the UI thread, providing better user experience.
-        """.trimIndent()
+            """.trimIndent()
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(state = rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(state = rememberScrollState()),
     ) {
         MarkdownView(
             content = content,
             markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
             parseDispatcher = Dispatchers.Default,
-            modifier = Modifier
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .padding(16.dp),
             onLoading = {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
-            }
+            },
         )
     }
-
 }

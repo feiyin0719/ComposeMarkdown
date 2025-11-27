@@ -19,10 +19,13 @@ import com.vladsch.flexmark.util.sequence.BasedSequence
  */
 class LatexBlock : Block() {
     var formula: String = ""
+
     override fun getSegments(): Array<BasedSequence> = emptyArray()
 }
 
-private class LatexBlockParser(private val block: LatexBlock) : AbstractBlockParser() {
+private class LatexBlockParser(
+    private val block: LatexBlock,
+) : AbstractBlockParser() {
     private val lines = mutableListOf<String>()
     private var finished = false
 
@@ -43,7 +46,10 @@ private class LatexBlockParser(private val block: LatexBlock) : AbstractBlockPar
         return BlockContinue.atIndex(state.index)
     }
 
-    override fun addLine(state: ParserState, line: BasedSequence) {
+    override fun addLine(
+        state: ParserState,
+        line: BasedSequence,
+    ) {
         if (finished) return
         val text = line.toString()
         lines.add(text)
@@ -65,12 +71,14 @@ private class LatexBlockParser(private val block: LatexBlock) : AbstractBlockPar
     }
 }
 
-class LatexBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension {
+class LatexBlockParserFactory :
+    CustomBlockParserFactory,
+    Parser.ParserExtension {
     override fun apply(options: DataHolder): BlockParserFactory =
         object : AbstractBlockParserFactory(options) {
             override fun tryStart(
                 state: ParserState,
-                matchedBlockParser: MatchedBlockParser
+                matchedBlockParser: MatchedBlockParser,
             ): BlockStart? {
                 val nextNonSpace = state.nextNonSpaceIndex
                 val line = state.line
@@ -84,14 +92,21 @@ class LatexBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension
                     if (closingIndex >= 0) {
                         val body = after.substring(0, closingIndex).trim()
                         block.formula = body
-                        return BlockStart.of(object : AbstractBlockParser() {
-                            override fun getBlock(): Block = block
-                            override fun tryContinue(state: ParserState): BlockContinue? =
-                                BlockContinue.none()
+                        return BlockStart
+                            .of(
+                                object : AbstractBlockParser() {
+                                    override fun getBlock(): Block = block
 
-                            override fun addLine(state: ParserState, line: BasedSequence) {}
-                            override fun closeBlock(state: ParserState) {}
-                        }).atIndex(line.length)
+                                    override fun tryContinue(state: ParserState): BlockContinue? = BlockContinue.none()
+
+                                    override fun addLine(
+                                        state: ParserState,
+                                        line: BasedSequence,
+                                    ) {}
+
+                                    override fun closeBlock(state: ParserState) {}
+                                },
+                            ).atIndex(line.length)
                     }
                     return BlockStart.of(parser).atIndex(line.length)
                 }
@@ -100,9 +115,13 @@ class LatexBlockParserFactory : CustomBlockParserFactory, Parser.ParserExtension
         }
 
     override fun getAfterDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun getBeforeDependents(): MutableSet<Class<*>> = mutableSetOf()
+
     override fun affectsGlobalScope(): Boolean = false
+
     override fun parserOptions(options: MutableDataHolder) {}
+
     override fun extend(parserBuilder: Parser.Builder) {
         parserBuilder.customBlockParserFactory(this)
     }

@@ -22,6 +22,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.widget.SelectionFormatText
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableMap
 
 @Composable
 fun RichText(
@@ -40,15 +43,16 @@ fun RichText(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    inlineContent: Map<String, InlineTextContent> = mapOf(),
-    standaloneInlineTextContent: Map<String, StandaloneInlineTextContent> = mapOf(),
+    inlineContent: ImmutableMap<String, InlineTextContent> = persistentMapOf(),
+    standaloneInlineTextContent: ImmutableMap<String, StandaloneInlineTextContent> = persistentMapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
-    val textSegments = rememberRichTextSegment(
-        text = text,
-        standaloneInlineTextContent = standaloneInlineTextContent,
-    )
+    val textSegments =
+        rememberRichTextSegment(
+            text = text,
+            standaloneInlineTextContent = standaloneInlineTextContent,
+        )
 
     Column(modifier = modifier) {
         textSegments.forEach {
@@ -72,9 +76,10 @@ fun RichText(
                         inlineContent = inlineContent,
                         onTextLayout = onTextLayout,
                         style = style,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
                     )
                 }
 
@@ -94,12 +99,11 @@ fun RichText(
 @Composable
 private fun rememberRichTextSegment(
     text: AnnotatedString,
-    standaloneInlineTextContent: Map<String, StandaloneInlineTextContent>,
-): List<RichTextSegment> {
-    return remember(text, standaloneInlineTextContent) {
+    standaloneInlineTextContent: ImmutableMap<String, StandaloneInlineTextContent>,
+): List<RichTextSegment> =
+    remember(text, standaloneInlineTextContent) {
         buildRichTextSegments(text, standaloneInlineTextContent)
     }
-}
 
 private fun buildRichTextSegments(
     text: AnnotatedString,
@@ -107,65 +111,76 @@ private fun buildRichTextSegments(
 ): List<RichTextSegment> {
     val standaloneInlineTextContentAnnotations = text.getStandaloneInlineTextContentAnnotations()
     // filter out annotations that don't have corresponding inline content
-    val validAnnotations = standaloneInlineTextContentAnnotations.filter { annotation ->
-        standaloneInlineTextContent.containsKey(annotation.item)
-    }
+    val validAnnotations =
+        standaloneInlineTextContentAnnotations.filter { annotation ->
+            standaloneInlineTextContent.containsKey(annotation.item)
+        }
 
     return buildList {
-        validAnnotations.fold(0) { lastIndex, annotation ->
-            if (annotation.start > lastIndex) {
-                add(RichTextSegment.Text(text.subSequence(lastIndex, annotation.start)))
+        validAnnotations
+            .fold(0) { lastIndex, annotation ->
+                if (annotation.start > lastIndex) {
+                    add(RichTextSegment.Text(text.subSequence(lastIndex, annotation.start)))
+                }
+                standaloneInlineTextContent[annotation.item]?.let {
+                    add(RichTextSegment.InlineContentSegment(it))
+                }
+                annotation.end
+            }.let { lastIndex ->
+                if (lastIndex < text.length) {
+                    add(RichTextSegment.Text(text.subSequence(lastIndex, text.length)))
+                }
             }
-            standaloneInlineTextContent[annotation.item]?.let {
-                add(RichTextSegment.InlineContentSegment(it))
-            }
-            annotation.end
-        }.let { lastIndex ->
-            if (lastIndex < text.length) {
-                add(RichTextSegment.Text(text.subSequence(lastIndex, text.length)))
-            }
-        }
     }
 }
 
 private sealed interface RichTextSegment {
-    data class Text(val text: AnnotatedString) : RichTextSegment
-    data class InlineContentSegment(val standaloneInlineTextContent: StandaloneInlineTextContent) :
-        RichTextSegment
+    data class Text(
+        val text: AnnotatedString,
+    ) : RichTextSegment
+
+    data class InlineContentSegment(
+        val standaloneInlineTextContent: StandaloneInlineTextContent,
+    ) : RichTextSegment
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun RichTextPreview() {
-    val annotatedString = AnnotatedString.Builder().apply {
-        append("This is a sample RichText with an inline image: ")
-        val inlineContentId = "inlineImage"
-        appendStandaloneInlineTextContent(
-            id = inlineContentId,
-            alternateText = "[image]",
-        )
-        append(" and some more text after the image.")
-        appendStandaloneInlineTextContent("invalid", "[invalid]")
-        append(" The end.")
-    }.toAnnotatedString()
+    val annotatedString =
+        AnnotatedString
+            .Builder()
+            .apply {
+                append("This is a sample RichText with an inline image: ")
+                val inlineContentId = "inlineImage"
+                appendStandaloneInlineTextContent(
+                    id = inlineContentId,
+                    alternateText = "[image]",
+                )
+                append(" and some more text after the image.")
+                appendStandaloneInlineTextContent("invalid", "[invalid]")
+                append(" The end.")
+            }.toAnnotatedString()
 
-    val inlineContent = mapOf(
-        "inlineImage" to StandaloneInlineTextContent(
-            modifier = Modifier,
-        ) { modifier ->
-            // Replace with actual image composable
-            Text(
-                text = "\uD83D\uDCF7", // Camera emoji as a placeholder for an image
-                modifier = modifier,
-                fontSize = TextUnit.Unspecified,
-            )
-        },
-    )
+    val inlineContent =
+        mapOf(
+            "inlineImage" to
+                StandaloneInlineTextContent(
+                    modifier = Modifier,
+                ) { modifier ->
+                    // Replace with actual image composable
+                    Text(
+                        text = "\uD83D\uDCF7", // Camera emoji as a placeholder for an image
+                        modifier = modifier,
+                        fontSize = TextUnit.Unspecified,
+                    )
+                },
+        )
 
     RichText(
         text = annotatedString,
-        inlineContent = mapOf(),
-        standaloneInlineTextContent = inlineContent,
+        inlineContent = persistentMapOf(),
+        standaloneInlineTextContent = inlineContent.toImmutableMap(),
         modifier = Modifier.fillMaxWidth(),
         style = TextStyle(fontSize = TextUnit.Unspecified),
     )

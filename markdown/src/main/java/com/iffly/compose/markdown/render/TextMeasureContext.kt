@@ -13,5 +13,5 @@ import androidx.compose.ui.unit.Dp
 data class TextMeasureContext(
     val maxTextWidth: Dp,
     val density: Density,
-    val textMeasurer: TextMeasurer
+    val textMeasurer: TextMeasurer,
 )

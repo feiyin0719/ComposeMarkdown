@@ -32,41 +32,44 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * Sample usage of table component, demonstrating DSL syntax and Modifier support
  */
 @Composable
-fun TableSample() {
+fun TableSample(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(16.dp)
-            .verticalScroll(state = rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(16.dp)
+                .verticalScroll(state = rememberScrollState()),
     ) {
         val twoCellModifier = Modifier.fillMaxSize()
         Text(
             text = "Basic Table Example",
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         )
 
         // DSL example with unified padding
         Table(
             modifier = Modifier.fillMaxWidth(),
-            border = TableBorder.solid(
-                mode = TableBorderMode.ALL,
-                color = Color.Gray,
-                width = 1.dp
-            ),
-            widthWeights = listOf(1f, 2f),
-            cellAlignment = Alignment.TopStart
+            border =
+                TableBorder.solid(
+                    mode = TableBorderMode.ALL,
+                    color = Color.Gray,
+                    width = 1.dp,
+                ),
+            widthWeights = persistentListOf(1f, 2f),
+            cellAlignment = Alignment.TopStart,
         ) {
             header {
                 cell(
                     modifier = twoCellModifier.background(Color.Red),
-                    cellBackground = Modifier.background(Color.Green)
+                    cellBackground = Modifier.background(Color.Green),
                 ) { Text("Name", fontWeight = FontWeight.Bold) }
                 cell(modifier = twoCellModifier) { Text("Quantity", fontWeight = FontWeight.Bold) }
             }
@@ -85,109 +88,122 @@ fun TableSample() {
         Text(
             text = "Styled Table Example",
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
+            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp),
         )
 
-        val cellModifier = Modifier
-            .wrapContentSize()
-            .widthIn(max = 170.dp)
+        val cellModifier =
+            Modifier
+                .wrapContentSize()
+                .widthIn(max = 170.dp)
 
         // Example using Modifier to customize styles
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
         ) {
             Table(
                 cellPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),
                 cellAlignment = Alignment.Center,
-                border = TableBorder.solid(
-                    mode = TableBorderMode.ALL,
-                    color = Color.Gray,
-                    width = 1.dp
-                )
+                border =
+                    TableBorder.solid(
+                        mode = TableBorderMode.ALL,
+                        color = Color.Gray,
+                        width = 1.dp,
+                    ),
             ) {
                 header(
-                    modifier = Modifier.background(Color.LightGray)
+                    modifier = Modifier.background(Color.LightGray),
                 ) {
                     cell(
-                        modifier = cellModifier
-                            .padding(12.dp)
+                        modifier =
+                            cellModifier
+                                .padding(12.dp),
                     ) {
                         Text(
                             "Product",
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                     cell(
-                        modifier = cellModifier
-                            .padding(12.dp)
+                        modifier =
+                            cellModifier
+                                .padding(12.dp),
                     ) {
                         Text(
                             "Price",
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                     cell(
-                        modifier = cellModifier
-                            .padding(12.dp)
+                        modifier =
+                            cellModifier
+                                .padding(12.dp),
                     ) {
                         Text(
                             "Status",
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
                 body {
                     row {
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp),
                         ) {
                             Text("MacBook Pro")
                         }
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp),
                         ) {
                             Text("¥18,999", color = Color.Blue)
                         }
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
-                                .background(Color.Green.copy(alpha = 0.2f))
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp)
+                                    .background(Color.Green.copy(alpha = 0.2f)),
                         ) {
                             Text("In Stock", color = Color.Green)
                         }
                     }
                     row(
-                        modifier = Modifier.background(Color.Gray.copy(alpha = 0.1f))
+                        modifier = Modifier.background(Color.Gray.copy(alpha = 0.1f)),
                     ) {
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp),
                         ) {
                             Text("iPhone 15fdsfdsfdsfdsfdsfdsfdsfsdfdsfsdsdfdsfdsfdsfdsfdsfsd")
                         }
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp),
                         ) {
                             Text(
                                 "¥7,999dasdasdasdasdasdasdasdasdasdasdasdasdasddasdasdasdasdsadasda",
-                                color = Color.Blue
+                                color = Color.Blue,
                             )
                         }
                         cell(
-                            modifier = cellModifier
-                                .padding(12.dp)
-                                .background(Color.Green.copy(alpha = 0.2f))
+                            modifier =
+                                cellModifier
+                                    .padding(12.dp)
+                                    .background(Color.Green.copy(alpha = 0.2f)),
                         ) {
                             Text("Limited Stock", color = Color.Green)
                         }
@@ -196,23 +212,23 @@ fun TableSample() {
             }
         }
 
-
         Text(
             text = "Clean Border Style Table",
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
+            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp),
         )
 
         // Clean style table
         Table(
-            cellPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            cellPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             header {
                 cell(
-                    modifier = Modifier.border(
-                        width = 0.dp,
-                        color = Color.Transparent
-                    )
+                    modifier =
+                        Modifier.border(
+                            width = 0.dp,
+                            color = Color.Transparent,
+                        ),
                 ) {
                     Text("Task", fontWeight = FontWeight.Bold)
                 }
@@ -223,9 +239,10 @@ fun TableSample() {
                 row {
                     cell { Text("Design Review") }
                     cell(
-                        modifier = Modifier
-                            .background(Color.Red.copy(alpha = 0.1f))
-                            .padding(4.dp)
+                        modifier =
+                            Modifier
+                                .background(Color.Red.copy(alpha = 0.1f))
+                                .padding(4.dp),
                     ) {
                         Text("High", color = Color.Red, fontWeight = FontWeight.Bold)
                     }
@@ -234,9 +251,10 @@ fun TableSample() {
                 row {
                     cell { Text("Code Documentation") }
                     cell(
-                        modifier = Modifier
-                            .background(Color.Yellow.copy(alpha = 0.2f))
-                            .padding(4.dp)
+                        modifier =
+                            Modifier
+                                .background(Color.Yellow.copy(alpha = 0.2f))
+                                .padding(4.dp),
                     ) {
                         Text("Medium", color = Color.Green)
                     }
@@ -245,10 +263,12 @@ fun TableSample() {
                 row {
                     cell { Text("Unit Testing") }
                     cell(
-                        modifier = Modifier
-                            .padding(4.dp),
-                        cellBackground = Modifier
-                            .background(Color.Green.copy(alpha = 0.1f))
+                        modifier =
+                            Modifier
+                                .padding(4.dp),
+                        cellBackground =
+                            Modifier
+                                .background(Color.Green.copy(alpha = 0.1f)),
                     ) {
                         Text("Low", color = Color.Green)
                     }
@@ -259,35 +279,35 @@ fun TableSample() {
         Text(
             text = "Clean Border Style Table",
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
+            modifier = Modifier.padding(top = 32.dp, bottom = 16.dp),
         )
         // Showcase more alignment options
         Table(
             cellPadding = PaddingValues(16.dp),
-            modifier = Modifier.border(1.dp, Color.Gray)
+            modifier = Modifier.border(1.dp, Color.Gray),
         ) {
             header {
                 cell(
                     alignment = Alignment.TopStart,
-                    modifier = Modifier
-                        .background(Color.Blue.copy(alpha = 0.1f))
-
+                    modifier =
+                        Modifier
+                            .background(Color.Blue.copy(alpha = 0.1f)),
                 ) {
                     Text("Top Left", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
                 cell(
                     alignment = Alignment.TopCenter,
-                    modifier = Modifier
-                        .background(Color.Blue.copy(alpha = 0.1f))
-
+                    modifier =
+                        Modifier
+                            .background(Color.Blue.copy(alpha = 0.1f)),
                 ) {
                     Text("Top Center", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
                 cell(
                     alignment = Alignment.TopEnd,
-                    modifier = Modifier
-                        .background(Color.Blue.copy(alpha = 0.1f))
-
+                    modifier =
+                        Modifier
+                            .background(Color.Blue.copy(alpha = 0.1f)),
                 ) {
                     Text("Top Right", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
@@ -296,19 +316,19 @@ fun TableSample() {
                 row {
                     cell(
                         alignment = Alignment.CenterStart,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Center Left")
                     }
                     cell(
                         alignment = Alignment.Center,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Center")
                     }
                     cell(
                         alignment = Alignment.CenterEnd,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Center Right")
                     }
@@ -316,19 +336,19 @@ fun TableSample() {
                 row {
                     cell(
                         alignment = Alignment.BottomStart,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Bottom Left", fontSize = 12.sp, color = Color.Gray)
                     }
                     cell(
                         alignment = Alignment.BottomCenter,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Bottom Center", fontSize = 12.sp, color = Color.Gray)
                     }
                     cell(
                         alignment = Alignment.BottomEnd,
-                        modifier = Modifier
+                        modifier = Modifier,
                     ) {
                         Text("Bottom Right", fontSize = 12.sp, color = Color.Gray)
                     }
@@ -340,7 +360,7 @@ fun TableSample() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun TableSamplePreview() {
+private fun TableSamplePreview() {
     MaterialTheme {
         TableSample()
     }

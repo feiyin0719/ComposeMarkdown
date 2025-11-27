@@ -22,9 +22,13 @@ import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 
 @Composable
-fun ErrorHandlingExample(paddingValues: PaddingValues) {
+fun ErrorHandlingExample(
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     // Intentionally create a scenario that might cause errors
-    val invalidContent = """
+    val invalidContent =
+        """
         # Error Handling Example
         
         This example demonstrates normal content and error handling:
@@ -41,24 +45,26 @@ fun ErrorHandlingExample(paddingValues: PaddingValues) {
         - Parsing exceptions
         
         The library provides elegant error handling mechanisms.
-    """.trimIndent()
+        """.trimIndent()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Blue.copy(alpha = 0.1f)),
         ) {
             Text(
                 text = "💡 Tip: This example demonstrates the error handling mechanism",
                 modifier = Modifier.padding(16.dp),
-                color = Color.Blue
+                color = Color.Blue,
             )
         }
 
@@ -69,25 +75,25 @@ fun ErrorHandlingExample(paddingValues: PaddingValues) {
             onError = { throwable ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f))
+                    colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f)),
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
                     ) {
                         Text(
                             text = "⚠️ Markdown parsing failed",
                             color = Color.Red,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Error message: ${throwable.message}",
                             color = Color.Red,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 }
-            }
+            },
         )
     }
 }

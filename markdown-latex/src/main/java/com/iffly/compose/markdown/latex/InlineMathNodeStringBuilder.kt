@@ -25,9 +25,7 @@ import com.vladsch.flexmark.util.ast.Node
 open class InlineMathNodeStringBuilder<T : Node>(
     private val textStyle: TextStyle,
     private val paddingValues: PaddingValues,
-) :
-    IInlineNodeStringBuilder<T> {
-
+) : IInlineNodeStringBuilder<T> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: T,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
@@ -36,35 +34,39 @@ open class InlineMathNodeStringBuilder<T : Node>(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext
+        measureContext: TextMeasureContext,
     ) {
-        val latexBody = when (node) {
-            is GitLabInlineMath -> node.text.toString()
-            is InlineLatexNode -> node.formula
-            else -> return
-        }
+        val latexBody =
+            when (node) {
+                is GitLabInlineMath -> node.text.toString()
+                is InlineLatexNode -> node.formula
+                else -> return
+            }
         val placeholderId =
             "inline_math_${System.identityHashCode(node)}"
         val latexConfig = textStyle.toLatexConfig(measureContext.density, paddingValues)
-        val drawable = LatexBitmapLoader.createDrawable(
-            latexBody,
-            latexConfig
-        )
+        val drawable =
+            LatexBitmapLoader.createDrawable(
+                latexBody,
+                latexConfig,
+            )
         val width = with(measureContext.density) { drawable.intrinsicWidth.toSp() }
         val height = with(measureContext.density) { drawable.intrinsicHeight.toSp() }
-        inlineContentMap[placeholderId] = InlineTextContent(
-            placeholder = Placeholder(
-                width = width,
-                height = height,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-            )
-        ) {
-            LatexImage(
-                latex = latexBody,
-                latexConfig = latexConfig,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }.toFixedSizeMarkdownInlineTextContent()
+        inlineContentMap[placeholderId] =
+            InlineTextContent(
+                placeholder =
+                    Placeholder(
+                        width = width,
+                        height = height,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                    ),
+            ) {
+                LatexImage(
+                    latex = latexBody,
+                    latexConfig = latexConfig,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }.toFixedSizeMarkdownInlineTextContent()
         appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
     }
 }
@@ -76,5 +78,5 @@ class InlineLatexNodeStringBuilder(
 
 class GitLabInlineMathNodeStringBuilder(
     textStyle: TextStyle,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
 ) : InlineMathNodeStringBuilder<GitLabInlineMath>(textStyle, paddingValues)

@@ -5,33 +5,27 @@ package com.iffly.compose.markdown.util
  * Directly inherits from LinkedHashMap and overrides the removeEldestEntry method
  */
 class LRUCache<K, V>(
-    private val maxSize: Int
+    private val maxSize: Int,
 ) : LinkedHashMap<K, V>(maxSize / 4, 0.75f, true) {
-
     /**
      * Override removeEldestEntry method to automatically remove the oldest entry when cache exceeds maximum size
      */
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
-        return size > maxSize
-    }
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean = size > maxSize
 
     /**
      * Get maximum cache size
      */
-    fun maxSize(): Int {
-        return maxSize
-    }
+    fun maxSize(): Int = maxSize
 
     /**
      * Get cache statistics
      */
-    fun getStats(): CacheStats {
-        return CacheStats(
+    fun getStats(): CacheStats =
+        CacheStats(
             currentSize = size,
             maxSize = maxSize,
-            loadFactor = size.toFloat() / maxSize
+            loadFactor = size.toFloat() / maxSize,
         )
-    }
 
     /**
      * Cache statistics information
@@ -39,6 +33,6 @@ class LRUCache<K, V>(
     data class CacheStats(
         val currentSize: Int,
         val maxSize: Int,
-        val loadFactor: Float
+        val loadFactor: Float,
     )
 }
