@@ -3,8 +3,8 @@ package com.iffly.compose.markdown.core.plugins
 import com.iffly.compose.markdown.config.IMarkdownRenderPlugin
 import com.iffly.compose.markdown.core.renders.BlockQuoteRenderer
 import com.iffly.compose.markdown.core.renders.BreakLineRenderer
-import com.iffly.compose.markdown.core.renders.BulletListBlockRenderer
 import com.iffly.compose.markdown.core.renders.BulletListItemRenderer
+import com.iffly.compose.markdown.core.renders.BulletListRenderer
 import com.iffly.compose.markdown.core.renders.CodeNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.DocumentRenderer
 import com.iffly.compose.markdown.core.renders.EmphasisNodeStringBuilder
@@ -15,8 +15,8 @@ import com.iffly.compose.markdown.core.renders.HeadingRenderer
 import com.iffly.compose.markdown.core.renders.ImageNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.OrderedListBlockRenderer
 import com.iffly.compose.markdown.core.renders.OrderedListItemRenderer
+import com.iffly.compose.markdown.core.renders.OrderedListRenderer
 import com.iffly.compose.markdown.core.renders.ParagraphNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.ParagraphRenderer
 import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
@@ -64,8 +64,8 @@ class CorePlugin : IMarkdownRenderPlugin {
             TableBlock::class.java to TableRenderer(),
             Paragraph::class.java to ParagraphRenderer(),
             Heading::class.java to HeadingRenderer(),
-            OrderedList::class.java to OrderedListBlockRenderer(),
-            BulletList::class.java to BulletListBlockRenderer(),
+            OrderedList::class.java to OrderedListRenderer(),
+            BulletList::class.java to BulletListRenderer(),
             OrderedListItem::class.java to OrderedListItemRenderer(),
             BulletListItem::class.java to BulletListItemRenderer(),
             FencedCodeBlock::class.java to FencedCodeBlockRenderer(),

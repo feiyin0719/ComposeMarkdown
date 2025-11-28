@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025.
+ * Microsoft Corporation. All rights reserved.
+ */
+
 package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.layout.Arrangement
@@ -12,33 +17,45 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
+import com.iffly.compose.markdown.util.StringExt.FIGURE_SPACE
+import com.iffly.compose.markdown.util.getIndentLevel
 import com.iffly.compose.markdown.util.getMarkerText
+import com.iffly.compose.markdown.widget.SelectionFormatText
+import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.BulletListItem
 import com.vladsch.flexmark.ast.ListBlock
 import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ast.OrderedListItem
 
-open class ListBlockRenderer : IBlockRenderer<ListBlock> {
+/**
+ * The renderer for ListBlock nodes.
+ */
+open class ListRenderer<T : ListBlock> : IBlockRenderer<T> {
     @Composable
     override fun Invoke(
-        node: ListBlock,
+        node: T,
         modifier: Modifier,
     ) {
         Column(
             verticalArrangement = Arrangement.Top,
-            modifier = modifier.wrapContentSize(),
+            modifier = modifier,
         ) {
             val theme = currentTheme()
-            var child = node.firstChild
             val spacerHeight =
                 if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
+            var child = node.firstChild
             while (child != null) {
-                MarkdownContent(child, Modifier)
+                MarkdownContent(
+                    node = child,
+                    modifier =
+                        Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth(),
+                )
                 if (child.next != null && theme.spacerTheme.showSpacer) {
                     Spacer(Modifier.height(spacerHeight))
                 }
@@ -48,39 +65,93 @@ open class ListBlockRenderer : IBlockRenderer<ListBlock> {
     }
 }
 
-class OrderedListBlockRenderer : ListBlockRenderer()
+/**
+ * The renderer for OrderedList nodes.
+ */
+class OrderedListRenderer : ListRenderer<OrderedList>()
 
-class BulletListBlockRenderer : ListBlockRenderer()
+/**
+ * The renderer for BulletList nodes.
+ */
+class BulletListRenderer : ListRenderer<BulletList>()
 
-abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
-    abstract fun getMarker(node: T): String
+/**
+ * A functional interface for rendering ListItem markers.
+ * @param T The type of ListItem.
+ */
+fun interface ListItemMarkerRenderer<in T : ListItem> {
+    @Composable
+    operator fun invoke(
+        node: T,
+        modifier: Modifier,
+    )
+}
 
+class ListItemMarkerRendererImpl<T : ListItem> : ListItemMarkerRenderer<T> {
+    @Composable
+    override fun invoke(
+        node: T,
+        modifier: Modifier,
+    ) {
+        val marker = node.getMarkerText()
+        val theme = currentTheme()
+        Text(
+            text = marker,
+            style = theme.listTheme.markerTextStyle ?: theme.textStyle,
+            modifier = modifier,
+        )
+    }
+}
+
+/**
+ * The base renderer for ListItem nodes.
+ * @param T The type of ListItem.
+ * @param markerRenderer The renderer for the list item marker.
+ * You can provide a custom implementation.
+ */
+open class BaseListItemRenderer<T : ListItem>(
+    private val markerRenderer: ListItemMarkerRenderer<T> = ListItemMarkerRendererImpl(),
+) : IBlockRenderer<T> {
     @Composable
     override fun Invoke(
         node: T,
         modifier: Modifier,
     ) {
         val theme = currentTheme()
-        val marker = getMarker(node)
+        val listTheme = theme.listTheme
+        val intentLevel = node.getIndentLevel()
         Row(
             modifier =
                 modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
         ) {
-            Text(
-                marker,
-                modifier = Modifier,
-                style = theme.listTheme.markerTextStyle ?: theme.textStyle,
-                textAlign = TextAlign.End,
-            )
-            Spacer(modifier = Modifier.width(theme.listTheme.markerSpacerWidth))
-            val spacerHeight =
-                if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
-            Column(verticalArrangement = Arrangement.Top, modifier = Modifier.wrapContentSize()) {
+            if (node.parent?.firstChild != node && intentLevel > 0) {
+                // add invisible space to align with above item marker for selection-copy purpose
+                SelectionFormatText(FIGURE_SPACE.repeat(intentLevel))
+            }
+            // Render the marker
+            markerRenderer(node = node, modifier = Modifier.wrapContentHeight())
+            Spacer(modifier = Modifier.width(listTheme.markerSpacerWidth))
+            Column(
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.wrapContentSize(),
+            ) {
+                val spacerHeight =
+                    if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
                 var child = node.firstChild
                 while (child != null) {
-                    MarkdownContent(child, Modifier)
+                    if (child != node.firstChild) {
+                        // add invisible space to align with marker for selection-copy purpose
+                        SelectionFormatText(FIGURE_SPACE.repeat(intentLevel + 1))
+                    }
+                    MarkdownContent(
+                        node = child,
+                        modifier =
+                            Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth(),
+                    )
                     if (child.next != null && theme.spacerTheme.showSpacer) {
                         Spacer(Modifier.height(spacerHeight))
                     }
@@ -91,13 +162,16 @@ abstract class ListItemRenderer<in T : ListItem> : IBlockRenderer<T> {
     }
 }
 
-class OrderedListItemRenderer : ListItemRenderer<OrderedListItem>() {
-    override fun getMarker(node: OrderedListItem): String {
-        val delimiter = (node.parent as? OrderedList)?.delimiter ?: "."
-        return "${node.getMarkerText()}$delimiter"
-    }
-}
+/**
+ * The renderer for OrderedListItem nodes.
+ */
+class OrderedListItemRenderer(
+    markerRenderer: ListItemMarkerRenderer<OrderedListItem> = ListItemMarkerRendererImpl(),
+) : BaseListItemRenderer<OrderedListItem>(markerRenderer = markerRenderer)
 
-class BulletListItemRenderer : ListItemRenderer<BulletListItem>() {
-    override fun getMarker(node: BulletListItem): String = node.getMarkerText()
-}
+/**
+ * The renderer for BulletListItem nodes.
+ */
+class BulletListItemRenderer(
+    markerRenderer: ListItemMarkerRenderer<BulletListItem> = ListItemMarkerRendererImpl(),
+) : BaseListItemRenderer<BulletListItem>(markerRenderer = markerRenderer)

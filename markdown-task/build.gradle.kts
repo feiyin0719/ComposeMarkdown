@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -31,6 +32,10 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    // Enable Compose build features to ensure Compose code is compiled in this module
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
@@ -42,6 +47,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.compose.foundation)
     implementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

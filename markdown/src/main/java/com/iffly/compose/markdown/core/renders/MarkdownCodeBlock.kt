@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
+import com.iffly.compose.markdown.util.StringExt
 import com.iffly.compose.markdown.widget.DisableSelectionWrapper
 import com.iffly.compose.markdown.widget.LineNumberText
 import com.iffly.compose.markdown.widget.SelectionFormatText
@@ -128,7 +129,7 @@ class CodeHeaderRenderer<T : Block>(
                             .padding(top = 9.dp),
                 )
                 // add invisible \n in header for selection-copy purpose
-                SelectionFormatText("\n")
+                SelectionFormatText(StringExt.LINE_SEPARATOR)
             }
         }
     }
@@ -183,7 +184,7 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
                     .then(scrollModifier),
         )
         // add invisible \n in code content for selection-copy purpose
-        SelectionFormatText("\n")
+        SelectionFormatText(StringExt.LINE_SEPARATOR)
     }
 }
 

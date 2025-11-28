@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
+import com.iffly.compose.markdown.util.StringExt
 import com.iffly.compose.markdown.widget.SelectionFormatText
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
@@ -91,7 +92,7 @@ fun RichText(
                 }
             }
             // Add invisible line break to keep selection-copy format correct across segments
-            SelectionFormatText("\n")
+            SelectionFormatText(StringExt.LINE_SEPARATOR)
         }
     }
 }

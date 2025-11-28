@@ -61,7 +61,7 @@ fun ListItem.getMarkerText(): String =
             val maxLength = max.toString().length
             val indexString = index.toString()
             val indexLength = indexString.length
-            "${StringExt.FIGURE_SPACE.repeat(maxLength - indexLength)}$indexString"
+            "${StringExt.FIGURE_SPACE.repeat(maxLength - indexLength)}$indexString."
         }
 
         else -> {
