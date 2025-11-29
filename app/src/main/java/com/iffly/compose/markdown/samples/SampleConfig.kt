@@ -74,4 +74,10 @@ val markdownExamples =
         ) { paddingValues ->
             LatexMathExample(paddingValues)
         },
+        MarkdownExample(
+            title = "Dynamic Content Example",
+            description = "Shows handling of dynamic content updates in Markdown",
+        ) { paddingValues ->
+            DynamicMarkdownSample(paddingValues)
+        },
     )

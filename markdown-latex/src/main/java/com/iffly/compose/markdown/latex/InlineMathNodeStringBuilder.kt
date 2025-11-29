@@ -43,7 +43,7 @@ open class InlineMathNodeStringBuilder<T : Node>(
                 else -> return
             }
         val placeholderId =
-            "inline_math_${System.identityHashCode(node)}"
+            "inline_math_$latexBody"
         val latexConfig = textStyle.toLatexConfig(measureContext.density, paddingValues)
         val drawable =
             LatexBitmapLoader.createDrawable(

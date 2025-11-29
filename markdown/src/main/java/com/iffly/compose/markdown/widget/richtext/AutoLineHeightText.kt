@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.widget.richtext
 
+import android.util.Log
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -24,34 +25,42 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 /**
- * A Text composable that automatically adjusts line height for inline content with specified height in sp.
+ * A Composable that displays text with automatic line height adjustment for inline content.
+ * It is used to fix the overlap issue when inline content has a larger height than the surrounding text.
  *
- * @param text The annotated string to display.
- * @param modifier The modifier to be applied to the Text.
+ * This Composable analyzes the inline content within the provided [text] and adjusts the line height
+ * of the text segments containing inline content to ensure proper vertical alignment.
+ *
+ * @param text The annotated string containing the text to be displayed.
+ * @param modifier The modifier to be applied to the text.
  * @param color The color of the text.
  * @param fontSize The size of the font.
  * @param fontStyle The style of the font.
  * @param fontWeight The weight of the font.
- * @param fontFamily The family of the font.
+ * @param fontFamily The font family of the text.
  * @param letterSpacing The spacing between letters.
  * @param textDecoration The decoration to be applied to the text.
  * @param textAlign The alignment of the text.
- * @param lineHeight The height of the lines.
+ * @param lineHeight The height of each line of text.
  * @param overflow The overflow behavior of the text.
  * @param softWrap Whether the text should wrap softly.
- * @param maxLines The maximum number of lines to display.
- * @param minLines The minimum number of lines to display.
- * @param inlineContent The inline content to be displayed within the text.
- * @param onTextLayout Callback that is invoked when the text layout is calculated.
+ * @param maxLines The maximum number of lines to be displayed.
+ * @param minLines The minimum number of lines to be displayed.
+ * @param inlineContent A map of inline content to be used within the text.
+ * @param onTextLayout A callback that is invoked when the text layout is calculated.
  * @param style The style to be applied to the text.
  */
 @Composable
@@ -75,37 +84,55 @@ fun AutoLineHeightText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
-    var adjustLineHeightRequestList by remember {
-        mutableStateOf<List<AdjustLineHeightRequest>>(emptyList())
-    }
-    val inlineContentAnnotations =
-        remember(text) {
-            text.getInlineContentAnnotations()
-        }
-
-    var adjustedText by remember {
-        mutableStateOf(text)
-    }
-
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var adjustedText by remember(text) { mutableStateOf(text) }
     val density = LocalDensity.current
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(text) {
         snapshotFlow {
-            Pair(adjustedText, adjustLineHeightRequestList)
+            textLayoutResult
         }.distinctUntilChanged()
-            .collectLatest { (currentText, requests) ->
-                if (requests.isEmpty()) {
-                    return@collectLatest
+            .map { layoutResult ->
+                layoutResult?.let {
+                    if (adjustedText != it.layoutInput.text) {
+                        return@map null
+                    }
+                    withContext(Dispatchers.Default) {
+                        val adjustLineHeightRequestMap =
+                            calculateAdjustLineHeightRequest(
+                                layoutResult = it,
+                                density = density,
+                            )
+                        it.layoutInput.text to adjustLineHeightRequestMap.values.toList()
+                    }
                 }
-                val newText =
-                    buildAdjustLineHeightText(requests, currentText)
-                adjustedText = newText
-                adjustLineHeightRequestList = emptyList()
+            }.collectLatest {
+                it?.let { (currentText, adjustLineHeightRequests) ->
+                    if (adjustedText != currentText) {
+                        return@collectLatest
+                    }
+                    if (adjustLineHeightRequests.isNotEmpty()) {
+                        val newText =
+                            buildAdjustLineHeightText(
+                                currentText = currentText,
+                                requests = adjustLineHeightRequests,
+                            )
+                        adjustedText = newText
+                    } else {
+                        if (currentText != adjustedText) {
+                            adjustedText = currentText
+                        }
+                    }
+                }
             }
     }
-
+    val textAnnotations = text.getStringAnnotations(0, text.length).map { it.item }
+    val adjustTextAnnotations =
+        adjustedText.getStringAnnotations(0, adjustedText.length).map { it.item }
+    Log.i("AutoLineHeightText", "original $text,$textAnnotations")
+    Log.i("AutoLineHeightText", "adjusted $adjustedText,$adjustTextAnnotations")
     Text(
         text = adjustedText,
+        modifier = modifier,
         color = color,
         fontSize = fontSize,
         fontStyle = fontStyle,
@@ -120,51 +147,38 @@ fun AutoLineHeightText(
         maxLines = maxLines,
         minLines = minLines,
         inlineContent = inlineContent,
-        onTextLayout = { layoutResult: TextLayoutResult ->
-            adjustLineHeightRequestList =
-                calculateAdjustLineHeightRequests(
-                    inlineTextContentAnnotations = inlineContentAnnotations,
-                    layoutResult = layoutResult,
-                    inlineContent = inlineContent,
-                    density = density,
-                )
+        onTextLayout = { layoutResult ->
+            textLayoutResult = layoutResult
             onTextLayout(layoutResult)
         },
-        modifier = modifier,
         style = style,
     )
 }
 
 private fun buildAdjustLineHeightText(
-    requests: List<AdjustLineHeightRequest>,
     currentText: AnnotatedString,
+    requests: List<AdjustLineHeightRequest>,
 ): AnnotatedString {
-    val sortedRequests = requests.sortedByDescending { it.startIndex }
     val newText =
         buildAnnotatedString {
             var lastIndex = 0
-            sortedRequests.forEach {
-                if (it.startIndex > lastIndex) {
-                    append(currentText.subSequence(lastIndex, it.startIndex))
-                }
-                with(
-                    ParagraphStyle(
-                        lineHeight = it.lineHeight,
-                    ),
-                ) {
-                    val segment =
-                        currentText.subSequence(it.startIndex, it.endIndex)
-                    if (segment.lastOrNull() == '\n') {
-                        // Apply paragraph style will make the text as a single line,
-                        // If it already ends with a new line character,
-                        // exclude the last new line character to avoid extra line
-                        append(segment.subSequence(0, segment.length - 1))
-                    } else {
-                        append(segment)
+            requests
+                .sortedBy {
+                    it.startIndex
+                }.forEach {
+                    if (it.startIndex > lastIndex) {
+                        appendAndRemoveLastLineSeparator(currentText.subSequence(lastIndex, it.startIndex))
                     }
+                    withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
+                        appendAndRemoveLastLineSeparator(
+                            currentText.subSequence(
+                                it.startIndex,
+                                it.endIndex,
+                            ),
+                        )
+                    }
+                    lastIndex = it.endIndex
                 }
-                lastIndex = it.endIndex
-            }
             if (lastIndex < currentText.length) {
                 append(currentText.subSequence(lastIndex, currentText.length))
             }
@@ -172,51 +186,52 @@ private fun buildAdjustLineHeightText(
     return newText
 }
 
-private const val INLINE_CONTENT_TAG = "androidx.compose.foundation.text.inlineContent"
+private fun AnnotatedString.Builder.appendAndRemoveLastLineSeparator(subSegment: AnnotatedString) {
+    if (subSegment.lastOrNull() == '\n') {
+        append(subSegment.subSequence(0, subSegment.length - 1))
+    } else {
+        append(subSegment)
+    }
+}
 
-private fun AnnotatedString.getInlineContentAnnotations(): List<AnnotatedString.Range<String>> =
-    this.getStringAnnotations(tag = INLINE_CONTENT_TAG, start = 0, end = this.length)
-
-private fun calculateAdjustLineHeightRequests(
-    inlineTextContentAnnotations: List<AnnotatedString.Range<String>>,
+private fun calculateAdjustLineHeightRequest(
     layoutResult: TextLayoutResult,
-    inlineContent: Map<String, InlineTextContent>,
     density: Density,
-): List<AdjustLineHeightRequest> {
+): MutableMap<Int, AdjustLineHeightRequest> {
     val adjustLineHeightRequestMap = mutableMapOf<Int, AdjustLineHeightRequest>()
-    for (annotation in inlineTextContentAnnotations) {
-        val inlineContentItem = inlineContent[annotation.item] ?: continue
-        if (!inlineContentItem.placeholder.height.isSp) {
-            // only adjust line height for inline content with height in sp
+    val annotationRanges = layoutResult.layoutInput.placeholders
+    for (annotation in annotationRanges) {
+        if (!annotation.item.height.isSp) {
             continue
         }
-        val startIndex = annotation.start
-        // get the line number where the inline content starts
-        val startLineNumber = layoutResult.getLineForOffset(startIndex)
-        // get the line height of that line
-        val lineHeight =
-            layoutResult.getLineBottom(startLineNumber) - layoutResult.getLineTop(startLineNumber)
-        val existingRequest = adjustLineHeightRequestMap[startLineNumber]
-        val lineHeightSp = with(density) { lineHeight.toSp() }
-        val existingLineHeight = existingRequest?.lineHeight ?: 0.sp
-        val inlineContentLineHeight = inlineContentItem.placeholder.height
-        // get the max of line height and existing line height
-        val finalLineHeight =
-            if (lineHeightSp > existingLineHeight) {
-                lineHeightSp
-            } else {
-                existingLineHeight
+
+        val lineNumber = layoutResult.getLineForOffset(annotation.start)
+        val textLineHeight =
+            layoutResult.getLineBottom(lineNumber) - layoutResult.getLineTop(lineNumber)
+        val textLineHeightSp =
+            with(density) {
+                textLineHeight.toSp()
             }
-        if (inlineContentLineHeight > finalLineHeight) {
-            adjustLineHeightRequestMap[startLineNumber] =
+        val existingRequestLineHeight = adjustLineHeightRequestMap[lineNumber]?.lineHeight ?: 0.sp
+
+        val inlineContentLineHeight = annotation.item.height
+        val maxRequestLineHeight =
+            if (inlineContentLineHeight > existingRequestLineHeight) {
+                inlineContentLineHeight
+            } else {
+                existingRequestLineHeight
+            }
+
+        if (maxRequestLineHeight > textLineHeightSp) {
+            adjustLineHeightRequestMap[lineNumber] =
                 AdjustLineHeightRequest(
-                    startIndex = layoutResult.getLineStart(startLineNumber),
-                    endIndex = layoutResult.getLineEnd(startLineNumber),
-                    lineHeight = inlineContentLineHeight,
+                    startIndex = layoutResult.getLineStart(lineNumber),
+                    endIndex = layoutResult.getLineEnd(lineNumber),
+                    lineHeight = maxRequestLineHeight,
                 )
         }
     }
-    return adjustLineHeightRequestMap.values.toList()
+    return adjustLineHeightRequestMap
 }
 
 private data class AdjustLineHeightRequest(
