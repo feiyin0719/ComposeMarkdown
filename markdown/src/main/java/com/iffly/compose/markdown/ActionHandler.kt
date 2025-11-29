@@ -15,6 +15,13 @@ interface ActionHandler {
     fun handleCopyClick(node: Node) {
         // Default implementation does nothing
     }
+
+    fun handleImageClick(
+        imageUrl: String,
+        node: Node,
+    ) {
+        // Default implementation does nothing
+    }
 }
 
 internal class MarkdownLinkInteractionListener(

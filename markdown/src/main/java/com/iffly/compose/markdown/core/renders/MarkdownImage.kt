@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,6 +13,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.iffly.compose.markdown.R
+import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.widget.LoadingView
 import com.vladsch.flexmark.ast.Image
 
@@ -34,6 +36,7 @@ fun MarkdownImage(
     val url = node.url
     val altText = node.text?.toString() ?: node.title?.toString() ?: ""
     val context = LocalPlatformContext.current
+    val actionHandler = currentActionHandler()
 
     SubcomposeAsyncImage(
         ImageRequest
@@ -46,7 +49,10 @@ fun MarkdownImage(
         contentDescription = altText,
         contentScale = contentScale,
         alignment = alignment,
-        modifier = modifier,
+        modifier =
+            modifier.clickable {
+                actionHandler?.handleImageClick(url.toString(), node)
+            },
         loading = {
             loadingView(
                 node,

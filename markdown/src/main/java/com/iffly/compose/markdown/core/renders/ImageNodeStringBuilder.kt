@@ -71,7 +71,7 @@ class ImageNodeStringBuilder(
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext,
     ) {
-        val imageId = "image_$${System.identityHashCode(node)}"
+        val imageId = "image_$${node.url}"
         inlineContentMap[imageId] =
             MarkdownInlineView.MarkdownStandaloneInlineView(
                 modifier = Modifier,
