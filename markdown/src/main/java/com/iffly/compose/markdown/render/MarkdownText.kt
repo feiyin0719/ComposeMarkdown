@@ -63,18 +63,10 @@ fun MarkdownText(
             remember(inlineContent) {
                 inlineContent
                     .mapNotNull { (key, value) ->
-                        (value as? MarkdownInlineView.MarkdownInlineTextContent)?.let {
-                            key to value.toInlineTextContent()
-                        }
-                    }.toMap()
-            }
-
-        val standaloneInlineTextContent =
-            remember(inlineContent) {
-                inlineContent
-                    .mapNotNull { (key, value) ->
-                        (value as? MarkdownInlineView.MarkdownStandaloneInlineView)?.let {
-                            key to it.toStandaloneInlineTextContent()
+                        if (value is MarkdownInlineView.MarkdownRichTextInlineContent) {
+                            key to value.inlineContent
+                        } else {
+                            null
                         }
                     }.toMap()
             }
@@ -88,7 +80,6 @@ fun MarkdownText(
                     .widthIn(minWidth, maxWidth),
             textAlign = textAlign,
             style = textStyle ?: theme.textStyle,
-            standaloneInlineTextContent = standaloneInlineTextContent.toImmutableMap(),
         )
     }
 }
@@ -119,7 +110,8 @@ fun markdownText(
 
     val annotatedString =
         buildAnnotatedString {
-            val buildNodeAnnotatedString = renderRegistry.getInlineNodeStringBuilder(node::class.java)
+            val buildNodeAnnotatedString =
+                renderRegistry.getInlineNodeStringBuilder(node::class.java)
             if (buildNodeAnnotatedString != null) {
                 buildNodeAnnotatedString.buildMarkdownInlineNodeString(
                     node,

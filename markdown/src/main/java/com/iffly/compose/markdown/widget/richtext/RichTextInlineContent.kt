@@ -5,21 +5,42 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.AnnotatedString.Range
+import androidx.compose.ui.text.Placeholder
 
 /**
- * Represents a standalone inline text content that can be inserted into [RichText].
- * It creates a separate paragraph for rendering in the text layout.
- * @param modifier The modifier to be applied to the inline text content.
- * @param content The composable content of the inline text content.
+ * Represents inline content that can be inserted into [RichText].
+ *
  * @see RichText
  */
-@Immutable
-data class StandaloneInlineTextContent(
-    val modifier: Modifier = Modifier,
-    val content: @Composable (modifier: Modifier) -> Unit,
-)
+sealed interface RichTextInlineContent {
+    /**
+     * Represents inline content with a fixed size that can be inserted into [RichText].
+     * @param placeholder The placeholder defining the size and alignment of the inline content.
+     * @param content The composable content of the inline content.
+     * @see RichText
+     */
+    @Immutable
+    data class FixedSizeInlineContent(
+        val placeholder: Placeholder,
+        val content: @Composable (String) -> Unit,
+    ) : RichTextInlineContent
 
-private const val STANDALONE_INLINE_CONTENT_TAG = "com.microsoft.copilot.markdown.compose.widget.richtext.StandaloneInlineTextContent"
+    /**
+     * Represents a standalone inline text content that can be inserted into [RichText].
+     * It creates a separate paragraph for rendering in the text layout.
+     * @param modifier The modifier to be applied to the inline text content.
+     * @param content The composable content of the inline text content.
+     * @see RichText
+     */
+    @Immutable
+    data class StandaloneInlineContent(
+        val modifier: Modifier = Modifier,
+        val content: @Composable (modifier: Modifier) -> Unit,
+    ) : RichTextInlineContent
+}
+
+private const val STANDALONE_INLINE_CONTENT_TAG =
+    "com.microsoft.copilot.markdown.compose.widget.richtext.StandaloneInlineTextContent"
 private const val REPLACEMENT_CHAR = "\uFFFD"
 
 /**

@@ -13,6 +13,7 @@ import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.LoadingView
+import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
 import com.vladsch.flexmark.ast.Image
 
@@ -73,27 +74,29 @@ class ImageNodeStringBuilder(
     ) {
         val imageId = "image_$${node.url}"
         inlineContentMap[imageId] =
-            MarkdownInlineView.MarkdownStandaloneInlineView(
-                modifier = Modifier,
-            ) { modifier ->
-                val theme = currentTheme()
-                MarkdownImage(
-                    node,
-                    modifier =
-                        modifier
-                            .clip(theme.imageTheme.shape)
-                            .then(theme.imageTheme.modifier),
-                    contentScale = theme.imageTheme.contentScale,
-                    alignment = theme.imageTheme.alignment,
-                    loadingView = { image, modifier ->
-                        loadingView.invoke(image, modifier)
-                    },
-                    errorView = { image, modifier ->
+            MarkdownInlineView.MarkdownRichTextInlineContent(
+                RichTextInlineContent.StandaloneInlineContent(
+                    modifier = Modifier,
+                ) { modifier ->
+                    val theme = currentTheme()
+                    MarkdownImage(
+                        node,
+                        modifier =
+                            modifier
+                                .clip(theme.imageTheme.shape)
+                                .then(theme.imageTheme.modifier),
+                        contentScale = theme.imageTheme.contentScale,
+                        alignment = theme.imageTheme.alignment,
+                        loadingView = { image, modifier ->
+                            loadingView.invoke(image, modifier)
+                        },
+                        errorView = { image, modifier ->
 
-                        errorView.invoke(image, modifier)
-                    },
-                )
-            }
+                            errorView.invoke(image, modifier)
+                        },
+                    )
+                },
+            )
         appendStandaloneInlineTextContent(imageId, "[${node.text ?: node.title ?: "Image"}]")
     }
 }

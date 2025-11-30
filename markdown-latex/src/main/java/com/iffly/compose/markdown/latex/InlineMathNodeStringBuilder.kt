@@ -2,7 +2,6 @@ package com.iffly.compose.markdown.latex
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -14,8 +13,8 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.TextMeasureContext
-import com.iffly.compose.markdown.render.toFixedSizeMarkdownInlineTextContent
 import com.iffly.compose.markdown.style.MarkdownTheme
+import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
 import com.vladsch.flexmark.util.ast.Node
 
@@ -53,20 +52,22 @@ open class InlineMathNodeStringBuilder<T : Node>(
         val width = with(measureContext.density) { drawable.intrinsicWidth.toSp() }
         val height = with(measureContext.density) { drawable.intrinsicHeight.toSp() }
         inlineContentMap[placeholderId] =
-            InlineTextContent(
-                placeholder =
-                    Placeholder(
-                        width = width,
-                        height = height,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                    ),
-            ) {
-                LatexImage(
-                    latex = latexBody,
-                    latexConfig = latexConfig,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }.toFixedSizeMarkdownInlineTextContent()
+            MarkdownInlineView.MarkdownRichTextInlineContent(
+                RichTextInlineContent.FixedSizeInlineContent(
+                    placeholder =
+                        Placeholder(
+                            width = width,
+                            height = height,
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                        ),
+                ) {
+                    LatexImage(
+                        latex = latexBody,
+                        latexConfig = latexConfig,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                },
+            )
         appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
     }
 }

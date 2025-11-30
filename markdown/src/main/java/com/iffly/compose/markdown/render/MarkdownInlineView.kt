@@ -1,34 +1,19 @@
 package com.iffly.compose.markdown.render
 
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Modifier
-import com.iffly.compose.markdown.widget.richtext.StandaloneInlineTextContent
+import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 
+/**
+ * Represents an inline view in Markdown rendering.
+ * It is used to render inline content inside text.
+ * Such as images, and rich content inline node etc.
+ * @see RichTextInlineContent
+ */
 sealed interface MarkdownInlineView {
-    sealed interface MarkdownInlineTextContent : MarkdownInlineView {
-        fun toInlineTextContent(): InlineTextContent
-
-        @Immutable
-        data class FixedSizeMarkdownInlineView(
-            val inlineTextContent: InlineTextContent,
-        ) : MarkdownInlineTextContent {
-            override fun toInlineTextContent(): InlineTextContent = inlineTextContent
-        }
-    }
-
-    data class MarkdownStandaloneInlineView(
-        val modifier: Modifier,
-        val content: @Composable (modifier: Modifier) -> Unit,
-    ) : MarkdownInlineView {
-        fun toStandaloneInlineTextContent(): StandaloneInlineTextContent =
-            StandaloneInlineTextContent(
-                modifier = modifier,
-                content = content,
-            )
-    }
+    /**
+     * Represents inline content that can be inserted into text.
+     * @param inlineContent The rich text inline content to be rendered.
+     */
+    data class MarkdownRichTextInlineContent(
+        val inlineContent: RichTextInlineContent,
+    ) : MarkdownInlineView
 }
-
-fun InlineTextContent.toFixedSizeMarkdownInlineTextContent(): MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView =
-    MarkdownInlineView.MarkdownInlineTextContent.FixedSizeMarkdownInlineView(this)

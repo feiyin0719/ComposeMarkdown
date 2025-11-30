@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.util.StringExt
 import com.iffly.compose.markdown.widget.SelectionFormatText
@@ -44,16 +42,39 @@ fun RichText(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    inlineContent: ImmutableMap<String, InlineTextContent> = persistentMapOf(),
-    standaloneInlineTextContent: ImmutableMap<String, StandaloneInlineTextContent> = persistentMapOf(),
+    inlineContent: ImmutableMap<String, RichTextInlineContent> = persistentMapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
+    val standaloneInlineContent =
+        inlineContent
+            .mapNotNull { (key, value) ->
+                if (value is RichTextInlineContent.StandaloneInlineContent) {
+                    key to value
+                } else {
+                    null
+                }
+            }.toMap()
+            .toImmutableMap()
     val textSegments =
         rememberRichTextSegment(
             text = text,
-            standaloneInlineTextContent = standaloneInlineTextContent,
+            standaloneInlineContent = standaloneInlineContent,
         )
+    val inlineTextContent =
+        inlineContent
+            .mapNotNull { (key, value) ->
+                if (value is RichTextInlineContent.FixedSizeInlineContent) {
+                    key to
+                        InlineTextContent(
+                            placeholder = value.placeholder,
+                            children = value.content,
+                        )
+                } else {
+                    null
+                }
+            }.toMap()
+            .toImmutableMap()
 
     Column(modifier = modifier) {
         textSegments.forEach {
@@ -74,7 +95,7 @@ fun RichText(
                         softWrap = softWrap,
                         maxLines = maxLines,
                         minLines = minLines,
-                        inlineContent = inlineContent,
+                        inlineContent = inlineTextContent,
                         onTextLayout = onTextLayout,
                         style = style,
                         modifier =
@@ -100,21 +121,21 @@ fun RichText(
 @Composable
 private fun rememberRichTextSegment(
     text: AnnotatedString,
-    standaloneInlineTextContent: ImmutableMap<String, StandaloneInlineTextContent>,
+    standaloneInlineContent: ImmutableMap<String, RichTextInlineContent.StandaloneInlineContent>,
 ): List<RichTextSegment> =
-    remember(text, standaloneInlineTextContent) {
-        buildRichTextSegments(text, standaloneInlineTextContent)
+    remember(text, standaloneInlineContent) {
+        buildRichTextSegments(text, standaloneInlineContent)
     }
 
 private fun buildRichTextSegments(
     text: AnnotatedString,
-    standaloneInlineTextContent: Map<String, StandaloneInlineTextContent>,
+    standaloneInlineContent: Map<String, RichTextInlineContent.StandaloneInlineContent>,
 ): List<RichTextSegment> {
     val standaloneInlineTextContentAnnotations = text.getStandaloneInlineTextContentAnnotations()
     // filter out annotations that don't have corresponding inline content
     val validAnnotations =
         standaloneInlineTextContentAnnotations.filter { annotation ->
-            standaloneInlineTextContent.containsKey(annotation.item)
+            standaloneInlineContent.containsKey(annotation.item)
         }
 
     return buildList {
@@ -123,7 +144,7 @@ private fun buildRichTextSegments(
                 if (annotation.start > lastIndex) {
                     add(RichTextSegment.Text(text.subSequence(lastIndex, annotation.start)))
                 }
-                standaloneInlineTextContent[annotation.item]?.let {
+                standaloneInlineContent[annotation.item]?.let {
                     add(RichTextSegment.InlineContentSegment(it))
                 }
                 annotation.end
@@ -141,48 +162,6 @@ private sealed interface RichTextSegment {
     ) : RichTextSegment
 
     data class InlineContentSegment(
-        val standaloneInlineTextContent: StandaloneInlineTextContent,
+        val standaloneInlineTextContent: RichTextInlineContent.StandaloneInlineContent,
     ) : RichTextSegment
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun RichTextPreview() {
-    val annotatedString =
-        AnnotatedString
-            .Builder()
-            .apply {
-                append("This is a sample RichText with an inline image: ")
-                val inlineContentId = "inlineImage"
-                appendStandaloneInlineTextContent(
-                    id = inlineContentId,
-                    alternateText = "[image]",
-                )
-                append(" and some more text after the image.")
-                appendStandaloneInlineTextContent("invalid", "[invalid]")
-                append(" The end.")
-            }.toAnnotatedString()
-
-    val inlineContent =
-        mapOf(
-            "inlineImage" to
-                StandaloneInlineTextContent(
-                    modifier = Modifier,
-                ) { modifier ->
-                    // Replace with actual image composable
-                    Text(
-                        text = "\uD83D\uDCF7", // Camera emoji as a placeholder for an image
-                        modifier = modifier,
-                        fontSize = TextUnit.Unspecified,
-                    )
-                },
-        )
-
-    RichText(
-        text = annotatedString,
-        inlineContent = persistentMapOf(),
-        standaloneInlineTextContent = inlineContent.toImmutableMap(),
-        modifier = Modifier.fillMaxWidth(),
-        style = TextStyle(fontSize = TextUnit.Unspecified),
-    )
 }
