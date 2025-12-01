@@ -14,14 +14,17 @@ import androidx.compose.ui.text.Placeholder
  */
 sealed interface RichTextInlineContent {
     /**
-     * Represents inline content with a fixed size that can be inserted into [RichText].
+     * Represents inline content that can be inserted into [RichText].
+     * It will be rendered inline within the text layout.
      * @param placeholder The placeholder defining the size and alignment of the inline content.
+     * @param adjustSizeByContent
      * @param content The composable content of the inline content.
      * @see RichText
      */
     @Immutable
-    data class FixedSizeInlineContent(
+    data class EmbeddedRichTextInlineContent(
         val placeholder: Placeholder,
+        val adjustSizeByContent: Boolean = false,
         val content: @Composable (String) -> Unit,
     ) : RichTextInlineContent
 

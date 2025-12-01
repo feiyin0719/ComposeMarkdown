@@ -1,14 +1,15 @@
 package com.iffly.compose.markdown.widget.richtext
 
-import android.util.Log
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -84,52 +85,11 @@ fun AutoLineHeightText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
-    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    var adjustedText by remember(text) { mutableStateOf(text) }
-    val density = LocalDensity.current
-    LaunchedEffect(text) {
-        snapshotFlow {
-            textLayoutResult
-        }.distinctUntilChanged()
-            .map { layoutResult ->
-                layoutResult?.let {
-                    if (adjustedText != it.layoutInput.text) {
-                        return@map null
-                    }
-                    withContext(Dispatchers.Default) {
-                        val adjustLineHeightRequestMap =
-                            calculateAdjustLineHeightRequest(
-                                layoutResult = it,
-                                density = density,
-                            )
-                        it.layoutInput.text to adjustLineHeightRequestMap.values.toList()
-                    }
-                }
-            }.collectLatest {
-                it?.let { (currentText, adjustLineHeightRequests) ->
-                    if (adjustedText != currentText) {
-                        return@collectLatest
-                    }
-                    if (adjustLineHeightRequests.isNotEmpty()) {
-                        val newText =
-                            buildAdjustLineHeightText(
-                                currentText = currentText,
-                                requests = adjustLineHeightRequests,
-                            )
-                        adjustedText = newText
-                    } else {
-                        if (currentText != adjustedText) {
-                            adjustedText = currentText
-                        }
-                    }
-                }
-            }
-    }
-    val textAnnotations = text.getStringAnnotations(0, text.length).map { it.item }
-    val adjustTextAnnotations =
-        adjustedText.getStringAnnotations(0, adjustedText.length).map { it.item }
-    Log.i("AutoLineHeightText", "original $text,$textAnnotations")
-    Log.i("AutoLineHeightText", "adjusted $adjustedText,$adjustTextAnnotations")
+    val (adjustedText, textLayoutResultState) =
+        rememberAdjustedText(
+            text = text,
+        )
+
     Text(
         text = adjustedText,
         modifier = modifier,
@@ -148,11 +108,60 @@ fun AutoLineHeightText(
         minLines = minLines,
         inlineContent = inlineContent,
         onTextLayout = { layoutResult ->
-            textLayoutResult = layoutResult
+            textLayoutResultState.value = layoutResult
             onTextLayout(layoutResult)
         },
         style = style,
     )
+}
+
+@Composable
+private fun rememberAdjustedText(text: AnnotatedString): Pair<AnnotatedString, MutableState<TextLayoutResult?>> {
+    val textLayoutResultState = remember { mutableStateOf<TextLayoutResult?>(null) }
+    var adjustedText by remember(text) { mutableStateOf(text) }
+    val latestText = rememberUpdatedState(adjustedText)
+    val density = LocalDensity.current
+    LaunchedEffect(text) {
+        snapshotFlow {
+            textLayoutResultState.value
+        }.distinctUntilChanged()
+            .map { layoutResult ->
+                layoutResult?.let {
+                    if (latestText.value != it.layoutInput.text) {
+                        // Text has changed, skip processing
+                        return@let null
+                    }
+                    withContext(Dispatchers.Default) {
+                        val adjustLineHeightRequestMap =
+                            calculateAdjustLineHeightRequest(
+                                layoutResult = it,
+                                density = density,
+                            )
+                        it.layoutInput.text to adjustLineHeightRequestMap.values.toList()
+                    }
+                }
+            }.collectLatest {
+                it?.let { (currentText, adjustLineHeightRequests) ->
+                    if (latestText.value != currentText) {
+                        // Text has changed, skip processing
+                        return@let
+                    }
+                    if (adjustLineHeightRequests.isNotEmpty()) {
+                        val newText =
+                            buildAdjustLineHeightText(
+                                currentText = currentText,
+                                requests = adjustLineHeightRequests,
+                            )
+                        adjustedText = newText
+                    } else {
+                        if (currentText != adjustedText) {
+                            adjustedText = currentText
+                        }
+                    }
+                }
+            }
+    }
+    return Pair(adjustedText, textLayoutResultState)
 }
 
 private fun buildAdjustLineHeightText(
@@ -167,9 +176,13 @@ private fun buildAdjustLineHeightText(
                     it.startIndex
                 }.forEach {
                     if (it.startIndex > lastIndex) {
+                        // add new ParagraphStyle will create a new line, so we need to remove the last line separator
+                        // to avoid extra empty line
                         appendAndRemoveLastLineSeparator(currentText.subSequence(lastIndex, it.startIndex))
                     }
                     withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
+                        // add new ParagraphStyle will create a new line, so we need to remove the last line separator
+                        // to avoid extra empty line
                         appendAndRemoveLastLineSeparator(
                             currentText.subSequence(
                                 it.startIndex,

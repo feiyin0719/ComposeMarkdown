@@ -90,7 +90,7 @@ class LatexBlockParserFactory :
                     // Single-line form: $$ formula $$
                     val closingIndex = after.indexOf("$$")
                     if (closingIndex >= 0) {
-                        val body = after.substring(0, closingIndex).trim()
+                        val body = after.take(closingIndex).trim()
                         block.formula = body
                         return BlockStart
                             .of(

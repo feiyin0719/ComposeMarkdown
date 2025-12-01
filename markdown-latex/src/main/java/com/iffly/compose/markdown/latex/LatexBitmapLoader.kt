@@ -61,22 +61,26 @@ object LatexBitmapLoader {
     fun createDrawable(
         mathExpression: String,
         config: LatexConfig,
-    ): JLatexMathDrawable =
+    ): JLatexMathDrawable? =
         drawableCache[mathExpression] ?: run {
-            val drawable =
-                JLatexMathDrawable
-                    .builder(mathExpression)
-                    .textSize(config.textSize)
-                    .color(config.color)
-                    .background(config.backgroundColor)
-                    .align(config.align)
-                    .padding(
-                        config.padding.left,
-                        config.padding.top,
-                        config.padding.right,
-                        config.padding.bottom,
-                    ).build()
-            drawableCache[mathExpression] = drawable
-            drawable
+            try {
+                val drawable =
+                    JLatexMathDrawable
+                        .builder(mathExpression)
+                        .textSize(config.textSize)
+                        .color(config.color)
+                        .background(config.backgroundColor)
+                        .align(config.align)
+                        .padding(
+                            config.padding.left,
+                            config.padding.top,
+                            config.padding.right,
+                            config.padding.bottom,
+                        ).build()
+                drawableCache[mathExpression] = drawable
+                drawable
+            } catch (_: Exception) {
+                return null
+            }
         }
 }
