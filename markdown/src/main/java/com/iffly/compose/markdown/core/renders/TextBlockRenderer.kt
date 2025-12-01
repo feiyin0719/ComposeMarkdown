@@ -14,7 +14,7 @@ import com.vladsch.flexmark.util.ast.Block
  * @see IBlockRenderer
  * @see MarkdownText
  */
-open class MarkdownTextRenderer<T> : IBlockRenderer<T> where T : Block {
+open class TextBlockRenderer<T> : IBlockRenderer<T> where T : Block {
     @Composable
     override fun Invoke(
         node: T,
@@ -26,12 +26,12 @@ open class MarkdownTextRenderer<T> : IBlockRenderer<T> where T : Block {
 
 /**
  * Renderer for Paragraph nodes.
- * @see MarkdownTextRenderer
+ * @see TextBlockRenderer
  */
-class ParagraphRenderer : MarkdownTextRenderer<Paragraph>()
+class ParagraphRenderer : TextBlockRenderer<Paragraph>()
 
 /**
  * Renderer for Heading nodes.
- * @see MarkdownTextRenderer
+ * @see TextBlockRenderer
  */
-class HeadingRenderer : MarkdownTextRenderer<Heading>()
+class HeadingRenderer : TextBlockRenderer<Heading>()

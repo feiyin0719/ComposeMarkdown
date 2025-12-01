@@ -20,12 +20,43 @@ import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
 /**
+ * A renderer for markdown content nodes.
+ *
+ */
+fun interface MarkdownContentRenderer {
+    /**
+     * @param node The node to be rendered.
+     * @param modifier The modifier to be applied to the node.
+     */
+    @Composable
+    operator fun invoke(
+        node: Node,
+        modifier: Modifier,
+    )
+}
+
+/**
  * A Composable that renders markdown content based on the type of node.
  * @param node The root node of the markdown content to be rendered.
  * @param modifier The modifier to be applied to the markdown content.
  */
 @Composable
 fun MarkdownContent(
+    node: Node,
+    modifier: Modifier = Modifier,
+) {
+    val renderRegistry = currentRenderRegistry()
+    renderRegistry.markdownContentRenderer?.invoke(
+        node = node,
+        modifier = modifier,
+    ) ?: DefaultMarkdownContent(
+        node = node,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun DefaultMarkdownContent(
     node: Node,
     modifier: Modifier = Modifier,
 ) {

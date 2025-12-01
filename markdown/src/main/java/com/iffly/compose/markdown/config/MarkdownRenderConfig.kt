@@ -3,6 +3,8 @@ package com.iffly.compose.markdown.config
 import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.MarkdownContentRenderer
+import com.iffly.compose.markdown.render.MarkdownTextRenderer
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.html.HtmlRenderer
@@ -64,6 +66,10 @@ class MarkdownRenderConfig {
             )
 
         private var markdownTheme: MarkdownTheme? = null
+
+        private var markdownTextRenderer: MarkdownTextRenderer? = null
+
+        private var markdownContentRenderer: MarkdownContentRenderer? = null
 
         private val inlineNodeStringBuilders =
             mutableMapOf<Class<out Node>, IInlineNodeStringBuilder<*>>()
@@ -129,6 +135,26 @@ class MarkdownRenderConfig {
             renderer: IBlockRenderer<*>,
         ): Builder {
             blockRenderers[blockClass] = renderer
+            return this
+        }
+
+        /**
+         * Sets the [MarkdownTextRenderer] for rendering markdown text nodes.
+         * @param renderer The [MarkdownTextRenderer] to set.
+         * @return The [Builder] instance for chaining.
+         */
+        fun markdownTextRenderer(renderer: MarkdownTextRenderer): Builder {
+            this.markdownTextRenderer = renderer
+            return this
+        }
+
+        /**
+         * Sets the [MarkdownContentRenderer] for rendering markdown content nodes.
+         * @param renderer The [MarkdownContentRenderer] to set.
+         * @return The [Builder] instance for chaining.
+         */
+        fun markdownContentRenderer(renderer: MarkdownContentRenderer): Builder {
+            this.markdownContentRenderer = renderer
             return this
         }
 
@@ -221,6 +247,8 @@ class MarkdownRenderConfig {
                 RenderRegistry(
                     blockRenderers.toMap(),
                     inlineNodeStringBuilders.toMap(),
+                    markdownContentRenderer,
+                    markdownTextRenderer,
                 ),
                 parserBuilder.build(),
                 htmlRendererBuilder.build(),

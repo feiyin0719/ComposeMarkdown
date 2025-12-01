@@ -25,6 +25,25 @@ import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
 
 /**
+ * A renderer for markdown text nodes.
+ */
+fun interface MarkdownTextRenderer {
+    /**
+     * @param parent The root node of the markdown content to be rendered.
+     * @param modifier The modifier to be applied to the rich text.
+     * @param textAlign The alignment of the text.
+     * @param textStyle The style to be applied to the text.
+     */
+    @Composable
+    operator fun invoke(
+        parent: Node,
+        modifier: Modifier,
+        textAlign: TextAlign,
+        textStyle: TextStyle?,
+    )
+}
+
+/**
  * A Composable that renders markdown content as rich text.
  * @param parent The root node of the markdown content to be rendered.
  * @param modifier The modifier to be applied to the rich text.
@@ -33,6 +52,27 @@ import kotlinx.collections.immutable.toImmutableMap
  */
 @Composable
 fun MarkdownText(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Start,
+    textStyle: TextStyle? = null,
+) {
+    val renderRegistry = currentRenderRegistry()
+    renderRegistry.markdownTextRenderer?.invoke(
+        parent = parent,
+        modifier = modifier,
+        textAlign = textAlign,
+        textStyle = textStyle,
+    ) ?: DefaultMarkdownText(
+        parent = parent,
+        modifier = modifier,
+        textAlign = textAlign,
+        textStyle = textStyle,
+    )
+}
+
+@Composable
+private fun DefaultMarkdownText(
     parent: Node,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
