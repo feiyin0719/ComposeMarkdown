@@ -20,6 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 
+/**
+ * A composable that displays a loading view with a shimmer effect and a circular progress indicator.
+ * @param modifier The modifier to be applied to the loading view.
+ */
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {
     // Loading shimmer placeholder

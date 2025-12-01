@@ -7,6 +7,7 @@ import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
+import com.iffly.compose.markdown.util.StringExt
 import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.SoftLineBreak
 
@@ -36,6 +37,6 @@ class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext,
     ) {
-        append("\n")
+        append(StringExt.LINE_SEPARATOR)
     }
 }

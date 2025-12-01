@@ -6,6 +6,10 @@ import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.getNodeParagraphStyle
 import com.vladsch.flexmark.util.ast.Node
 
+/**
+ * String builder for Paragraph nodes.
+ * @see CompositeChildNodeStringBuilder
+ */
 class ParagraphNodeStringBuilder : CompositeChildNodeStringBuilder<Node>() {
     override fun getParagraphStyle(
         node: Node,

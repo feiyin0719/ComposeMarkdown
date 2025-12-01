@@ -14,7 +14,7 @@ import java.io.IOException
 /**
  * Sealed class for read results, for better error handling
  */
-sealed class ReadResult<out T> {
+internal sealed class ReadResult<out T> {
     data class Success<T>(
         val data: T,
     ) : ReadResult<T>()
@@ -30,7 +30,7 @@ sealed class ReadResult<out T> {
 /**
  * File reader interface for easy testing and extension
  */
-interface IMarkdownFileReader {
+internal interface IMarkdownFileReader {
     suspend fun readLines(
         startLine: Int,
         endLine: Int,
@@ -47,8 +47,15 @@ interface IMarkdownFileReader {
 
 /**
  * Cache statistics information
+ * @param cacheSize Current number of cached lines
+ * @param maxCacheSize Maximum number of cached lines
+ * @param currentReaderLine Current line number of the BufferedReader
+ * @param isReaderOpen Whether the BufferedReader is open
+ * @param loadFactor Current load factor of the cache
+ * @param hitRate Cache hit rate
+ * @param missRate Cache miss rate
  */
-data class FileCacheInfo(
+internal data class FileCacheInfo(
     val cacheSize: Int,
     val maxCacheSize: Int,
     val currentReaderLine: Int,
@@ -66,7 +73,7 @@ data class FileCacheInfo(
  * @param maxCacheSize Maximum number of cached lines
  * @param dispatcher Coroutine dispatcher
  */
-class CachedMarkdownFileReader(
+internal class CachedMarkdownFileReader(
     private val file: File,
     private val maxCacheSize: Int = 1000,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,

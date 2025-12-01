@@ -3,7 +3,7 @@ package com.iffly.compose.markdown.latex
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.data.MutableDataHolder
 
-class LatexExtension private constructor() : Parser.ParserExtension {
+internal class LatexExtension private constructor() : Parser.ParserExtension {
     companion object {
         fun create(): LatexExtension = LatexExtension()
     }

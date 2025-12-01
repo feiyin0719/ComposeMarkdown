@@ -22,6 +22,11 @@ import com.vladsch.flexmark.util.ast.Node
 
 /**
  * Inline math renderer using jlatexmath to draw a LaTeX formula to a bitmap.
+ * @param T The type of node to render.
+ * @param textStyle The text style to use for rendering the LaTeX formula.
+ * @param paddingValues The padding values to use for rendering the LaTeX formula.
+ * @param useAdaptiveInlineContent Whether to use adaptive inline content size.
+ * @see IInlineNodeStringBuilder
  */
 open class InlineMathNodeStringBuilder<T : Node>(
     private val textStyle: TextStyle,
@@ -102,12 +107,28 @@ open class InlineMathNodeStringBuilder<T : Node>(
     }
 }
 
+/**
+ * The string builder for inline LaTeX nodes.
+ * @param textStyle The text style to use for rendering the LaTeX formula.
+ * @param paddingValues The padding values to use for rendering the LaTeX formula.
+ * @param useAdaptiveInlineContent Whether to use adaptive inline content size.
+ * @see IInlineNodeStringBuilder
+ */
 class InlineLatexNodeStringBuilder(
     textStyle: TextStyle,
     paddingValues: PaddingValues,
-) : InlineMathNodeStringBuilder<InlineLatexNode>(textStyle, paddingValues)
+    useAdaptiveInlineContent: Boolean = true,
+) : InlineMathNodeStringBuilder<InlineLatexNode>(textStyle, paddingValues, useAdaptiveInlineContent)
 
+/**
+ * The string builder for GitLab inline math nodes.
+ * @param textStyle The text style to use for rendering the LaTeX formula.
+ * @param paddingValues The padding values to use for rendering the LaTeX formula.
+ * @param useAdaptiveInlineContent Whether to use adaptive inline content size.
+ * @see IInlineNodeStringBuilder
+ */
 class GitLabInlineMathNodeStringBuilder(
     textStyle: TextStyle,
     paddingValues: PaddingValues,
-) : InlineMathNodeStringBuilder<GitLabInlineMath>(textStyle, paddingValues)
+    useAdaptiveInlineContent: Boolean = true,
+) : InlineMathNodeStringBuilder<GitLabInlineMath>(textStyle, paddingValues, useAdaptiveInlineContent)

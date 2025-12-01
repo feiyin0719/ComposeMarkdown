@@ -17,6 +17,11 @@ import com.vladsch.flexmark.util.misc.Extension
 /**
  * Markdown math plugin providing custom inline `$...$` and display `$$...$$` LaTeX support
  * using custom Flexmark parser extensions, plus (optionally) the GitLab extension if desired.
+ * @param mathStyle The text style to use for rendering math.
+ * @param paddingValues The padding values to use for rendering math.
+ * @param enableGitLabExtension Whether to enable the GitLab math extension.
+ * @param useAdaptiveInlineContent Whether to use adaptive inline content size for inline math.
+ * @see AbstractMarkdownRenderPlugin
  */
 class MarkdownMathPlugin(
     private val mathStyle: TextStyle =
@@ -25,8 +30,8 @@ class MarkdownMathPlugin(
             textAlign = TextAlign.Center,
         ),
     private val paddingValues: PaddingValues = PaddingValues(0.dp),
-    /** Whether to also enable GitLabExtension (kept for backward compatibility). */
     private val enableGitLabExtension: Boolean = false,
+    private val useAdaptiveInlineContent: Boolean = true,
 ) : AbstractMarkdownRenderPlugin() {
     override fun extensions(): List<Extension> =
         buildList {
@@ -44,6 +49,7 @@ class MarkdownMathPlugin(
                 InlineLatexNodeStringBuilder(
                     mathStyle,
                     paddingValues,
+                    useAdaptiveInlineContent,
                 ),
             )
             // Backwards compatibility: still support GitLabInlineMath if extension enabled
@@ -53,6 +59,7 @@ class MarkdownMathPlugin(
                     GitLabInlineMathNodeStringBuilder(
                         mathStyle,
                         paddingValues,
+                        useAdaptiveInlineContent,
                     ),
                 )
             }

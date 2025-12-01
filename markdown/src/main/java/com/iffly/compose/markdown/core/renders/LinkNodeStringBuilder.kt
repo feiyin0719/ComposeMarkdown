@@ -36,6 +36,10 @@ private fun AnnotatedString.Builder.buildStyleString(
     )
 }
 
+/**
+ * String builder for Link nodes.
+ * @see IInlineNodeStringBuilder
+ */
 class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Link,
@@ -47,14 +51,13 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext,
     ) {
-        val linkNode = node
         val linkInteractionListener =
             actionHandler?.let {
-                MarkdownLinkInteractionListener(actionHandler = it, node = linkNode)
+                MarkdownLinkInteractionListener(actionHandler = it, node = node)
             }
         val linkAnnotation =
             LinkAnnotation.Url(
-                url = linkNode.url.toString(),
+                url = node.url.toString(),
                 styles = markdownTheme.link,
                 linkInteractionListener = linkInteractionListener,
             )

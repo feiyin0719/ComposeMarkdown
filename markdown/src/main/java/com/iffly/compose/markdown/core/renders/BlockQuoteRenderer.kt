@@ -16,6 +16,10 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.vladsch.flexmark.ast.BlockQuote
 
+/**
+ * The renderer for BlockQuote nodes.
+ * @see IBlockRenderer
+ */
 class BlockQuoteRenderer : IBlockRenderer<BlockQuote> {
     @Composable
     override fun Invoke(

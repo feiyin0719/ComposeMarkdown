@@ -33,6 +33,7 @@ import com.vladsch.flexmark.ast.OrderedListItem
 
 /**
  * The renderer for ListBlock nodes.
+ * @see IBlockRenderer
  */
 open class ListRenderer<T : ListBlock> : IBlockRenderer<T> {
     @Composable
@@ -67,11 +68,13 @@ open class ListRenderer<T : ListBlock> : IBlockRenderer<T> {
 
 /**
  * The renderer for OrderedList nodes.
+ * @see ListRenderer
  */
 class OrderedListRenderer : ListRenderer<OrderedList>()
 
 /**
  * The renderer for BulletList nodes.
+ * @see ListRenderer
  */
 class BulletListRenderer : ListRenderer<BulletList>()
 
@@ -87,6 +90,11 @@ fun interface ListItemMarkerRenderer<in T : ListItem> {
     )
 }
 
+/**
+ * The default implementation of ListItemMarkerRenderer.
+ * @param T The type of ListItem.
+ * @see ListItemMarkerRenderer
+ */
 class ListItemMarkerRendererImpl<T : ListItem> : ListItemMarkerRenderer<T> {
     @Composable
     override fun invoke(
@@ -164,6 +172,7 @@ open class BaseListItemRenderer<T : ListItem>(
 
 /**
  * The renderer for OrderedListItem nodes.
+ * @see BaseListItemRenderer
  */
 class OrderedListItemRenderer(
     markerRenderer: ListItemMarkerRenderer<OrderedListItem> = ListItemMarkerRendererImpl(),
@@ -171,6 +180,7 @@ class OrderedListItemRenderer(
 
 /**
  * The renderer for BulletListItem nodes.
+ * @see BaseListItemRenderer
  */
 class BulletListItemRenderer(
     markerRenderer: ListItemMarkerRenderer<BulletListItem> = ListItemMarkerRendererImpl(),

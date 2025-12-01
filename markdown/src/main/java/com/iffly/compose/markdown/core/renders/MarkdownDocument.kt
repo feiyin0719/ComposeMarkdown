@@ -12,6 +12,11 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.vladsch.flexmark.util.ast.Document
 
+/**
+ * A Composable that renders a Document node and its children.
+ * @param node The Document node to be rendered.
+ * @param modifier The modifier to be applied to the Document node.
+ */
 @Composable
 fun Document(
     node: Document,
@@ -33,6 +38,10 @@ fun Document(
     }
 }
 
+/**
+ * The renderer for Document nodes.
+ * @see IBlockRenderer
+ */
 class DocumentRenderer : IBlockRenderer<Document> {
     @Composable
     override fun Invoke(

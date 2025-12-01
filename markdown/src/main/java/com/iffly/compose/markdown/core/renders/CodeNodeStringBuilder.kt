@@ -11,6 +11,10 @@ import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.ast.Code
 
+/**
+ * String builder for Code nodes.
+ * @see IInlineNodeStringBuilder
+ */
 class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Code,

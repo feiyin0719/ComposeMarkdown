@@ -28,15 +28,6 @@ fun MarkdownTheme.getNodeParagraphStyle(node: Node?): ParagraphStyle =
         }
     }
 
-private fun Node.isInTableHeader(): Boolean {
-    var parent = this.parent
-    while (parent != null) {
-        if (parent is TableHead) return true
-        parent = parent.parent
-    }
-    return false
-}
-
 fun Node.contentText(): String = chars.toString()
 
 const val BULLET_POINT = "•"

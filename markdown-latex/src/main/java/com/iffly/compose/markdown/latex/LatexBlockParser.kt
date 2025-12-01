@@ -71,7 +71,7 @@ private class LatexBlockParser(
     }
 }
 
-class LatexBlockParserFactory :
+internal class LatexBlockParserFactory :
     CustomBlockParserFactory,
     Parser.ParserExtension {
     override fun apply(options: DataHolder): BlockParserFactory =

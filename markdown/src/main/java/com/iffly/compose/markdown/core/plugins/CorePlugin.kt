@@ -57,6 +57,10 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.Extension
 
+/**
+ * Core plugin providing renderers and string builders for common Markdown elements.
+ * @see IMarkdownRenderPlugin
+ */
 class CorePlugin : IMarkdownRenderPlugin {
     override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
         mutableMapOf(

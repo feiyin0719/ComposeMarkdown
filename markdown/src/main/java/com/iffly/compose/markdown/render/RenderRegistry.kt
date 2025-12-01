@@ -3,6 +3,9 @@ package com.iffly.compose.markdown.render
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
+/**
+ * Registry for block renderers and inline node string builders.
+ */
 class RenderRegistry(
     private val blockRenderers: Map<Class<out Block>, IBlockRenderer<*>>,
     private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>,

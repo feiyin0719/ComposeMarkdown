@@ -8,6 +8,12 @@ import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.util.ast.Block
 
+/**
+ * Base renderer for block nodes that render text content.
+ * @param T The type of the block node, must be a subclass of [Block].
+ * @see IBlockRenderer
+ * @see MarkdownText
+ */
 open class MarkdownTextRenderer<T> : IBlockRenderer<T> where T : Block {
     @Composable
     override fun Invoke(
@@ -18,6 +24,14 @@ open class MarkdownTextRenderer<T> : IBlockRenderer<T> where T : Block {
     }
 }
 
+/**
+ * Renderer for Paragraph nodes.
+ * @see MarkdownTextRenderer
+ */
 class ParagraphRenderer : MarkdownTextRenderer<Paragraph>()
 
+/**
+ * Renderer for Heading nodes.
+ * @see MarkdownTextRenderer
+ */
 class HeadingRenderer : MarkdownTextRenderer<Heading>()

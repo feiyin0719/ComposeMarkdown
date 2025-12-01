@@ -19,6 +19,11 @@ import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
+/**
+ * A Composable that renders markdown content based on the type of node.
+ * @param node The root node of the markdown content to be rendered.
+ * @param modifier The modifier to be applied to the markdown content.
+ */
 @Composable
 fun MarkdownContent(
     node: Node,
@@ -38,30 +43,34 @@ fun MarkdownContent(
     }
 }
 
+/**
+ * A Composable that renders a markdown block node.
+ * @param node The block node to be rendered.
+ * @param modifier The modifier to be applied to the block node.
+ */
 @Composable
 fun MarkdownBlock(
-    node: Node,
+    node: Block,
     modifier: Modifier = Modifier,
 ) {
     val renderRegistry = currentRenderRegistry()
-    if (node is Block) {
-        val renderer = renderRegistry.getBlockRenderer(node::class.java)
-        if (renderer != null) {
-            renderer.Invoke(node, modifier)
-        } else {
-            // Fallback to rendering children if no renderer is found
-            Log.i(
-                "MarkdownNode",
-                "No renderer found for ${node::class.java.simpleName}, rendering children.",
+
+    val renderer = renderRegistry.getBlockRenderer(node::class.java)
+    if (renderer != null) {
+        renderer.Invoke(node, modifier)
+    } else {
+        // Fallback to rendering children if no renderer is found
+        Log.i(
+            "MarkdownNode",
+            "No renderer found for ${node::class.java.simpleName}, rendering children.",
+        )
+        val isShowNotSupported = isShowNotSupported()
+        if (isShowNotSupported) {
+            Text(
+                text = "Unsupported block: ${node::class.java.simpleName}",
             )
-            val isShowNotSupported = isShowNotSupported()
-            if (isShowNotSupported) {
-                Text(
-                    text = "Unsupported block: ${node::class.java.simpleName}",
-                )
-            } else {
-                Text(node.contentText())
-            }
+        } else {
+            Text(node.contentText())
         }
     }
 }

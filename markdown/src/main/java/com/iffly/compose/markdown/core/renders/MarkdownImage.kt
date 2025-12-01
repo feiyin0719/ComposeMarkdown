@@ -17,6 +17,15 @@ import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.widget.LoadingView
 import com.vladsch.flexmark.ast.Image
 
+/**
+ * A Composable that renders a markdown image node.
+ * @param node The image node to be rendered.
+ * @param modifier The modifier to be applied to the image.
+ * @param alignment The alignment of the image.
+ * @param contentScale The content scale of the image.
+ * @param errorView A Composable that is shown when the image fails to load.
+ * @param loadingView A Composable that is shown while the image is loading.
+ */
 @Composable
 fun MarkdownImage(
     node: Image,
@@ -68,6 +77,13 @@ fun MarkdownImage(
     )
 }
 
+/**
+ * A Composable that shows a default error view when an image fails to load.
+ * @param modifier The modifier to be applied to the error view.
+ * @param alignment The alignment of the error view.
+ * @param contentScale The content scale of the error view.
+ * @param altText The alternative text for the error view.
+ */
 @Composable
 fun MarkdownImageErrorView(
     modifier: Modifier = Modifier,

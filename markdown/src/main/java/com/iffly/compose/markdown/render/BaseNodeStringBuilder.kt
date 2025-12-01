@@ -9,6 +9,17 @@ import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.util.ast.Node
 
+/**
+ * Builds an AnnotatedString for the child nodes of the given parent node.
+ * @param parent The parent node whose child nodes will be processed.
+ * @param indentLevel The current indentation level for nested lists.
+ * @param inlineContentMap A map to hold any inline content (like images) that needs to be rendered.
+ * @param markdownTheme The markdown typography style.
+ * @param renderRegistry The render registry containing all renderers and builders.
+ * @param actionHandler Optional listener for link interactions.
+ * @param isShowNotSupported Whether to show unsupported node indicators.
+ * @param measureContext The context for measuring text.
+ */
 fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     parent: Node,
     indentLevel: Int = 1,
@@ -44,6 +55,12 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     }
 }
 
+/**
+ * A base implementation of [IInlineNodeStringBuilder] for nodes that primarily
+ * serve as containers for other inline nodes.
+ * @param T The type of the inline node, must be a subclass of [Node].
+ * @see IInlineNodeStringBuilder
+ */
 open class CompositeChildNodeStringBuilder<T : Node> : IInlineNodeStringBuilder<T> {
     open fun getSpanStyle(
         node: T,

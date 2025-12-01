@@ -15,7 +15,7 @@ import ru.noties.jlatexmath.JLatexMathDrawable.ALIGN_CENTER
 import ru.noties.jlatexmath.JLatexMathDrawable.ALIGN_LEFT
 import ru.noties.jlatexmath.JLatexMathDrawable.ALIGN_RIGHT
 
-data class LatexConfig(
+internal data class LatexConfig(
     val textSize: Float,
     val color: Int,
     val backgroundColor: Int,
@@ -23,7 +23,7 @@ data class LatexConfig(
     val padding: android.graphics.Rect,
 )
 
-fun TextStyle.toLatexConfig(
+internal fun TextStyle.toLatexConfig(
     density: Density,
     paddingValues: PaddingValues,
 ): LatexConfig =
@@ -53,7 +53,7 @@ private fun TextAlign.toJLatexMathAlign(): Int =
         else -> ALIGN_CENTER
     }
 
-object LatexBitmapLoader {
+internal object LatexBitmapLoader {
     private val cache: LRUCache<String, Bitmap> = LRUCache(50)
 
     private val drawableCache = LRUCache<String, JLatexMathDrawable>(50)

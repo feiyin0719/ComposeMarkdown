@@ -8,6 +8,10 @@ import com.iffly.compose.markdown.util.getNodeParagraphStyle
 import com.iffly.compose.markdown.util.getNodeSpanStyle
 import com.vladsch.flexmark.ast.Heading
 
+/**
+ * String builder for Heading nodes.
+ * @see CompositeChildNodeStringBuilder
+ */
 class HeadingNodeStringBuilder : CompositeChildNodeStringBuilder<Heading>() {
     override fun getSpanStyle(
         node: Heading,

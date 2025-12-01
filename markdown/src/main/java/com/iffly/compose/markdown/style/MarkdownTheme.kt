@@ -24,6 +24,25 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Theme for Markdown rendering.
+ * @param breakLineHeight The height of the line break.
+ * @param breakLineColor The color of the line break.
+ * @param textStyle The default text style.
+ * @param strongEmphasis The style for strong emphasis (bold).
+ * @param emphasis The style for emphasis (italic).
+ * @param code The style for inline code.
+ * @param strikethrough The style for strikethrough text.
+ * @param subscript The style for subscript text.
+ * @param link The styles for links.
+ * @param headStyle The styles for headings.
+ * @param listTheme The theme for lists.
+ * @param imageTheme The theme for images.
+ * @param blockQuoteTheme The theme for block quotes.
+ * @param spacerTheme The theme for spacers.
+ * @param tableTheme The theme for tables.
+ * @param codeBlockTheme The theme for code blocks.
+ */
 @Stable
 data class MarkdownTheme(
     val breakLineHeight: Dp = 1.dp,
@@ -153,6 +172,14 @@ data class MarkdownTheme(
     }
 }
 
+/**
+ * Theme for images in Markdown.
+ * @param alignment The alignment of the image.
+ * @param contentScale The content scale of the image.
+ * @param shape The shape of the image.
+ * @param modifier The modifier for the image.
+ * @param errorPlaceholderColor The placeholder color when image fails to load.
+ */
 @Immutable
 data class ImageTheme(
     val alignment: Alignment = Alignment.Center,
@@ -162,6 +189,15 @@ data class ImageTheme(
     val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
 )
 
+/**
+ * Theme for block quotes in Markdown.
+ * @param borderColor The color of the border.
+ * @param borderWidth The width of the border.
+ * @param backgroundColor The background color of the block quote.
+ * @param shape The shape of the block quote.
+ * @param padding The padding inside the block quote.
+ *
+ */
 @Immutable
 data class BlockQuoteTheme(
     val borderColor: Color = Color.LightGray,
@@ -171,12 +207,24 @@ data class BlockQuoteTheme(
     val padding: PaddingValues = PaddingValues(horizontal = 12.dp),
 )
 
+/**
+ * Theme for spacers in Markdown.
+ * @param showSpacer Whether to show the spacer.
+ * @param spacerHeight The height of the spacer.
+ */
 @Immutable
 data class SpacerTheme(
     val showSpacer: Boolean = true,
     val spacerHeight: Dp = 12.dp,
 )
 
+/**
+ * Theme for lists in Markdown.
+ * @param markerSpacerWidth The width of the spacer between the marker and the content.
+ * @param showSpacerInTightList Whether to show spacer in tight lists.
+ * @param tightListSpacerHeight The height of the spacer in tight lists.
+ * @param markerTextStyle The text style for the list markers.
+ */
 @Immutable
 data class ListTheme(
     val markerSpacerWidth: Dp = 4.dp,
@@ -190,6 +238,19 @@ data class ListTheme(
         ),
 )
 
+/**
+ * Theme for tables in Markdown.
+ * @param borderColor The color of the table borders.
+ * @param borderThickness The thickness of the table borders.
+ * @param titleBackgroundColor The background color of the table title.
+ * @param tableHeaderBackgroundColor The background color of the table header.
+ * @param tableCellBackgroundColor The background color of the table cells.
+ * @param cellTextStyle The text style for the table cells.
+ * @param headerTextStyle The text style for the table headers.
+ * @param copyTextStyle The text style for the copy button in table cells.
+ * @param shape The shape of the table.
+ * @param cellPadding The padding inside the table cells.
+ */
 data class TableTheme(
     val borderColor: Color = Color.Gray,
     val borderThickness: Dp = 1.dp,

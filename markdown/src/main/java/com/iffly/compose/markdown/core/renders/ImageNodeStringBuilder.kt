@@ -17,6 +17,9 @@ import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
 import com.vladsch.flexmark.ast.Image
 
+/**
+ * A renderer for image widgets.
+ */
 fun interface ImageWidgetRenderer {
     @Suppress("ComposableNaming")
     @Composable
@@ -26,6 +29,10 @@ fun interface ImageWidgetRenderer {
     )
 }
 
+/**
+ * The default loading view for image widgets.
+ * @see ImageWidgetRenderer
+ */
 class LoadingImageWidgetRenderer : ImageWidgetRenderer {
     @Suppress("ComposableNaming")
     @Composable
@@ -37,6 +44,10 @@ class LoadingImageWidgetRenderer : ImageWidgetRenderer {
     }
 }
 
+/**
+ * The default error view for image widgets.
+ * @see ImageWidgetRenderer
+ */
 class ErrorImageWidgetRenderer : ImageWidgetRenderer {
     @Suppress("ComposableNaming")
     @Composable
@@ -58,6 +69,12 @@ class ErrorImageWidgetRenderer : ImageWidgetRenderer {
     }
 }
 
+/**
+ * The string builder for image nodes.
+ * @param loadingView The Composable to be shown while the image is loading.
+ * @param errorView The Composable to be shown when the image fails to load.
+ * @see IInlineNodeStringBuilder
+ */
 class ImageNodeStringBuilder(
     private val loadingView: ImageWidgetRenderer = LoadingImageWidgetRenderer(),
     private val errorView: ImageWidgetRenderer = ErrorImageWidgetRenderer(),

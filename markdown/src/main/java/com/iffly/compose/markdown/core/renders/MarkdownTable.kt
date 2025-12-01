@@ -50,7 +50,16 @@ import com.vladsch.flexmark.ext.tables.TableRow
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableList
 
+/**
+ * Renderer table sub view. It is used to custom table render.
+ * @param T The type of the node, must be a subclass of [Node].
+ */
 fun interface TableWidgetRenderer<T : Node> {
+    /**
+     * Composable function to render the given node.
+     * @param node The node to render.
+     * @param modifier Modifier to be applied to the rendered content.
+     */
     @Suppress("ComposableNaming")
     @Composable
     operator fun invoke(
@@ -59,6 +68,11 @@ fun interface TableWidgetRenderer<T : Node> {
     )
 }
 
+/**
+ * Renderer for table title.
+ * @param T The type of the node, must be a subclass of [TableBlock].
+ * @see TableWidgetRenderer
+ */
 class TableTitleRenderer : TableWidgetRenderer<TableBlock> {
     @Suppress("ComposableNaming")
     @Composable
@@ -70,6 +84,11 @@ class TableTitleRenderer : TableWidgetRenderer<TableBlock> {
     }
 }
 
+/**
+ * Renderer for table cell.
+ * @param T The type of the node, must be a subclass of [TableCell].
+ * @see TableWidgetRenderer
+ */
 class TableCellRenderer : TableWidgetRenderer<TableCell> {
     @Suppress("ComposableNaming")
     @Composable
@@ -90,6 +109,13 @@ class TableCellRenderer : TableWidgetRenderer<TableCell> {
     }
 }
 
+/**
+ * Renderer for TableBlock nodes.
+ * @param tableTitleRenderer The renderer for the table title.
+ * @param tableCellRenderer The renderer for the table cells.
+ * @see TableWidgetRenderer
+ * @see IBlockRenderer
+ */
 class TableRenderer(
     private val tableTitleRenderer: TableWidgetRenderer<TableBlock> = TableTitleRenderer(),
     private val tableCellRenderer: TableWidgetRenderer<TableCell> = TableCellRenderer(),
@@ -108,8 +134,19 @@ class TableRenderer(
     }
 }
 
+/**
+ * String builder for TableCell nodes.
+ * @see CompositeChildNodeStringBuilder
+ */
 class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
 
+/**
+ * Composable function to render a markdown table.
+ * @param tableBlock The TableBlock node to render.
+ * @param tableTitleRenderer The renderer for the table title.
+ * @param tableCellRenderer The renderer for the table cells.
+ * @param modifier Modifier to be applied to the rendered content.
+ */
 @Composable
 fun MarkdownTable(
     tableBlock: TableBlock,
@@ -184,6 +221,11 @@ fun MarkdownTable(
     }
 }
 
+/**
+ * Composable function to render the table title with a copy button.
+ * @param tableBlock The TableBlock node representing the table.
+ * @param modifier Modifier to be applied to the rendered content.
+ */
 @Composable
 private fun TableTitle(
     tableBlock: TableBlock,

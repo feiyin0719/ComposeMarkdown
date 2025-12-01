@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalShowNotSupportedProvider =
+internal val LocalShowNotSupportedProvider =
     staticCompositionLocalOf {
         false
     }

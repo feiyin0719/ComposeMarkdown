@@ -8,7 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 
 @Composable
-fun LatexImage(
+internal fun LatexImage(
     latex: String,
     latexConfig: LatexConfig,
     modifier: Modifier = Modifier,

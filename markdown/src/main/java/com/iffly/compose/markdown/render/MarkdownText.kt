@@ -24,6 +24,13 @@ import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
 
+/**
+ * A Composable that renders markdown content as rich text.
+ * @param parent The root node of the markdown content to be rendered.
+ * @param modifier The modifier to be applied to the rich text.
+ * @param textAlign The alignment of the text.
+ * @param textStyle The style to be applied to the text.
+ */
 @Composable
 fun MarkdownText(
     parent: Node,

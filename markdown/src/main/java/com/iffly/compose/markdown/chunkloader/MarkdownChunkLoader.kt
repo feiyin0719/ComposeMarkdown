@@ -14,6 +14,14 @@ import java.io.File
 
 /**
  * Chunk loading configuration
+ * @param initialLines Number of lines to load initially
+ * @param incrementalLines Number of lines to load incrementally
+ * @param maxCachedChunks Maximum number of chunks to cache
+ * @param maxCachedFileLines Maximum number of lines to cache in file reader
+ * @param minRemovedBatchSize Minimum number of chunks to remove when recycling cache
+ * @param chunkSize Number of blocks per chunk
+ * @param parserDispatcher Coroutine dispatcher for parsing
+ * @param ioDispatcher Coroutine dispatcher for IO operations
  */
 data class ChunkLoaderConfig(
     val initialLines: Int = 1000,
@@ -29,7 +37,7 @@ data class ChunkLoaderConfig(
 /**
  * Chunk loading result
  */
-sealed class LoadResult {
+internal sealed class LoadResult {
     object Success : LoadResult()
 
     data class Error(
@@ -42,7 +50,7 @@ sealed class LoadResult {
  * Markdown chunk loader
  * Responsible for loading and parsing Markdown file content on demand
  */
-class MarkdownChunkLoader(
+internal class MarkdownChunkLoader(
     fileSource: File,
     renderConfig: MarkdownRenderConfig,
     private val config: ChunkLoaderConfig = ChunkLoaderConfig(),
@@ -192,14 +200,13 @@ class MarkdownChunkLoader(
         startLine: Int,
         endLine: Int,
     ) {
-        val currentStart = startLine
         var currentEnd = endLine
 
-        while (currentStart <= currentEnd) {
+        while (startLine <= currentEnd) {
             val chunks =
                 markdownChunkParser.parseRange(
                     fileReader,
-                    currentStart,
+                    startLine,
                     currentEnd,
                     dropFirst = false,
                 )
