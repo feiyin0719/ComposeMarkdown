@@ -1,9 +1,8 @@
 # ComposeMarkdown API 参考
-
+[English](API.md) |[简体中文](API_zh-CN.md)
 > 本文是 `markdown` 模块中核心可组合函数（composable）和配置类型的详细参考文档。
 >
 > - 关于整体介绍、安装与特性说明，请查看[README](../README_zh-CN.md)。
-> - 中文版本请查看本文件：[English](API.md)。
 
 ## 目录
 

@@ -1,9 +1,8 @@
 # ComposeMarkdown API Reference
-
+[English](API.md) |[简体中文](API_zh-CN.md)
 > Detailed reference for the core composables and configuration types in the `markdown` module.
 >
 > - For an overview, installation and feature tour, see [README.md](../README.md).
-> - For Chinese version (if available): see [简体中文](API_zh-CN.md).
 
 ## Table of Contents
 
