@@ -7,7 +7,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2024.09.00"
+composeBom = "2025.12.00"
 appcompat = "1.7.1"
 material = "1.12.0"
 flexmark = "0.64.8"
@@ -54,6 +54,7 @@ coil3-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", versi
 compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 compose-markdown-task = { group = "com.github.feiyin0719.ComposeMarkdown", name = "markdown-task", version.ref = "compose-markdown" }
 jlatexmath = { module = "ru.noties:jlatexmath-android", version.ref = "jlatexmath-android" }
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

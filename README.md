@@ -48,7 +48,7 @@ Markdown syntax and custom styling.
 
 | Technology            | Version     | Purpose                       |
 |-----------------------|-------------|-------------------------------|
-| **Jetpack Compose**   | 2024.09.00+ | Modern UI framework           |
+| **Jetpack Compose**   | 2025.12.00+ | Modern UI framework           |
 | **Flexmark**          | 0.64.8      | Markdown parsing engine       |
 | **Kotlin Coroutines** | 1.7+        | Asynchronous processing       |
 | **Material Design 3** | Latest      | Design language specification |
@@ -59,7 +59,7 @@ Markdown syntax and custom styling.
 
 - **Android API**: 24+ (Android 7.0)
 - **Kotlin**: 2.0.21+
-- **Compose BOM**: 2024.09.00+
+- **Compose BOM**: 2025.12.00+
 - **Java**: 8+
 
 ### Add Dependency
@@ -79,7 +79,7 @@ repositories {
 ```toml
 [versions]
 compose-markdown = "0.0.1"
-composeBom = "2024.09.00"
+composeBom = "2025.12.00"
 coil = "2.5.0"
 [libraries]
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -419,34 +419,34 @@ fun AsyncMarkdownExample() {
                     .fillMaxWidth()
                     .padding(16.dp),
                 colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                    ),
+                  CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                  ),
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                  modifier = Modifier.padding(16.dp),
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Error,
-                            contentDescription = "Error",
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Parse Error",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = error.message ?: "Unknown error occurred",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.Error,
+                      contentDescription = "Error",
+                      tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                      text = "Parse Error",
+                      style = MaterialTheme.typography.titleMedium,
+                      color = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                  }
+                  Spacer(modifier = Modifier.height(8.dp))
+                  Text(
+                    text = error.message ?: "Unknown error occurred",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                  )
                 }
             }
         },
@@ -522,12 +522,12 @@ fun LargeMarkdownDocument() {
         markdownRenderConfig = config,
         modifier = Modifier.fillMaxSize(),
         chunkLoaderConfig =
-            ChunkLoaderConfig(
-                /* initialLines = 1000,
-                incrementalLines = 500,
-                chunkSize = 5, */
-                parserDispatcher = MarkdownThreadPool.dispatcher,
-            ),
+          ChunkLoaderConfig(
+            /* initialLines = 1000,
+            incrementalLines = 500,
+            chunkSize = 5, */
+            parserDispatcher = MarkdownThreadPool.dispatcher,
+          ),
     )
 }
 ```

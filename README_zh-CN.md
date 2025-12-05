@@ -47,7 +47,7 @@
 
 | 技术                  | 版本        | 作用                     |
 |-----------------------|-------------|--------------------------|
-| **Jetpack Compose**   | 2024.09.00+ | 现代 UI 框架             |
+| **Jetpack Compose**   | 2025.12.00+ | 现代 UI 框架             |
 | **Flexmark**          | 0.64.8      | Markdown 解析引擎        |
 | **Kotlin Coroutines** | 1.7+        | 异步处理                 |
 | **Material Design 3** | 最新        | 设计语言规范             |
@@ -58,7 +58,7 @@
 
 - **Android API**：24+（Android 7.0）
 - **Kotlin**：2.0.21+
-- **Compose BOM**：2024.09.00+
+- **Compose BOM**：2025.12.00+
 - **Java**：8+
 
 ### 添加依赖
@@ -77,7 +77,7 @@ repositories {
 ```toml
 [versions]
 compose-markdown = "0.0.1"
-composeBom = "2024.09.00"
+composeBom = "2025.12.00"
 coil = "2.5.0"
 [libraries]
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
