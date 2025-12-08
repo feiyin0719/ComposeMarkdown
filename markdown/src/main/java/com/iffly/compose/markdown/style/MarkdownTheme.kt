@@ -196,6 +196,7 @@ data class ImageTheme(
  * @param backgroundColor The background color of the block quote.
  * @param shape The shape of the block quote.
  * @param padding The padding inside the block quote.
+ * @param textStyle The text style for the block quote content.
  *
  */
 @Immutable
@@ -205,6 +206,10 @@ data class BlockQuoteTheme(
     val backgroundColor: Color = Color(0xFFF5F5F5),
     val shape: Shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
     val padding: PaddingValues = PaddingValues(horizontal = 12.dp),
+    val textStyle: TextStyle? =
+        TextStyle(
+            fontStyle = FontStyle.Italic,
+        ),
 )
 
 /**
@@ -229,7 +234,7 @@ data class SpacerTheme(
 data class ListTheme(
     val markerSpacerWidth: Dp = 4.dp,
     val showSpacerInTightList: Boolean = true,
-    val tightListSpacerHeight: Dp = 4.dp,
+    val tightListSpacerHeight: Dp = 8.dp,
     val markerTextStyle: TextStyle? =
         TextStyle(
             lineHeight = 24.sp,

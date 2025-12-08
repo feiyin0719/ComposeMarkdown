@@ -23,6 +23,7 @@ import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.StringExt.FIGURE_SPACE
 import com.iffly.compose.markdown.util.getIndentLevel
 import com.iffly.compose.markdown.util.getMarkerText
+import com.iffly.compose.markdown.util.isInQuoteBlock
 import com.iffly.compose.markdown.widget.SelectionFormatText
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.BulletListItem
@@ -103,9 +104,15 @@ class ListItemMarkerRendererImpl<T : ListItem> : ListItemMarkerRenderer<T> {
     ) {
         val marker = node.getMarkerText()
         val theme = currentTheme()
+        val isInQuoteBlock = node.isInQuoteBlock()
+        val mergedTextStyle =
+            (theme.listTheme.markerTextStyle ?: theme.textStyle)
+                .merge(
+                    theme.blockQuoteTheme.textStyle.takeIf { isInQuoteBlock },
+                )
         Text(
             text = marker,
-            style = theme.listTheme.markerTextStyle ?: theme.textStyle,
+            style = mergedTextStyle,
             modifier = modifier,
         )
     }

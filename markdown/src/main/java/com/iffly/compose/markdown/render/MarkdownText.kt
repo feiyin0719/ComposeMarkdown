@@ -20,6 +20,7 @@ import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
+import com.iffly.compose.markdown.util.isInQuoteBlock
 import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
@@ -117,7 +118,11 @@ private fun DefaultMarkdownText(
                         }
                     }.toMap()
             }
-
+        val isInQuote = parent.isInQuoteBlock()
+        val mergedTextStyle =
+            (textStyle ?: theme.textStyle).merge(
+                theme.blockQuoteTheme.textStyle.takeIf { isInQuote },
+            )
         RichText(
             text = text,
             inlineContent = inlineContentMap.toImmutableMap(),
@@ -126,7 +131,7 @@ private fun DefaultMarkdownText(
                     .wrapContentHeight()
                     .widthIn(minWidth, maxWidth),
             textAlign = textAlign,
-            style = textStyle ?: theme.textStyle,
+            style = mergedTextStyle,
         )
     }
 }

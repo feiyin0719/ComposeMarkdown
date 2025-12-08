@@ -3,11 +3,11 @@ package com.iffly.compose.markdown.util
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import com.iffly.compose.markdown.style.MarkdownTheme
+import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.BulletList
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.OrderedList
-import com.vladsch.flexmark.ext.tables.TableHead
 import com.vladsch.flexmark.util.ast.Node
 
 fun MarkdownTheme.getNodeSpanStyle(node: Node): SpanStyle =
@@ -70,4 +70,15 @@ fun ListItem.getIndentLevel(): Int {
         parent = parent.parent
     }
     return level
+}
+
+fun Node.isInQuoteBlock(): Boolean {
+    var parent = this.parent
+    while (parent != null) {
+        if (parent is BlockQuote) {
+            return true
+        }
+        parent = parent.parent
+    }
+    return false
 }

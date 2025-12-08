@@ -47,10 +47,11 @@ private fun MarkdownBlockQuote(
                 .background(color = blockQuoteTheme.backgroundColor, shape = blockQuoteTheme.shape)
                 .drawBehind {
                     val borderWidth = blockQuoteTheme.borderWidth.toPx()
+                    val x = borderWidth / 2
                     drawLine(
                         color = borderColor,
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, size.height),
+                        start = Offset(x, 0f),
+                        end = Offset(x, size.height),
                         strokeWidth = borderWidth,
                     )
                 }.padding(blockQuoteTheme.padding),
@@ -62,6 +63,9 @@ private fun MarkdownBlockQuote(
                 node = child,
                 modifier = Modifier,
             )
+            if (child.next != null && theme.spacerTheme.showSpacer) {
+                Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+            }
             child = child.next
         }
         if (node.lastChild !is BlockQuote) {

@@ -93,8 +93,17 @@ fun BasicSyntaxExample(
                 ### Quote with List
                 > - Quote list item 1
                 > - Quote list item 2
+                > 1. Nested quote list item
+                > 2. Another nested quote list item
                 >>  - Nested quote list item
                 >>  - Another nested quote list item
+                > # Quote with Heading1
+                > ## Quote with Heading2
+                > Regular paragraph inside quote.
+                > ```python
+                > def hello():
+                >     print("Hello from quote!")
+                > ```
                 
                 ## Dividers
                 

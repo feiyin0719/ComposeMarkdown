@@ -170,12 +170,101 @@ fun MarkdownView(
 @Composable
 private fun MarkdownViewPreview() {
     MarkdownView(
-        content = "# Hello, Markdown!\n\nThis is a **preview** of the Markdown view.",
+        content =
+            """
+            # Basic Syntax Example
+            
+            ### Quote with List
+            > - Quote list item 1
+            > - Quote list item 2
+            > 1. Nested quote list item
+            > 2. Another nested quote list item
+            >>  - Nested quote list item
+            >>  - Another nested quote list item
+            > # Quote with Heading1
+            > ## Quote with Heading2
+            > Regular paragraph inside quote.
+            > ```python
+            > def hello():
+            >     print("Hello from quote!")
+            > ```
+            
+            This is an example demonstrating basic Markdown syntax.
+            
+            ## Text Formatting
+            
+            **Bold text** and *italic text* as well as `inline code`
+            
+            ## Lists
+            
+            ### Ordered Lists
+            1. First item
+            2. Second item
+               1. Nested item
+                  - 1
+                  - 2
+               2. Another nested item
+            3. Third item
+            4. 1. Fourth item with number
+               2. Another fourth item
+            
+            ### Loose List
+            1. Item 1
+                
+                This is a loose list item with multiple paragraphs.
+                
+                Another paragraph in the same list item.
+                
+                > Blockquote inside loose list item.
+                > Another line of blockquote.
+                
+                1. Nested ordered list inside loose item.
+                
+                2. ``` kotlin
+                   val x = 10
+                   ```
+                   
+            2. > quote as second item
+               >> another line of quote
+               
+               test paragraph after quote.
+               
+               ```java
+                 System.out.println("Hello, World!");
+               ```
+               
+                          
+            
+            ### Unordered Lists
+            - Item A
+            - Item B
+              - Nested item
+              - Another nested item
+            - Item C
+            
+            ## Quotes
+            
+            > This is a quote block
+            > Can contain multiple lines of content
+            
+            ## Dividers
+            
+            ---
+            
+            ## Links
+            
+            [GitHub](https://github.com) | [Google](https://google.com)
+            
+            ## Code
+            
+            ```kotlin
+            fun greetUser(name: String) {
+                println("Hello, ${'$'}name!")
+            }
+            
+            greetUser("Compose")
+            
+            """.trimIndent(),
         markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
-        onLoading = { Text("test") },
-        onError = { error ->
-            // Display error message
-            Text("Error: ${error.message}")
-        },
     )
 }
