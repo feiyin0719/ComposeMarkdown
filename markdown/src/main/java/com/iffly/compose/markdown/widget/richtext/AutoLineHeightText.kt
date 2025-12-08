@@ -30,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.Dispatchers
@@ -174,11 +175,16 @@ private fun buildAdjustLineHeightText(
             requests
                 .sortedBy {
                     it.startIndex
-                }.forEach {
+                }.fastForEach {
                     if (it.startIndex > lastIndex) {
                         // add new ParagraphStyle will create a new line, so we need to remove the last line separator
                         // to avoid extra empty line
-                        appendAndRemoveLastLineSeparator(currentText.subSequence(lastIndex, it.startIndex))
+                        appendAndRemoveLastLineSeparator(
+                            currentText.subSequence(
+                                lastIndex,
+                                it.startIndex,
+                            ),
+                        )
                     }
                     withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
                         // add new ParagraphStyle will create a new line, so we need to remove the last line separator
@@ -213,9 +219,10 @@ private fun calculateAdjustLineHeightRequest(
 ): MutableMap<Int, AdjustLineHeightRequest> {
     val adjustLineHeightRequestMap = mutableMapOf<Int, AdjustLineHeightRequest>()
     val annotationRanges = layoutResult.layoutInput.placeholders
-    for (annotation in annotationRanges) {
+
+    annotationRanges.fastForEach { annotation ->
         if (!annotation.item.height.isSp) {
-            continue
+            return@fastForEach
         }
 
         val lineNumber = layoutResult.getLineForOffset(annotation.start)

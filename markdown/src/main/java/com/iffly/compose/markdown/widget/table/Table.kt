@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
@@ -279,7 +280,13 @@ private fun getColumnWeightWidths(
     val columnWeightWidths =
         if (!widthWeights.isNullOrEmpty()) {
             // Weight mode: distribute available width according to weights
-            calculateWeightBasedColumnWidths(widthWeights, columnCount, constraints, border, density)
+            calculateWeightBasedColumnWidths(
+                widthWeights,
+                columnCount,
+                constraints,
+                border,
+                density,
+            )
         } else {
             // Content mode: measure cells to determine widths
             List(columnCount) { -1 }
@@ -301,8 +308,8 @@ private fun measureAllCells(
     rowHeights: MutableList<Int>,
     cellPlaceableMap: List<MutableList<Placeable?>>,
     cellData: List<MutableList<CellImpl?>>,
-) = allRows.forEachIndexed { rowIndex, row ->
-    row.cells.forEachIndexed { columnIndex, cell ->
+) = allRows.fastForEachIndexed { rowIndex, row ->
+    row.cells.fastForEachIndexed { columnIndex, cell ->
         if (columnIndex < columnCount) {
             measureSingleCell(
                 measureScope = measureScope,
@@ -376,9 +383,9 @@ private fun layoutTable(
     layout(measureResult.totalWidth, measureResult.totalHeight) {
         var yOffset = 0
 
-        measureResult.allRows.forEachIndexed { rowIndex, row ->
+        measureResult.allRows.fastForEachIndexed { rowIndex, row ->
             if (yOffset >= measureResult.totalHeight) {
-                return@forEachIndexed
+                return@fastForEachIndexed
             }
             val rowHeight = measureResult.rowHeights[rowIndex]
             // Place row background if exists

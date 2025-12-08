@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.util.fastForEach
 import com.iffly.compose.markdown.util.StringExt
 import com.iffly.compose.markdown.widget.SelectionFormatText
 import kotlinx.collections.immutable.ImmutableMap
@@ -103,7 +104,7 @@ fun RichText(
             .toImmutableMap()
 
     Column(modifier = modifier) {
-        textSegments.forEach {
+        textSegments.fastForEach {
             when (it) {
                 is RichTextSegment.Text -> {
                     AdaptiveInlineContentText(

@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastMapIndexed
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableMap
@@ -200,7 +202,7 @@ private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
         )
     val placeables =
         subcompose("adaptive_inline") {
-            adaptiveKeys.forEach { key ->
+            adaptiveKeys.fastForEach { key ->
                 val value = adaptiveInlineContent.getValue(key)
                 Box(modifier = Modifier.wrapContentSize()) {
                     value.content(key)
@@ -210,7 +212,7 @@ private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
 
     val measuredAdaptiveInlineContent: Map<String, InlineTextContent> =
         adaptiveKeys
-            .mapIndexed { index, key ->
+            .fastMapIndexed { index, key ->
                 val value = adaptiveInlineContent.getValue(key)
                 val placeable = placeables.getOrNull(index)
                 val width =
