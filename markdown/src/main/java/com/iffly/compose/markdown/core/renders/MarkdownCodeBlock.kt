@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -163,28 +163,30 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
             if (contentTheme.height != null) {
                 val scrollState = rememberScrollState()
                 Modifier
-                    .height(contentTheme.height)
+                    .heightIn(max = contentTheme.height)
                     .verticalScroll(scrollState)
             } else {
                 Modifier
             }
-        LineNumberText(
-            text = codeText,
-            textStyle = contentTheme.codeTextStyle,
-            lineNumberStyle = contentTheme.lineNumberTextStyle,
-            contentPadding = contentTheme.contentPadding,
-            lineNumberPadding = contentTheme.lineNumberPadding,
-            showLineNumber = contentTheme.showLineNumber,
-            softWrap = contentTheme.softWrap,
-            maxLines = contentTheme.maxLines,
-            minLines = contentTheme.minLines,
-            modifier =
-                modifier
-                    .then(contentTheme.modifier)
-                    .then(scrollModifier),
-        )
-        // add invisible \n in code content for selection-copy purpose
-        SelectionFormatText(StringExt.LINE_SEPARATOR)
+        DisableSelectionWrapper(disabled = contentTheme.disableSelection) {
+            LineNumberText(
+                text = codeText,
+                textStyle = contentTheme.codeTextStyle,
+                lineNumberStyle = contentTheme.lineNumberTextStyle,
+                contentPadding = contentTheme.contentPadding,
+                lineNumberPadding = contentTheme.lineNumberPadding,
+                showLineNumber = contentTheme.showLineNumber,
+                softWrap = contentTheme.softWrap,
+                maxLines = contentTheme.maxLines,
+                minLines = contentTheme.minLines,
+                modifier =
+                    modifier
+                        .then(contentTheme.modifier)
+                        .then(scrollModifier),
+            )
+            // add invisible \n in code content for selection-copy purpose
+            SelectionFormatText(StringExt.LINE_SEPARATOR)
+        }
     }
 }
 

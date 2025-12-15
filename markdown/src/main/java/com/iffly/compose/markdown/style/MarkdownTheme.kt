@@ -340,8 +340,9 @@ data class CodeBlockTheme(
      * @param codeTextStyle The text style for the code content.
      * @param lineNumberTextStyle The text style for the line numbers.
      * @param modifier The modifier for the code content.
-     * @param height The fixed height for the code content, if has fixed height,
+     * @param height The max height for the code content, if has fixed height,
      * it will support scrolling.
+     * @param disableSelection Whether to disable text selection.
      */
     @Immutable
     data class CodeContentTheme(
@@ -372,5 +373,6 @@ data class CodeBlockTheme(
             ),
         val modifier: Modifier = Modifier.padding(start = 17.dp, end = 17.dp, top = 17.dp),
         val height: Dp? = null,
+        val disableSelection: Boolean = false,
     )
 }
