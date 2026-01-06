@@ -9,7 +9,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -36,7 +35,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 
 /**
@@ -120,46 +119,31 @@ fun AutoLineHeightText(
 private fun rememberAdjustedText(text: AnnotatedString): Pair<AnnotatedString, MutableState<TextLayoutResult?>> {
     val textLayoutResultState = remember { mutableStateOf<TextLayoutResult?>(null) }
     var adjustedText by remember(text) { mutableStateOf(text) }
-    val latestText = rememberUpdatedState(adjustedText)
     val density = LocalDensity.current
     LaunchedEffect(text) {
         snapshotFlow {
             textLayoutResultState.value
         }.distinctUntilChanged()
-            .map { layoutResult ->
+            .mapNotNull { layoutResult ->
                 layoutResult?.let {
-                    if (latestText.value != it.layoutInput.text) {
+                    if (adjustedText != it.layoutInput.text) {
                         // Text has changed, skip processing
                         return@let null
                     }
                     withContext(Dispatchers.Default) {
-                        val adjustLineHeightRequestMap =
-                            calculateAdjustLineHeightRequest(
-                                layoutResult = it,
-                                density = density,
-                            )
-                        it.layoutInput.text to adjustLineHeightRequestMap.values.toList()
-                    }
-                }
-            }.collectLatest {
-                it?.let { (currentText, adjustLineHeightRequests) ->
-                    if (latestText.value != currentText) {
-                        // Text has changed, skip processing
-                        return@let
-                    }
-                    if (adjustLineHeightRequests.isNotEmpty()) {
-                        val newText =
+                        calculateAdjustLineHeightRequest(
+                            layoutResult = it,
+                            density = density,
+                        ).takeIf { map -> map.isNotEmpty() }?.let { requestMap ->
                             buildAdjustLineHeightText(
-                                currentText = currentText,
-                                requests = adjustLineHeightRequests,
+                                currentText = it.layoutInput.text,
+                                requests = requestMap.values.toList(),
                             )
-                        adjustedText = newText
-                    } else {
-                        if (currentText != adjustedText) {
-                            adjustedText = currentText
                         }
                     }
                 }
+            }.collectLatest {
+                adjustedText = it
             }
     }
     return Pair(adjustedText, textLayoutResultState)
