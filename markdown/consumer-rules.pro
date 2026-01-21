@@ -1,0 +1,4 @@
+-keep class com.vladsch.flexmark.** { *; }
+-dontwarn java.awt.**
+-dontwarn javax.imageio.**
+-dontwarn javax.swing.**
