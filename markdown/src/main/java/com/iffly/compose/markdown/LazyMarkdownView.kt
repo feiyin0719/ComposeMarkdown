@@ -1,9 +1,12 @@
 package com.iffly.compose.markdown
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,15 +117,19 @@ fun LazyMarkdownView(
         showNotSupportedText,
         actionHandler = actionHandler,
     ) {
+        val theme = markdownRenderConfig.markdownTheme
         LazyColumn(
             modifier = modifier,
             state = listState,
         ) {
-            items(nodes, key = { System.identityHashCode(it) }) { node ->
+            itemsIndexed(nodes, key = { index, node -> System.identityHashCode(node) }) { index, node ->
                 MarkdownContent(
                     node = node,
                     modifier = Modifier,
                 )
+                if (index != nodes.lastIndex && theme.spacerTheme.showSpacer) {
+                    Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+                }
             }
         }
     }
