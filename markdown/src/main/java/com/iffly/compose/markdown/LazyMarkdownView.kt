@@ -55,6 +55,7 @@ fun LazyMarkdownView(
 
     // Use collectAsState to collect Flow state
     val nodes by markdownChunkLoader.nodesFlow.collectAsState()
+    val currentNodes by androidx.compose.runtime.rememberUpdatedState(nodes)
 
     val prefetchStrategy =
         remember {
@@ -66,12 +67,13 @@ fun LazyMarkdownView(
             prefetchStrategy = prefetchStrategy,
         )
 
-    LaunchedEffect(file) {
+    LaunchedEffect(markdownChunkLoader) {
         markdownChunkLoader.loadInitialChunks()
     }
 
     // Listen to scroll state changes, get first and last visible nodes and scroll direction
-    LaunchedEffect(listState, nodes) {
+    // Use currentNodes inside to access latest data without restarting the effect on every node change
+    LaunchedEffect(markdownChunkLoader) {
         var previousScrollOffset = 0
 
         snapshotFlow {
@@ -94,10 +96,10 @@ fun LazyMarkdownView(
                 previousScrollOffset = currentScrollOffset
 
                 if (firstIndex != null && lastIndex != null &&
-                    firstIndex < nodes.size && lastIndex < nodes.size
+                    firstIndex < currentNodes.size && lastIndex < currentNodes.size
                 ) {
-                    val firstVisibleNode = nodes[firstIndex]
-                    val lastVisibleNode = nodes[lastIndex]
+                    val firstVisibleNode = currentNodes[firstIndex]
+                    val lastVisibleNode = currentNodes[lastIndex]
                     markdownChunkLoader.loadMoreChunksIfNeeded(
                         firstVisibleNode,
                         lastVisibleNode,
