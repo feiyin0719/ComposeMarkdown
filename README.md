@@ -604,6 +604,8 @@ Currently supported official plugin modules:
 
 | Plugin | Module (artifact) | Description |
 |--------|-------------------|-------------|
+| Table | markdown-table | Supports GFM tables |
+| Image | markdown-image | Supports Markdown images with Coil integration |
 | Task List | markdown-task | Supports GitHub-style task list checkboxes: `- [ ]` / `- [x]` |
 | LaTeX / Math | markdown-latex | Supports inline and block formulas: `$...$`, `$$...$$` |
 
@@ -611,12 +613,71 @@ Currently supported official plugin modules:
 
 ```kotlin
 dependencies {
+    implementation("com.github.feiyin0719:markdown-table:<version>")
+    implementation("com.github.feiyin0719:markdown-image:<version>")
     implementation("com.github.feiyin0719:markdown-task:<version>")
     implementation("com.github.feiyin0719:markdown-latex:<version>")
 }
 ```
 
 If only the root library (e.g. `ComposeMarkdown`) is published, these modules may already be bundled and you can just import their classes directly.
+
+### Table Example
+
+```kotlin
+// Option 1: Default theme
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(TableMarkdownPlugin())
+    .build()
+
+// Option 2: Custom table theme
+val tableTheme = TableTheme(
+    borderColor = Color.Blue,
+    borderThickness = 2.dp,
+    // ... other properties
+)
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(TableMarkdownPlugin(tableThemeuilder()
+    .addPlugin(TableMarkdownPlugin())
+    .build()
+
+// Option 2: Custom table theme
+val tableTheme = TableTheme(
+    borderColor = Color.Blue,
+    borderThickness = 2.dp,
+    // ... other properties
+)
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(TableMarkdownPlugin(tableTheme))
+    .build()
+```
+
+Markdown sample:
+
+```
+| Feature | Supported |
+| :---: | :---: |
+| Tables | ✅ |
+```
+
+### Image Example
+
+```kotlin
+// Option 1: Default theme
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(ImageMarkdownPlugin())
+    .build()
+
+// Option 2: Custom image theme
+val imageTheme = ImageTheme(
+    alignment = Alignment.Center,
+    contentScale = ContentScale.Crop,
+    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+)
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(ImageMarkdownPlugin(imageTheme))
+    .build()
+```
 
 ### Task List Example
 

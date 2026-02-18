@@ -37,10 +37,8 @@ import androidx.compose.ui.unit.sp
  * @param link The styles for links.
  * @param headStyle The styles for headings.
  * @param listTheme The theme for lists.
- * @param imageTheme The theme for images.
  * @param blockQuoteTheme The theme for block quotes.
  * @param spacerTheme The theme for spacers.
- * @param tableTheme The theme for tables.
  * @param codeBlockTheme The theme for code blocks.
  */
 @Stable
@@ -156,10 +154,8 @@ data class MarkdownTheme(
                 ),
         ),
     val listTheme: ListTheme = ListTheme(),
-    val imageTheme: ImageTheme = ImageTheme(),
     val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
     val spacerTheme: SpacerTheme = SpacerTheme(),
-    val tableTheme: TableTheme = TableTheme(),
     val codeBlockTheme: CodeBlockTheme = CodeBlockTheme(),
 ) {
     companion object {
@@ -171,23 +167,6 @@ data class MarkdownTheme(
         const val HEAD6 = 6
     }
 }
-
-/**
- * Theme for images in Markdown.
- * @param alignment The alignment of the image.
- * @param contentScale The content scale of the image.
- * @param shape The shape of the image.
- * @param modifier The modifier for the image.
- * @param errorPlaceholderColor The placeholder color when image fails to load.
- */
-@Immutable
-data class ImageTheme(
-    val alignment: Alignment = Alignment.Center,
-    val contentScale: ContentScale = ContentScale.Inside,
-    val shape: Shape = RoundedCornerShape(8.dp),
-    val modifier: Modifier = Modifier,
-    val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
-)
 
 /**
  * Theme for block quotes in Markdown.
@@ -241,48 +220,6 @@ data class ListTheme(
             fontSize = 17.sp,
             textAlign = TextAlign.End,
         ),
-)
-
-/**
- * Theme for tables in Markdown.
- * @param borderColor The color of the table borders.
- * @param borderThickness The thickness of the table borders.
- * @param titleBackgroundColor The background color of the table title.
- * @param tableHeaderBackgroundColor The background color of the table header.
- * @param tableCellBackgroundColor The background color of the table cells.
- * @param cellTextStyle The text style for the table cells.
- * @param headerTextStyle The text style for the table headers.
- * @param copyTextStyle The text style for the copy button in table cells.
- * @param shape The shape of the table.
- * @param cellPadding The padding inside the table cells.
- */
-data class TableTheme(
-    val borderColor: Color = Color.Gray,
-    val borderThickness: Dp = 1.dp,
-    val titleBackgroundColor: Color = Color.LightGray,
-    val tableHeaderBackgroundColor: Color = Color.White,
-    val tableCellBackgroundColor: Color = Color.White,
-    val cellTextStyle: TextStyle? =
-        TextStyle(
-            fontSize = 14.sp,
-            fontFamily = FontFamily.Default,
-            color = Color.Black,
-        ),
-    val headerTextStyle: TextStyle? =
-        TextStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            color = Color.Black,
-        ),
-    val copyTextStyle: TextStyle =
-        TextStyle(
-            fontSize = 12.sp,
-            fontFamily = FontFamily.Monospace,
-            color = Color.Black,
-        ),
-    val shape: Shape = RoundedCornerShape(8.dp),
-    val cellPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
 )
 
 /**

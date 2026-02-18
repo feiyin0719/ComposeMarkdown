@@ -54,6 +54,8 @@ dependencies {
     implementation(libs.coil3.okhttp)
     implementation(project(":markdown"))
     implementation(project(":markdown-task"))
+    implementation(project(":markdown-table"))
+    implementation(project(":markdown-image"))
     implementation(project(":markdown-latex"))
 //    implementation(libs.compose.markdown)
 //    implementation(libs.compose.markdown.task)

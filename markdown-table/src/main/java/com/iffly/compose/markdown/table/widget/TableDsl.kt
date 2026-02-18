@@ -3,7 +3,7 @@
  * Microsoft Corporation. All rights reserved.
  */
 
-package com.iffly.compose.markdown.widget.table
+package com.iffly.compose.markdown.table.widget
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment

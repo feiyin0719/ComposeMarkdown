@@ -12,7 +12,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/markdown" />
+            <option value="$PROJECT_DIR$/markdown-image" />
             <option value="$PROJECT_DIR$/markdown-latex" />
+            <option value="$PROJECT_DIR$/markdown-table" />
             <option value="$PROJECT_DIR$/markdown-task" />
           </set>
         </option>

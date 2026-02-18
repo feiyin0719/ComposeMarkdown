@@ -341,22 +341,22 @@ data class MarkdownTheme(
  val link: TextLinkStyles = TextLinkStyles(...),
  val headStyle: Map<Int, TextStyle> = defaultHeadStyles,
  val listTheme: ListTheme = ListTheme(),
- val imageTheme: ImageTheme = ImageTheme(),
  val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
  val spacerTheme: SpacerTheme = SpacerTheme(),
- val tableTheme: TableTheme = TableTheme(),
  val codeBlockTheme: CodeBlockTheme = CodeBlockTheme(),
 )
 ```
 
 `MarkdownTheme.kt` 中的重要嵌套类型包括：
 
-- `ImageTheme` —— 控制对齐方式、`ContentScale`、形状、修饰符以及错误占位颜色等。
 - `BlockQuoteTheme` —— 控制边框颜色 / 宽度、背景、形状、内边距等。
 - `SpacerTheme` —— 是否在块之间显示间隔，以及间隔高度。
 - `ListTheme` —— 列表项目符号 / 序号的间距与样式。
-- `TableTheme` —— 表格的边框颜色 / 厚度、行背景色、文本样式、内边距等。
 - `CodeBlockTheme` —— 代码块文本样式、背景、内边距、溢出行为等。
+
+> **注意**：
+> - `TableTheme` 现已移至 `TableMarkdownPlugin` 配置中，不再属于 `MarkdownTheme`。
+> - `ImageTheme` 现已移至 `ImageMarkdownPlugin` 配置中，不再属于 `MarkdownTheme`。
 
 #### 标题级别
 
@@ -453,31 +453,8 @@ data class ListTheme(
 
 #### 图片
 
-`ImageTheme` 控制图片的展示方式：
+已移至 `ImageMarkdownPlugin`。请参阅 [插件](#插件) 部分以了解如何配置 `ImageTheme`。
 
-```kotlin
-@Immutable
-data class ImageTheme(
- val alignment: Alignment = Alignment.Center,
- val contentScale: ContentScale = ContentScale.Inside,
- val shape: Shape = RoundedCornerShape(8.dp),
- val modifier: Modifier = Modifier,
- val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
-)
-```
-
-例如，你可以统一做成 16:9 的缩略图风格：
-
-```kotlin
-val theme = MarkdownTheme(
- imageTheme =
-  ImageTheme(
-   contentScale = ContentScale.Crop,
-   shape = RoundedCornerShape(12.dp),
-   modifier = Modifier.padding(vertical = 8.dp),
-  ),
-)
-```
 
 #### 引用块
 
@@ -950,7 +927,9 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
 
 ##### MarkdownTable（表格）
 
-文件：`core/renders/MarkdownTable.kt`
+`TableMarkdownPlugin` (位于 `markdown-table` 模块中)
+
+文件：`markdown-table/src/main/java/com/iffly/compose/markdown/table/MarkdownTable.kt`
 
 该模块基于 Flexmark 的 `TableBlock` 扩展及一个小型 Compose `Table` DSL，提供完整的表格渲染能力。
 
@@ -1201,7 +1180,35 @@ val config = MarkdownRenderConfig.Builder()
 
 ##### MarkdownImage（图片）
 
-文件：`core/renders/MarkdownImage.kt`
+`ImageMarkdownPlugin` (位于 `markdown-image` 模块中)
+
+你可以通过向插件构造函数传递 `ImageTheme` 来自定义图片外观：
+
+```kotlin
+.addPlugin(
+    ImageMarkdownPlugin(
+        imageTheme = ImageTheme(
+            alignment = Alignment.Center,
+            contentScale = ContentScale.Inside,
+            // ...
+        )
+    )
+)
+```
+
+**ImageTheme 配置参数**：
+
+```kotlin
+data class ImageTheme(
+    val alignment: Alignment = Alignment.Center,
+    val contentScale: ContentScale = ContentScale.Inside,
+    val shape: Shape = RoundedCornerShape(8.dp),
+    val modifier: Modifier = Modifier,
+    val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
+)
+```
+
+文件：`markdown-image/src/main/java/com/iffly/compose/markdown/image/MarkdownImage.kt`
 
 `MarkdownImage` 是用于 Flexmark `Image` 节点的默认图片 Composable。它基于 Coil 3，并提供自定义加载与错误 UI 的钩子。
 

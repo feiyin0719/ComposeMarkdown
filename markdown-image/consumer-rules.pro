@@ -1,0 +1,1 @@
+-keep class com.iffly.compose.markdown.image.** { *; }

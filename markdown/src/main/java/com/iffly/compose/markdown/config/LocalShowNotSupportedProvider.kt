@@ -13,4 +13,4 @@ internal val LocalShowNotSupportedProvider =
 
 @Composable
 @ReadOnlyComposable
-internal fun isShowNotSupported(): Boolean = LocalShowNotSupportedProvider.current
+fun isShowNotSupported(): Boolean = LocalShowNotSupportedProvider.current

@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.core.renders
+package com.iffly.compose.markdown.table
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -31,17 +31,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentActionHandler
-import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.table.widget.BodyScope
+import com.iffly.compose.markdown.table.widget.RowScope
+import com.iffly.compose.markdown.table.widget.Table
+import com.iffly.compose.markdown.table.widget.TableBorder
+import com.iffly.compose.markdown.table.widget.TableBorderMode
+import com.iffly.compose.markdown.table.widget.TableScope
 import com.iffly.compose.markdown.widget.DisableSelectionWrapper
-import com.iffly.compose.markdown.widget.table.BodyScope
-import com.iffly.compose.markdown.widget.table.RowScope
-import com.iffly.compose.markdown.widget.table.Table
-import com.iffly.compose.markdown.widget.table.TableBorder
-import com.iffly.compose.markdown.widget.table.TableBorderMode
-import com.iffly.compose.markdown.widget.table.TableScope
 import com.vladsch.flexmark.ext.tables.TableBlock
 import com.vladsch.flexmark.ext.tables.TableBody
 import com.vladsch.flexmark.ext.tables.TableCell
@@ -73,37 +72,39 @@ fun interface TableWidgetRenderer<T : Node> {
  * @param T The type of the node, must be a subclass of [TableBlock].
  * @see TableWidgetRenderer
  */
-class TableTitleRenderer : TableWidgetRenderer<TableBlock> {
+class TableTitleRenderer(
+    private val tableTheme: TableTheme = TableTheme(),
+) : TableWidgetRenderer<TableBlock> {
     @Suppress("ComposableNaming")
     @Composable
     override fun invoke(
         node: TableBlock,
         modifier: Modifier,
     ) {
-        TableTitle(tableBlock = node, modifier = modifier)
+        TableTitle(tableBlock = node, modifier = modifier, tableTheme = tableTheme)
     }
 }
 
 /**
  * Renderer for table cell.
- * @param T The type of the node, must be a subclass of [TableCell].
  * @see TableWidgetRenderer
  */
-class TableCellRenderer : TableWidgetRenderer<TableCell> {
+class TableCellRenderer(
+    private val tableTheme: TableTheme = TableTheme(),
+) : TableWidgetRenderer<TableCell> {
     @Suppress("ComposableNaming")
     @Composable
     override fun invoke(
         node: TableCell,
         modifier: Modifier,
     ) {
-        val theme = currentTheme()
         val isHeader = node.parent is TableRow && node.parent?.parent is TableHead
         SelectionContainer {
             MarkdownText(
                 parent = node,
                 modifier = Modifier,
                 textAlign = node.alignment.toTextAlign(),
-                textStyle = if (isHeader) theme.tableTheme.headerTextStyle else theme.tableTheme.cellTextStyle,
+                textStyle = if (isHeader) tableTheme.headerTextStyle else tableTheme.cellTextStyle,
             )
         }
     }
@@ -117,9 +118,15 @@ class TableCellRenderer : TableWidgetRenderer<TableCell> {
  * @see IBlockRenderer
  */
 class TableRenderer(
-    private val tableTitleRenderer: TableWidgetRenderer<TableBlock> = TableTitleRenderer(),
-    private val tableCellRenderer: TableWidgetRenderer<TableCell> = TableCellRenderer(),
+    private val tableTheme: TableTheme = TableTheme(),
+    tableTitleRenderer: TableWidgetRenderer<TableBlock>? = null,
+    tableCellRenderer: TableWidgetRenderer<TableCell>? = null,
 ) : IBlockRenderer<TableBlock> {
+    private val tableTitleRenderer: TableWidgetRenderer<TableBlock> =
+        tableTitleRenderer ?: TableTitleRenderer(tableTheme)
+    private val tableCellRenderer: TableWidgetRenderer<TableCell> =
+        tableCellRenderer ?: TableCellRenderer(tableTheme)
+
     @Composable
     override fun Invoke(
         node: TableBlock,
@@ -130,6 +137,7 @@ class TableRenderer(
             modifier = modifier,
             tableTitleRenderer = tableTitleRenderer,
             tableCellRenderer = tableCellRenderer,
+            tableTheme = tableTheme,
         )
     }
 }
@@ -146,6 +154,7 @@ class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
  * @param tableTitleRenderer The renderer for the table title.
  * @param tableCellRenderer The renderer for the table cells.
  * @param modifier Modifier to be applied to the rendered content.
+ *  * @param tableTheme The theme to be applied to the table.
  */
 @Composable
 fun MarkdownTable(
@@ -153,30 +162,30 @@ fun MarkdownTable(
     tableTitleRenderer: TableWidgetRenderer<TableBlock>,
     tableCellRenderer: TableWidgetRenderer<TableCell>,
     modifier: Modifier = Modifier,
+    tableTheme: TableTheme = TableTheme(),
 ) {
     val cells = tableBlock.cells()
     val columnsCount = cells.firstOrNull()?.size ?: 0
     if (columnsCount == 0 || cells.isEmpty()) return
-    val theme = currentTheme()
-    val borderColor = theme.tableTheme.borderColor
+    val borderColor = tableTheme.borderColor
     val widthWeights = if (columnsCount <= 2) List(columnsCount) { 1f } else null
 
     Column(
         modifier =
             modifier
                 .wrapContentSize()
-                .clip(theme.tableTheme.shape)
+                .clip(tableTheme.shape)
                 .border(
-                    theme.tableTheme.borderThickness,
+                    tableTheme.borderThickness,
                     borderColor,
-                    theme.tableTheme.shape,
+                    tableTheme.shape,
                 ),
     ) {
         tableTitleRenderer(tableBlock, Modifier.fillMaxWidth())
         Spacer(
             Modifier
                 .fillMaxWidth()
-                .height(theme.tableTheme.borderThickness)
+                .height(tableTheme.borderThickness)
                 .background(borderColor),
         )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -191,19 +200,19 @@ fun MarkdownTable(
                 Table(
                     modifier = Modifier.tableModifier(columnsCount),
                     widthWeights = widthWeights?.toImmutableList(),
-                    cellPadding = theme.tableTheme.cellPadding,
+                    cellPadding = tableTheme.cellPadding,
                     border =
                         TableBorder.solid(
                             mode = TableBorderMode.ALL,
                             color = borderColor,
-                            width = theme.tableTheme.borderThickness,
+                            width = tableTheme.borderThickness,
                         ),
                     cellAlignment = Alignment.TopStart,
                 ) {
                     tableHeader(
                         headerCells = cells.first(),
                         modifier = cellModifier,
-                        backgroundColor = theme.tableTheme.tableHeaderBackgroundColor,
+                        backgroundColor = tableTheme.tableHeaderBackgroundColor,
                         cellContent = tableCellRenderer,
                     )
                     val bodyCells = if (cells.size > 1) cells.subList(1, cells.size) else null
@@ -211,7 +220,7 @@ fun MarkdownTable(
                         tableBody(
                             rows = it,
                             modifier = cellModifier,
-                            backgroundColor = theme.tableTheme.tableCellBackgroundColor,
+                            backgroundColor = tableTheme.tableCellBackgroundColor,
                             cellContent = tableCellRenderer,
                         )
                     }
@@ -230,15 +239,15 @@ fun MarkdownTable(
 private fun TableTitle(
     tableBlock: TableBlock,
     modifier: Modifier = Modifier,
+    tableTheme: TableTheme = TableTheme(),
 ) {
-    val theme = currentTheme()
     val actionHandler = currentActionHandler()
     DisableSelectionWrapper(disabled = true) {
         Row(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .background(theme.tableTheme.titleBackgroundColor)
+                    .background(tableTheme.titleBackgroundColor)
                     .padding(horizontal = 12.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -246,7 +255,7 @@ private fun TableTitle(
             // Copy button
             Text(
                 text = "Copy table",
-                style = theme.tableTheme.copyTextStyle,
+                style = tableTheme.copyTextStyle,
                 modifier =
                     Modifier.clickable {
                         actionHandler?.handleCopyClick(tableBlock)

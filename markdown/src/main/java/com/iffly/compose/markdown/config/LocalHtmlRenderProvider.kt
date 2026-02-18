@@ -14,4 +14,4 @@ internal val LocalHtmlRenderProvider =
 
 @Composable
 @ReadOnlyComposable
-internal fun currentHtmlRenderer(): HtmlRenderer = LocalHtmlRenderProvider.current
+fun currentHtmlRenderer(): HtmlRenderer = LocalHtmlRenderProvider.current

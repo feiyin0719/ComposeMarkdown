@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.core.renders
+package com.iffly.compose.markdown.image
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -12,8 +12,8 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.iffly.compose.markdown.R
 import com.iffly.compose.markdown.config.currentActionHandler
+import com.iffly.compose.markdown.image.R
 import com.iffly.compose.markdown.widget.LoadingView
 import com.vladsch.flexmark.ast.Image
 

@@ -14,4 +14,4 @@ internal val LocalActionHandlerProvider =
 
 @Composable
 @ReadOnlyComposable
-internal fun currentActionHandler(): ActionHandler? = LocalActionHandlerProvider.current
+fun currentActionHandler(): ActionHandler? = LocalActionHandlerProvider.current

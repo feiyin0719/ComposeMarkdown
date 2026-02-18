@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.core.renders
+package com.iffly.compose.markdown.image
 
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
-import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.RenderRegistry
@@ -48,22 +47,23 @@ class LoadingImageWidgetRenderer : ImageWidgetRenderer {
  * The default error view for image widgets.
  * @see ImageWidgetRenderer
  */
-class ErrorImageWidgetRenderer : ImageWidgetRenderer {
+class ErrorImageWidgetRenderer(
+    private val imageTheme: ImageTheme,
+) : ImageWidgetRenderer {
     @Suppress("ComposableNaming")
     @Composable
     override fun invoke(
         node: Image,
         modifier: Modifier,
     ) {
-        val theme = currentTheme()
         MarkdownImageErrorView(
             modifier =
                 modifier
-                    .background(color = theme.imageTheme.errorPlaceholderColor)
-                    .clip(theme.imageTheme.shape)
-                    .then(theme.imageTheme.modifier),
-            contentScale = theme.imageTheme.contentScale,
-            alignment = theme.imageTheme.alignment,
+                    .background(color = imageTheme.errorPlaceholderColor)
+                    .clip(imageTheme.shape)
+                    .then(imageTheme.modifier),
+            contentScale = imageTheme.contentScale,
+            alignment = imageTheme.alignment,
             altText = node.text?.toString() ?: node.title?.toString(),
         )
     }
@@ -76,9 +76,12 @@ class ErrorImageWidgetRenderer : ImageWidgetRenderer {
  * @see IInlineNodeStringBuilder
  */
 class ImageNodeStringBuilder(
+    private val imageTheme: ImageTheme = ImageTheme(),
     private val loadingView: ImageWidgetRenderer = LoadingImageWidgetRenderer(),
-    private val errorView: ImageWidgetRenderer = ErrorImageWidgetRenderer(),
+    errorView: ImageWidgetRenderer? = null,
 ) : IInlineNodeStringBuilder<Image> {
+    private val errorView: ImageWidgetRenderer = errorView ?: ErrorImageWidgetRenderer(imageTheme)
+
     override fun AnnotatedString.Builder.buildInlineNodeString(
         node: Image,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
@@ -89,27 +92,25 @@ class ImageNodeStringBuilder(
         renderRegistry: RenderRegistry,
         measureContext: TextMeasureContext,
     ) {
-        val imageId = "image_$${node.url}"
+        val imageId = "image_${node.url}"
         inlineContentMap[imageId] =
             MarkdownInlineView.MarkdownRichTextInlineContent(
                 RichTextInlineContent.StandaloneInlineContent(
                     modifier = Modifier,
                 ) { modifier ->
-                    val theme = currentTheme()
                     MarkdownImage(
                         node,
                         modifier =
                             modifier
-                                .clip(theme.imageTheme.shape)
-                                .then(theme.imageTheme.modifier),
-                        contentScale = theme.imageTheme.contentScale,
-                        alignment = theme.imageTheme.alignment,
+                                .clip(imageTheme.shape)
+                                .then(imageTheme.modifier),
+                        contentScale = imageTheme.contentScale,
+                        alignment = imageTheme.alignment,
                         loadingView = { image, modifier ->
                             loadingView.invoke(image, modifier)
                         },
                         errorView = { image, modifier ->
-
-                            errorView.invoke(image, modifier)
+                            this@ImageNodeStringBuilder.errorView.invoke(image, modifier)
                         },
                     )
                 },

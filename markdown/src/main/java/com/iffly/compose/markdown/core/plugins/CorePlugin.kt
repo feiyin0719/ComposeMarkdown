@@ -12,7 +12,6 @@ import com.iffly.compose.markdown.core.renders.FencedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.HardLineBreakNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.HeadingNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.HeadingRenderer
-import com.iffly.compose.markdown.core.renders.ImageNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.OrderedListItemRenderer
@@ -23,8 +22,6 @@ import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrikethroughNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrongEmphasisNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.SubscriptNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.TableCellNodeStringBuilder
-import com.iffly.compose.markdown.core.renders.TableRenderer
 import com.iffly.compose.markdown.core.renders.TextNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -49,9 +46,6 @@ import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension
 import com.vladsch.flexmark.ext.gfm.strikethrough.Subscript
-import com.vladsch.flexmark.ext.tables.TableBlock
-import com.vladsch.flexmark.ext.tables.TableCell
-import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
@@ -65,7 +59,6 @@ class CorePlugin : IMarkdownRenderPlugin {
     override fun blockRenderers(): Map<Class<out Block>, IBlockRenderer<*>> =
         mutableMapOf(
             Document::class.java to DocumentRenderer(),
-            TableBlock::class.java to TableRenderer(),
             Paragraph::class.java to ParagraphRenderer(),
             Heading::class.java to HeadingRenderer(),
             OrderedList::class.java to OrderedListRenderer(),
@@ -82,7 +75,6 @@ class CorePlugin : IMarkdownRenderPlugin {
         mutableMapOf(
             Text::class.java to TextNodeStringBuilder(),
             Paragraph::class.java to ParagraphNodeStringBuilder(),
-            Image::class.java to ImageNodeStringBuilder(),
             Code::class.java to CodeNodeStringBuilder(),
             StrongEmphasis::class.java to StrongEmphasisNodeStringBuilder(),
             Emphasis::class.java to EmphasisNodeStringBuilder(),
@@ -92,12 +84,10 @@ class CorePlugin : IMarkdownRenderPlugin {
             HardLineBreak::class.java to HardLineBreakNodeStringBuilder(),
             Link::class.java to LinkNodeStringBuilder(),
             Heading::class.java to HeadingNodeStringBuilder(),
-            TableCell::class.java to TableCellNodeStringBuilder(),
         )
 
     override fun extensions(): List<Extension> =
         listOf(
-            TablesExtension.create(),
             StrikethroughSubscriptExtension.create(),
         )
 }

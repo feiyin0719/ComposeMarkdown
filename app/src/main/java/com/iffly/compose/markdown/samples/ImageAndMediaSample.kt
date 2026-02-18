@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.image.ImageMarkdownPlugin
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
@@ -59,7 +60,11 @@ fun ImageAndMediaExample(
                 
                 The image above is clickable and will navigate to the Android developer website.
                 """.trimIndent(),
-            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+            markdownRenderConfig =
+                MarkdownRenderConfig
+                    .Builder()
+                    .addPlugin(ImageMarkdownPlugin())
+                    .build(),
             modifier = Modifier.padding(16.dp),
             actionHandler =
                 object : ActionHandler {

@@ -342,22 +342,22 @@ data class MarkdownTheme(
     val link: TextLinkStyles = TextLinkStyles(...),
     val headStyle: Map<Int, TextStyle> = defaultHeadStyles,
     val listTheme: ListTheme = ListTheme(),
-    val imageTheme: ImageTheme = ImageTheme(),
     val blockQuoteTheme: BlockQuoteTheme = BlockQuoteTheme(),
     val spacerTheme: SpacerTheme = SpacerTheme(),
-    val tableTheme: TableTheme = TableTheme(),
     val codeBlockTheme: CodeBlockTheme = CodeBlockTheme(),
 )
 ```
 
 Key nested types (from `MarkdownTheme.kt`):
 
-- `ImageTheme` – alignment, `ContentScale`, shape, modifier, error placeholder color
 - `BlockQuoteTheme` – border color/width, background, shape, padding
 - `SpacerTheme` – whether to show spacers between blocks, height
 - `ListTheme` – bullet/number marker spacing and style
-- `TableTheme` – border color/thickness, row background colors, text styles, padding
 - `CodeBlockTheme` – code block text style, background, padding, overflow, etc.
+
+> **Note**:
+> - `TableTheme` is now part of `TableMarkdownPlugin` configuration, not `MarkdownTheme`.
+> - `ImageTheme` is now part of `ImageMarkdownPlugin` configuration, not `MarkdownTheme`.
 
 #### Heading levels
 
@@ -455,31 +455,8 @@ Typical customisation:
 
 #### Images
 
-`ImageTheme` controls how images are shown:
+Moved to `ImageMarkdownPlugin`. See the [Plugins](#plugins) section for details on how to configure `ImageTheme`.
 
-```kotlin
-@Immutable
-data class ImageTheme(
-    val alignment: Alignment = Alignment.Center,
-    val contentScale: ContentScale = ContentScale.Inside,
-    val shape: Shape = RoundedCornerShape(8.dp),
-    val modifier: Modifier = Modifier,
-    val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
-)
-```
-
-You can, for example, enforce a 16:9 thumbnail style:
-
-```kotlin
-val theme = MarkdownTheme(
-    imageTheme =
-        ImageTheme(
-            contentScale = ContentScale.Crop,
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.padding(vertical = 8.dp),
-        ),
-)
-```
 
 #### Block quotes
 
@@ -977,7 +954,9 @@ To change link behaviour:
 
 ##### MarkdownTable (tables)
 
-File: `core/renders/MarkdownTable.kt`
+`TableMarkdownPlugin` (in `markdown-table` module)
+
+File: `markdown-table/src/main/java/com/iffly/compose/markdown/table/MarkdownTable.kt`
 
 This module provides a fully featured table renderer based on flexmark's `TableBlock` extension and
 a small Compose `Table` widget DSL.
@@ -1233,7 +1212,35 @@ of the widget you want to take over.
 
 ##### MarkdownImage (images)
 
-File: `core/renders/MarkdownImage.kt`
+`ImageMarkdownPlugin` (in `markdown-image` module)
+
+You can customize the image appearance by passing an `ImageTheme` to the plugin constructor:
+
+```kotlin
+.addPlugin(
+    ImageMarkdownPlugin(
+        imageTheme = ImageTheme(
+            alignment = Alignment.Center,
+            contentScale = ContentScale.Inside,
+            // ...
+        )
+    )
+)
+```
+
+**ImageTheme Configuration**:
+
+```kotlin
+data class ImageTheme(
+    val alignment: Alignment = Alignment.Center,
+    val contentScale: ContentScale = ContentScale.Inside,
+    val shape: Shape = RoundedCornerShape(8.dp),
+    val modifier: Modifier = Modifier,
+    val errorPlaceholderColor: Color = Color(0xFFE0E0E0),
+)
+```
+
+File: `markdown-image/src/main/java/com/iffly/compose/markdown/image/MarkdownImage.kt`
 
 `MarkdownImage` is the default image composable used for flexmark `Image` nodes. It is built on top
 of Coil 3 and exposes hooks to customise loading and error UI.

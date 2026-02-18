@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.table.TableMarkdownPlugin
 
 @Composable
 fun TableAndCodeExample(
@@ -151,7 +152,11 @@ fun TableAndCodeExample(
                    | Image Rendering | ✅ | ✅ | ✅ | Local and network images |
                    | Custom Styling | ✅ | ✅ | ✅ | Fully customizable |
                 """.trimIndent(),
-            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+            markdownRenderConfig =
+                MarkdownRenderConfig
+                    .Builder()
+                    .addPlugin(TableMarkdownPlugin())
+                    .build(),
             modifier = Modifier.padding(16.dp),
         )
     }

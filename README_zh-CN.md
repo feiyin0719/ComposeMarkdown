@@ -555,6 +555,8 @@ val config =
 
 | 插件 | 模块（artifact） | 描述 |
 |--------|-------------------|-------------|
+| 表格支持 | markdown-table | 支持 GFM 表格 |
+| 图片支持 | markdown-image | 支持 Markdown 图片（集成 Coil） |
 | 任务列表 | markdown-task | 支持 GitHub 风格的任务列表复选框：`- [ ]` / `- [x]` |
 | LaTeX / 数学公式 | markdown-latex | 支持行内和块级公式：`$...$`、`$$...$$` |
 
@@ -562,12 +564,49 @@ val config =
 
 ```kotlin
 dependencies {
+	implementation("com.github.feiyin0719:markdown-table:<version>")
+	implementation("com.github.feiyin0719:markdown-image:<version>")
 	implementation("com.github.feiyin0719:markdown-task:<version>")
 	implementation("com.github.feiyin0719:markdown-latex:<version>")
 }
 ```
 
 如果只发布了根库（例如 `ComposeMarkdown`），这些模块可能已经被打包在其中，此时你可以直接导入相关类使用。
+
+### 表格示例
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+	.addPlugin(TableMarkdownPlugin())
+	.build()
+```
+
+Markdown 示例：
+
+```
+| Feature | Supported |
+| :---: | :---: |
+| Tables | ✅ |
+```
+
+### 图片示例
+
+```kotlin
+// 选项 1：默认主题
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(ImageMarkdownPlugin())
+    .build()
+
+// 选项 2：自定义图片主题
+val imageTheme = ImageTheme(
+    alignment = Alignment.Center,
+    contentScale = ContentScale.Crop,
+    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+)
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(ImageMarkdownPlugin(imageTheme))
+    .build()
+```
 
 ### 任务列表示例
 

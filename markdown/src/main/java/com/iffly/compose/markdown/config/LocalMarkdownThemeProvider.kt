@@ -14,4 +14,4 @@ internal val LocalMarkdownThemeProvider =
 
 @Composable
 @ReadOnlyComposable
-internal fun currentTheme(): MarkdownTheme = LocalMarkdownThemeProvider.current
+fun currentTheme(): MarkdownTheme = LocalMarkdownThemeProvider.current
