@@ -80,4 +80,10 @@ val markdownExamples =
         ) { paddingValues ->
             DynamicMarkdownSample(paddingValues)
         },
+        MarkdownExample(
+            title = "Autolink Example",
+            description = "Demonstrates automatic linking of URLs and emails",
+        ) { paddingValues ->
+            AutolinkExample(paddingValues)
+        },
     )

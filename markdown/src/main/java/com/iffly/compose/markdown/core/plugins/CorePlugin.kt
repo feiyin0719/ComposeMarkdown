@@ -22,6 +22,7 @@ import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrikethroughNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrongEmphasisNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.SubscriptNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.TextBaseNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.TextNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -42,6 +43,7 @@ import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
+import com.vladsch.flexmark.ast.TextBase
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension
@@ -74,6 +76,7 @@ class CorePlugin : IMarkdownRenderPlugin {
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mutableMapOf(
             Text::class.java to TextNodeStringBuilder(),
+            TextBase::class.java to TextBaseNodeStringBuilder(),
             Paragraph::class.java to ParagraphNodeStringBuilder(),
             Code::class.java to CodeNodeStringBuilder(),
             StrongEmphasis::class.java to StrongEmphasisNodeStringBuilder(),

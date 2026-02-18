@@ -559,6 +559,7 @@ val config =
 | 图片支持 | markdown-image | 支持 Markdown 图片（集成 Coil） |
 | 任务列表 | markdown-task | 支持 GitHub 风格的任务列表复选框：`- [ ]` / `- [x]` |
 | LaTeX / 数学公式 | markdown-latex | 支持行内和块级公式：`$...$`、`$$...$$` |
+| AutoLink / 自动链接 | markdown-autolink | 支持自动识别 URL 和邮箱地址 |
 
 ### 依赖声明（如果以独立 artifact 形式发布）
 
@@ -568,6 +569,7 @@ dependencies {
 	implementation("com.github.feiyin0719:markdown-image:<version>")
 	implementation("com.github.feiyin0719:markdown-task:<version>")
 	implementation("com.github.feiyin0719:markdown-latex:<version>")
+	implementation("com.github.feiyin0719:markdown-autolink:<version>")
 }
 ```
 
@@ -655,6 +657,27 @@ val mathConfig = MarkdownRenderConfig.Builder()
   ```
 
 - 单行块级公式：`$$ E = mc^2 $$`
+
+### AutoLink 示例
+
+```kotlin
+// 默认配置
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(AutolinkMarkdownRenderPlugin())
+    .build()
+
+// 自定义链接样式
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(AutolinkMarkdownRenderPlugin(
+        linkStyles = TextLinkStyles(
+            style = SpanStyle(
+                color = Color.Blue,
+                textDecoration = TextDecoration.Underline
+            )
+        )
+    ))
+    .build()
+```
 
 ### 同时启用多个插件
 

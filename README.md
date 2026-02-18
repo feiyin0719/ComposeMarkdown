@@ -608,6 +608,7 @@ Currently supported official plugin modules:
 | Image | markdown-image | Supports Markdown images with Coil integration |
 | Task List | markdown-task | Supports GitHub-style task list checkboxes: `- [ ]` / `- [x]` |
 | LaTeX / Math | markdown-latex | Supports inline and block formulas: `$...$`, `$$...$$` |
+| AutoLink | markdown-autolink | Supports automatic linking for URLs and emails |
 
 ### Dependency Declaration (if published as separate artifacts)
 
@@ -617,6 +618,7 @@ dependencies {
     implementation("com.github.feiyin0719:markdown-image:<version>")
     implementation("com.github.feiyin0719:markdown-task:<version>")
     implementation("com.github.feiyin0719:markdown-latex:<version>")
+    implementation("com.github.feiyin0719:markdown-autolink:<version>")
 }
 ```
 
@@ -726,6 +728,27 @@ Supported:
   ```
 
 - Single-line block: `$$ E = mc^2 $$`
+
+### AutoLink Example
+
+```kotlin
+// Option 1: Default configuration
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(AutolinkMarkdownRenderPlugin())
+    .build()
+
+// Option 2: Custom link styles
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(AutolinkMarkdownRenderPlugin(
+        linkStyles = TextLinkStyles(
+            style = SpanStyle(
+                color = Color.Blue, 
+                textDecoration = TextDecoration.Underline
+            )
+        )
+    ))
+    .build()
+```
 
 ### Enabling Multiple Plugins Simultaneously
 
