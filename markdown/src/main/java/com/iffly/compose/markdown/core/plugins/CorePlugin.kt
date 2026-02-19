@@ -14,10 +14,12 @@ import com.iffly.compose.markdown.core.renders.HeadingNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.HeadingRenderer
 import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
+import com.iffly.compose.markdown.core.renders.LinkRefNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.OrderedListItemRenderer
 import com.iffly.compose.markdown.core.renders.OrderedListRenderer
 import com.iffly.compose.markdown.core.renders.ParagraphNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.ParagraphRenderer
+import com.iffly.compose.markdown.core.renders.ReferenceNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.SoftLineBreakNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrikethroughNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.StrongEmphasisNodeStringBuilder
@@ -34,12 +36,13 @@ import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.Heading
-import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.ast.Link
+import com.vladsch.flexmark.ast.LinkRef
 import com.vladsch.flexmark.ast.OrderedList
 import com.vladsch.flexmark.ast.OrderedListItem
 import com.vladsch.flexmark.ast.Paragraph
+import com.vladsch.flexmark.ast.Reference
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
@@ -86,6 +89,8 @@ class CorePlugin : IMarkdownRenderPlugin {
             SoftLineBreak::class.java to SoftLineBreakNodeStringBuilder(),
             HardLineBreak::class.java to HardLineBreakNodeStringBuilder(),
             Link::class.java to LinkNodeStringBuilder(),
+            LinkRef::class.java to LinkRefNodeStringBuilder(),
+            Reference::class.java to ReferenceNodeStringBuilder(),
             Heading::class.java to HeadingNodeStringBuilder(),
         )
 

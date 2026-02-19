@@ -113,6 +113,27 @@ fun BasicSyntaxExample(
                 
                 [GitHub](https://github.com) | [Google](https://google.com)
                 
+                ### Reference Links
+                
+                This is a [reference link][ref1].
+                
+                This is another [reference link][ref2].
+                
+                [ref1]: https://kotlinlang.org
+                [ref2]: https://android.com
+                
+                ### Collapsed Reference Links
+                
+                This is a [collapsed reference link][].
+                
+                [collapsed reference link]: https://compose.google.com
+                
+                ### Shortcut Reference Links
+                
+                [Shortcut Link]
+                
+                [Shortcut Link]: https://developer.android.com
+                
                 ## Code
                 
                 ```kotlin
