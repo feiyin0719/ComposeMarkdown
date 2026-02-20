@@ -13,12 +13,13 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.iffly.compose.markdown.config.currentActionHandler
-import com.iffly.compose.markdown.image.R
 import com.iffly.compose.markdown.widget.LoadingView
-import com.vladsch.flexmark.ast.Image
+import com.vladsch.flexmark.util.ast.Node
 
 /**
  * A Composable that renders a markdown image node.
+ * @param url The image url to be rendered.
+ * @param contentDescription The content description of the image.
  * @param node The image node to be rendered.
  * @param modifier The modifier to be applied to the image.
  * @param alignment The alignment of the image.
@@ -28,48 +29,54 @@ import com.vladsch.flexmark.ast.Image
  */
 @Composable
 fun MarkdownImage(
-    node: Image,
+    url: String,
+    contentDescription: String?,
+    node: Node,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Inside,
-    errorView: @Composable (image: Image, modifier: Modifier) -> Unit = { image, modifier ->
-        MarkdownImageErrorView(
-            modifier = modifier,
-            altText = image.text?.toString() ?: image.title?.toString(),
-        )
-    },
-    loadingView: @Composable (image: Image, modifier: Modifier) -> Unit = { image, modifier ->
-        LoadingView(modifier = modifier)
-    },
+    errorView: @Composable (url: String, contentDescription: String?, node: Node, modifier: Modifier) -> Unit =
+        { url, contentDescription, image, modifier ->
+            MarkdownImageErrorView(
+                modifier = modifier,
+                altText = contentDescription,
+            )
+        },
+    loadingView: @Composable (url: String, contentDescription: String?, node: Node, modifier: Modifier) -> Unit =
+        { url, contentDescription, image, modifier ->
+            LoadingView(modifier = modifier)
+        },
 ) {
-    val url = node.url
-    val altText = node.text?.toString() ?: node.title?.toString() ?: ""
     val context = LocalPlatformContext.current
     val actionHandler = currentActionHandler()
 
     SubcomposeAsyncImage(
         ImageRequest
             .Builder(context)
-            .data(url.toString())
+            .data(url)
             .crossfade(true)
             .memoryCachePolicy(CachePolicy.ENABLED)
             .diskCachePolicy(CachePolicy.ENABLED)
             .build(),
-        contentDescription = altText,
+        contentDescription = contentDescription,
         contentScale = contentScale,
         alignment = alignment,
         modifier =
             modifier.clickable {
-                actionHandler?.handleImageClick(url.toString(), node)
+                actionHandler?.handleImageClick(url, node)
             },
         loading = {
             loadingView(
+                url,
+                contentDescription,
                 node,
                 Modifier,
             )
         },
         error = {
             errorView(
+                url,
+                contentDescription,
                 node,
                 Modifier,
             )

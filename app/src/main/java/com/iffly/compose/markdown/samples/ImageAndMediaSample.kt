@@ -59,6 +59,12 @@ fun ImageAndMediaExample(
                 ![Image 3](https://failed.test)
                 
                 The image above is clickable and will navigate to the Android developer website.
+                
+                ## Image Reference
+                
+                ![Image 5][id]
+                
+                [id]: https://qcloud.dpfile.com/pc/w7BUcqbwgbqmYoDIbJcYkS-4p5gNsX7g5bXVyqeC386xoJR2wB3zvXKeaGZtgX19.jpg
                 """.trimIndent(),
             markdownRenderConfig =
                 MarkdownRenderConfig

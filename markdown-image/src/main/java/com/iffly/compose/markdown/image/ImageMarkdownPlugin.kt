@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.vladsch.flexmark.ast.Image
+import com.vladsch.flexmark.ast.ImageRef
 import com.vladsch.flexmark.util.ast.Node
 
 /**
@@ -40,5 +41,6 @@ class ImageMarkdownPlugin(
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
             Image::class.java to ImageNodeStringBuilder(imageTheme),
+            ImageRef::class.java to ImageRefNodeStringBuilder(imageTheme),
         )
 }
