@@ -97,7 +97,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
         val referenceNode = node.getReferenceNode(node.document)
         val url =
             referenceNode?.url?.unescape()?.takeIf { node.isDefined } ?: node.reference.unescape()
-        if (url.isNotEmpty()) {
+        if (url.isNotBlank()) {
             val linkInteractionListener =
                 actionHandler?.let {
                     MarkdownLinkInteractionListener(actionHandler = it, node = node)

@@ -130,27 +130,33 @@ class ImageNodeStringBuilder(
         val imageId = "image_${node.url}"
         val url = node.url.unescape()
         val contentDescription = node.text?.toString() ?: node.title?.unescape()
-        inlineContentMap[imageId] =
-            MarkdownInlineView.MarkdownRichTextInlineContent(
-                RichTextInlineContent.StandaloneInlineContent(
-                    modifier = Modifier,
-                ) { modifier ->
-                    MarkdownImage(
-                        url = url,
-                        contentDescription = contentDescription,
-                        node = node,
-                        modifier =
-                            modifier
-                                .clip(imageTheme.shape)
-                                .then(imageTheme.modifier),
-                        contentScale = imageTheme.contentScale,
-                        alignment = imageTheme.alignment,
-                        loadingView = loadingView,
-                        errorView = errorView,
-                    )
-                },
-            )
-        appendStandaloneInlineTextContent(imageId, "[${node.text ?: node.title ?: "Image"}]")
+        if (url.isNotBlank()) {
+            inlineContentMap[imageId] =
+                MarkdownInlineView.MarkdownRichTextInlineContent(
+                    RichTextInlineContent.StandaloneInlineContent(
+                        modifier = Modifier,
+                    ) { modifier ->
+                        MarkdownImage(
+                            url = url,
+                            contentDescription = contentDescription,
+                            node = node,
+                            modifier =
+                                modifier
+                                    .clip(imageTheme.shape)
+                                    .then(imageTheme.modifier),
+                            contentScale = imageTheme.contentScale,
+                            alignment = imageTheme.alignment,
+                            loadingView = loadingView,
+                            errorView = errorView,
+                        )
+                    },
+                )
+            appendStandaloneInlineTextContent(imageId, "[${node.text ?: node.title ?: "Image"}]")
+        } else {
+            contentDescription?.let {
+                append("[$it]")
+            }
+        }
     }
 }
 
@@ -176,31 +182,37 @@ class ImageRefNodeStringBuilder(
         val url =
             referenceNode?.url?.unescape()?.takeIf { node.isDefined } ?: node.reference.unescape()
         val text =
-            referenceNode?.title?.unescape()?.takeIf { node.isDefined }
-        val imageId = "image_$url"
-        inlineContentMap[imageId] =
-            MarkdownInlineView.MarkdownRichTextInlineContent(
-                RichTextInlineContent.StandaloneInlineContent(
-                    modifier = Modifier,
-                ) { modifier ->
-                    MarkdownImage(
-                        url = url,
-                        contentDescription = node.text?.toString() ?: text.toString(),
-                        node = node,
-                        modifier =
-                            modifier
-                                .clip(imageTheme.shape)
-                                .then(imageTheme.modifier),
-                        contentScale = imageTheme.contentScale,
-                        alignment = imageTheme.alignment,
-                        loadingView = loadingView,
-                        errorView = errorView,
-                    )
-                },
+            node.text?.toString() ?: referenceNode?.title?.unescape()?.takeIf { node.isDefined }
+        if (url.isNotBlank()) {
+            val imageId = "image_$url"
+            inlineContentMap[imageId] =
+                MarkdownInlineView.MarkdownRichTextInlineContent(
+                    RichTextInlineContent.StandaloneInlineContent(
+                        modifier = Modifier,
+                    ) { modifier ->
+                        MarkdownImage(
+                            url = url,
+                            contentDescription = text,
+                            node = node,
+                            modifier =
+                                modifier
+                                    .clip(imageTheme.shape)
+                                    .then(imageTheme.modifier),
+                            contentScale = imageTheme.contentScale,
+                            alignment = imageTheme.alignment,
+                            loadingView = loadingView,
+                            errorView = errorView,
+                        )
+                    },
+                )
+            appendStandaloneInlineTextContent(
+                imageId,
+                "[${node.text ?: text ?: "ImageRef"}]",
             )
-        appendStandaloneInlineTextContent(
-            imageId,
-            "[${node.text ?: text ?: "ImageRef"}]",
-        )
+        } else {
+            text?.let {
+                append("[$it]")
+            }
+        }
     }
 }
