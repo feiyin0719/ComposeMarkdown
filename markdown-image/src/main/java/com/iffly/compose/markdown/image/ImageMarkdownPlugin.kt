@@ -37,10 +37,25 @@ data class ImageTheme(
  */
 class ImageMarkdownPlugin(
     private val imageTheme: ImageTheme = ImageTheme(),
+    private val loadingView: ImageWidgetRenderer = LoadingImageWidgetRenderer(),
+    errorView: ImageWidgetRenderer? = null,
 ) : AbstractMarkdownRenderPlugin() {
+    private val errorView: ImageWidgetRenderer =
+        errorView ?: ErrorImageWidgetRenderer(imageTheme)
+
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
-            Image::class.java to ImageNodeStringBuilder(imageTheme),
-            ImageRef::class.java to ImageRefNodeStringBuilder(imageTheme),
+            Image::class.java to
+                ImageNodeStringBuilder(
+                    imageTheme = imageTheme,
+                    loadingView = loadingView,
+                    errorView = errorView,
+                ),
+            ImageRef::class.java to
+                ImageRefNodeStringBuilder(
+                    imageTheme = imageTheme,
+                    loadingView = loadingView,
+                    errorView = errorView,
+                ),
         )
 }

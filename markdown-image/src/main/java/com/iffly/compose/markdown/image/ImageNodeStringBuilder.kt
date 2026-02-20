@@ -1,9 +1,13 @@
 package com.iffly.compose.markdown.image
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -47,6 +51,29 @@ class LoadingImageWidgetRenderer : ImageWidgetRenderer {
     ) {
         LoadingView(modifier)
     }
+}
+
+/**
+ * A Composable that shows a default error view when an image fails to load.
+ * @param modifier The modifier to be applied to the error view.
+ * @param alignment The alignment of the error view.
+ * @param contentScale The content scale of the error view.
+ * @param altText The alternative text for the error view.
+ */
+@Composable
+fun MarkdownImageErrorView(
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Inside,
+    altText: String? = null,
+) {
+    Image(
+        painter = painterResource(id = R.drawable.ic_image_error),
+        contentDescription = altText ?: "Image load failed",
+        modifier = modifier,
+        contentScale = contentScale,
+        alignment = alignment,
+    )
 }
 
 /**
@@ -109,26 +136,17 @@ class ImageNodeStringBuilder(
                     modifier = Modifier,
                 ) { modifier ->
                     MarkdownImage(
-                        url,
-                        contentDescription,
-                        node,
+                        url = url,
+                        contentDescription = contentDescription,
+                        node = node,
                         modifier =
                             modifier
                                 .clip(imageTheme.shape)
                                 .then(imageTheme.modifier),
                         contentScale = imageTheme.contentScale,
                         alignment = imageTheme.alignment,
-                        loadingView = { url, contentDescription, image, modifier ->
-                            loadingView.invoke(url, contentDescription, image, modifier)
-                        },
-                        errorView = { url, contentDescription, image, modifier ->
-                            this@ImageNodeStringBuilder.errorView.invoke(
-                                url,
-                                contentDescription,
-                                image,
-                                modifier,
-                            )
-                        },
+                        loadingView = loadingView,
+                        errorView = errorView,
                     )
                 },
             )
@@ -175,17 +193,8 @@ class ImageRefNodeStringBuilder(
                                 .then(imageTheme.modifier),
                         contentScale = imageTheme.contentScale,
                         alignment = imageTheme.alignment,
-                        loadingView = { url, contentDescription, image, modifier ->
-                            loadingView.invoke(url, contentDescription, image, modifier)
-                        },
-                        errorView = { url, contentDescription, image, modifier ->
-                            this@ImageRefNodeStringBuilder.errorView.invoke(
-                                url,
-                                contentDescription,
-                                image,
-                                modifier,
-                            )
-                        },
+                        loadingView = loadingView,
+                        errorView = errorView,
                     )
                 },
             )
