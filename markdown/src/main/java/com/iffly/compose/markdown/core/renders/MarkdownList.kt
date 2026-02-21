@@ -6,11 +6,9 @@
 package com.iffly.compose.markdown.core.renders
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -19,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
-import com.iffly.compose.markdown.render.MarkdownContent
+import com.iffly.compose.markdown.render.MarkdownChildren
 import com.iffly.compose.markdown.util.StringExt.FIGURE_SPACE
 import com.iffly.compose.markdown.util.getIndentLevel
 import com.iffly.compose.markdown.util.getMarkerText
@@ -42,28 +40,15 @@ open class ListRenderer<T : ListBlock> : IBlockRenderer<T> {
         node: T,
         modifier: Modifier,
     ) {
-        Column(
-            verticalArrangement = Arrangement.Top,
+        val theme = currentTheme()
+        val spacerHeight =
+            if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
+        MarkdownChildren(
+            parent = node,
             modifier = modifier,
-        ) {
-            val theme = currentTheme()
-            val spacerHeight =
-                if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
-            var child = node.firstChild
-            while (child != null) {
-                MarkdownContent(
-                    node = child,
-                    modifier =
-                        Modifier
-                            .wrapContentHeight()
-                            .fillMaxWidth(),
-                )
-                if (child.next != null && theme.spacerTheme.showSpacer) {
-                    Spacer(Modifier.height(spacerHeight))
-                }
-                child = child.next
-            }
-        }
+            verticalArrangement = Arrangement.Top,
+            spacerHeight = spacerHeight,
+        )
     }
 }
 
@@ -135,6 +120,8 @@ open class BaseListItemRenderer<T : ListItem>(
         val theme = currentTheme()
         val listTheme = theme.listTheme
         val intentLevel = node.getIndentLevel()
+        val spacerHeight =
+            if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
         Row(
             modifier =
                 modifier
@@ -148,31 +135,18 @@ open class BaseListItemRenderer<T : ListItem>(
             // Render the marker
             markerRenderer(node = node, modifier = Modifier.wrapContentHeight())
             Spacer(modifier = Modifier.width(listTheme.markerSpacerWidth))
-            Column(
-                verticalArrangement = Arrangement.Top,
+            MarkdownChildren(
+                parent = node,
                 modifier = Modifier.wrapContentSize(),
-            ) {
-                val spacerHeight =
-                    if (node.isLoose) theme.spacerTheme.spacerHeight else theme.listTheme.tightListSpacerHeight
-                var child = node.firstChild
-                while (child != null) {
-                    if (child != node.firstChild) {
+                verticalArrangement = Arrangement.Top,
+                spacerHeight = spacerHeight,
+                onBeforeChild = { child, parent ->
+                    if (child != parent.firstChild) {
                         // add invisible space to align with marker for selection-copy purpose
                         SelectionFormatText(FIGURE_SPACE.repeat(intentLevel + 1))
                     }
-                    MarkdownContent(
-                        node = child,
-                        modifier =
-                            Modifier
-                                .wrapContentHeight()
-                                .fillMaxWidth(),
-                    )
-                    if (child.next != null && theme.spacerTheme.showSpacer) {
-                        Spacer(Modifier.height(spacerHeight))
-                    }
-                    child = child.next
-                }
-            }
+                },
+            )
         }
     }
 }

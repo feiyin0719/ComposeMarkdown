@@ -11,6 +11,7 @@
   - [MarkdownView（异步）](#markdownview-异步)
   - [MarkdownView（节点）](#markdownview-节点)
   - [LazyMarkdownView](#lazymarkdownview)
+  - [MarkdownChildren](#markdownchildren)
 - [配置](#配置)
   - [MarkdownRenderConfig](#markdownrenderconfig)
   - [MarkdownRenderConfig.Builder](#markdownrenderconfigbuilder)
@@ -205,6 +206,52 @@ fun LazyMarkdownView(
 
 - 适合只读的长篇内容，比如书籍、大型文档等。
 - 若是可编辑或频繁变动的内容，更推荐使用异步版 `MarkdownView`，并自行实现分页或 diff 逻辑。
+
+---
+
+### MarkdownChildren
+
+一个遍历并渲染父节点所有子节点的实用 Composable。它会根据当前主题或传入参数自动处理 `Spacer` 的插入逻辑。
+
+**函数签名**（来自 `MarkdownContent.kt`）：
+
+```kotlin
+@Composable
+fun MarkdownChildren(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    spacerHeight: Dp = currentTheme().spacerTheme.spacerHeight,
+    showSpacer: Boolean = currentTheme().spacerTheme.showSpacer,
+    childModifierFactory: (child: Node) -> Modifier = {
+        Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    },
+    onBeforeChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onAfterChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onBeforeAll: (@Composable (parent: Node) -> Unit)? = null,
+    onAfterAll: (@Composable (parent: Node) -> Unit)? = null,
+)
+```
+
+**参数说明**
+
+- `parent`：需要渲染子节点的 `Node` 对象。
+- `verticalArrangement`：子节点的垂直排列方式。
+- `spacerHeight`：子节点间的垂直间距。默认为 `theme.spacerTheme.spacerHeight`。
+- `showSpacer`：是否插入间距。默认为 `theme.spacerTheme.showSpacer`。
+- `onBeforeChild`：可选的 Composable 回调，在渲染每个子节点前调用（适用于自定义标记或缩进）。
+- `onAfterChild`：可选的 Composable 回调，在渲染每个子节点后调用。
+- `onBeforeAll`：可选的 Composable 回调，在渲染所有子节点之前调用（例如用于顶部间距）。
+- `onAfterAll`：可选的 Composable 回调，在渲染所有子节点之后调用（例如用于底部间距）。
+- `childModifierFactory`：为每个子节点创建 Modifier 的工厂函数。
+
+**适用场景**
+
+当你实现自定义的 `IBlockRenderer`（例如自定义容器块）并需要以标准的间距规则渲染嵌套内容时使用。
+注意：`MarkdownChildren` 提供容器布局（如 `Column`），你可以通过 `modifier` 自定义。
+
 
 ---
 

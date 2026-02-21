@@ -44,6 +44,26 @@ Markdown syntax and custom styling.
 - 🔌 **Plugin System** - Flexible plugin architecture for feature extensions
 - 🛡️ **Error Handling** - Graceful error state handling mechanism
 
+#### 5. MarkdownChildren (Utility)
+
+A utility component for custom Renderers to visit and render children nodes with proper spacing.
+
+```kotlin
+@Composable
+fun MarkdownChildren(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    spacerHeight: Dp = currentTheme().spacerTheme.spacerHeight,
+    showSpacer: Boolean = currentTheme().spacerTheme.showSpacer,
+    childModifierFactory: (child: Node) -> Modifier = { ... },
+    onBeforeChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onAfterChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onBeforeAll: (@Composable (parent: Node) -> Unit)? = null,
+    onAfterAll: (@Composable (parent: Node) -> Unit)? = null,
+)
+```
+
 ## 🔧 Tech Stack
 
 | Technology            | Version     | Purpose                       |

@@ -208,6 +208,52 @@ fun LazyMarkdownView(
 
 ---
 
+### MarkdownChildren
+
+A utility composable that iterates over a parent node's children and renders them. It automatically handles `Spacer` insertion based on the current theme or provided parameters.
+
+**Signature** (from `MarkdownContent.kt`):
+
+```kotlin
+@Composable
+fun MarkdownChildren(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    spacerHeight: Dp = currentTheme().spacerTheme.spacerHeight,
+    showSpacer: Boolean = currentTheme().spacerTheme.showSpacer,
+    childModifierFactory: (child: Node) -> Modifier = {
+        Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    },
+    onBeforeChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onAfterChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onBeforeAll: (@Composable (parent: Node) -> Unit)? = null,
+    onAfterAll: (@Composable (parent: Node) -> Unit)? = null,
+)
+```
+
+**Parameters**
+
+- `parent`: The `Node` whose children you want to render.
+- `verticalArrangement`: The vertical arrangement of the children.
+- `spacerHeight`: Vertical spacing between children. Defaults to `theme.spacerTheme.spacerHeight`.
+- `showSpacer`: Whether to insert spacers. Defaults to `theme.spacerTheme.showSpacer`.
+- `onBeforeChild`: Optional Composable callback invoked before each child is rendered (useful for custom markers or indentation).
+- `onAfterChild`: Optional Composable callback invoked after each child is rendered.
+- `onBeforeAll`: Optional Composable callback invoked before rendering any children (e.g., for top padding/spacers).
+- `onAfterAll`: Optional Composable callback invoked after rendering all children (e.g., for bottom padding/spacers).
+- `childModifierFactory`: A factory function to create a Modifier for each child node.
+
+**Use Case**
+
+Use this when implementing a custom `IBlockRenderer` (e.g., for a custom container block) where you need to render nested content with standard spacing rules.
+Note that `MarkdownChildren` provides a container layout (like `Column`); you can customize it with `modifier`.
+
+
+---
+
 ## Configuration
 
 ### MarkdownRenderConfig

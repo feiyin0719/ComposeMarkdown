@@ -43,6 +43,26 @@
 - 🔌 **插件系统** - 灵活的插件架构，轻松扩展功能
 - 🛡️ **错误处理** - 优雅的错误状态处理机制
 
+#### 5. MarkdownChildren (工具组件)
+
+用于自定义 Renderer 的实用组件，可方便地遍历并渲染子节点，同时处理好间距逻辑。
+
+```kotlin
+@Composable
+fun MarkdownChildren(
+    parent: Node,
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    spacerHeight: Dp = currentTheme().spacerTheme.spacerHeight,
+    showSpacer: Boolean = currentTheme().spacerTheme.showSpacer,
+    childModifierFactory: (child: Node) -> Modifier = { ... },
+    onBeforeChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onAfterChild: (@Composable (child: Node, parent: Node) -> Unit)? = null,
+    onBeforeAll: (@Composable (parent: Node) -> Unit)? = null, // 新增
+    onAfterAll: (@Composable (parent: Node) -> Unit)? = null, // 新增
+)
+```
+
 ## 🔧 技术栈
 
 | 技术                  | 版本        | 作用                     |
