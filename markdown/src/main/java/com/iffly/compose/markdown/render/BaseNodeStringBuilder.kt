@@ -18,7 +18,7 @@ import com.vladsch.flexmark.util.ast.Node
  * @param renderRegistry The render registry containing all renderers and builders.
  * @param actionHandler Optional listener for link interactions.
  * @param isShowNotSupported Whether to show unsupported node indicators.
- * @param measureContext The context for measuring text.
+ * @param nodeStringBuilderContext The context for measuring text.
  */
 fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     parent: Node,
@@ -28,7 +28,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler? = null,
     isShowNotSupported: Boolean,
-    measureContext: TextMeasureContext,
+    nodeStringBuilderContext: NodeStringBuilderContext,
 ) {
     var node = parent.firstChild
     while (node != null) {
@@ -43,7 +43,7 @@ fun AnnotatedString.Builder.buildChildNodeAnnotatedString(
             renderRegistry,
             isShowNotSupported,
             this,
-            measureContext,
+            nodeStringBuilderContext,
         ) ?: run {
             if (isShowNotSupported) {
                 append("[Unsupported: ${node::class.java.simpleName}]")
@@ -110,7 +110,7 @@ open class CompositeChildNodeStringBuilder<T : Node> : IInlineNodeStringBuilder<
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         withParagraphStyle(node = node, markdownTheme = markdownTheme) {
             withSpanStyle(node = node, markdownTheme = markdownTheme) {
@@ -122,7 +122,7 @@ open class CompositeChildNodeStringBuilder<T : Node> : IInlineNodeStringBuilder<
                     renderRegistry = renderRegistry,
                     actionHandler = actionHandler,
                     isShowNotSupported = isShowNotSupported,
-                    measureContext = measureContext,
+                    nodeStringBuilderContext = nodeStringBuilderContext,
                 )
             }
         }

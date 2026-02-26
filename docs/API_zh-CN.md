@@ -692,7 +692,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
   indentLevel: Int,
   isShowNotSupported: Boolean,
   renderRegistry: RenderRegistry,
-  measureContext: TextMeasureContext,
+  nodeStringBuilderContext: NodeStringBuilderContext,
  )
 }
 ```
@@ -718,9 +718,9 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 - `renderRegistry`：渲染注册表，用于：
   - 递归构建子节点字符串（例如 `buildChildNodeAnnotatedString` 内部会依赖它）；
   - 查找其他已注册的内联构建器，实现组合式渲染。
-- `measureContext`：文本测量上下文：
-  - 在需要根据文字宽高做布局决策（例如截断、折行、动态 placeholder 宽度）时使用；
-  - 大多数简单构建器可以忽略，仅在复杂场景下才需要显式测量。
+- `nodeStringBuilderContext`：节点字符串构建上下文：
+  - 提供按职责分组的子上下文：布局（`layoutContext`）、文本样式（`designContext`）与系统能力（`systemContext`）；
+  - 当需要文本测量或密度转换时，使用 `nodeStringBuilderContext.layoutContext`。
 
 **实现建议**
 
@@ -763,7 +763,7 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
   indentLevel: Int,
   isShowNotSupported: Boolean,
   renderRegistry: RenderRegistry,
-  measureContext: TextMeasureContext,
+  nodeStringBuilderContext: NodeStringBuilderContext,
  ) {
   // 1. 使用唯一 key 注册富内联内容
   val key = "icon-${node.id}"
@@ -932,7 +932,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
   indentLevel: Int,
   isShowNotSupported: Boolean,
   renderRegistry: RenderRegistry,
-  measureContext: TextMeasureContext,
+  nodeStringBuilderContext: NodeStringBuilderContext,
  ) {
   val linkInteractionListener =
    actionHandler?.let {
@@ -953,7 +953,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
     renderRegistry,
     actionHandler,
     isShowNotSupported,
-    measureContext,
+    nodeStringBuilderContext,
    )
   }
  }

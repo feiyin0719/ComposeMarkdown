@@ -693,7 +693,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
                 indentLevel: Int,
                 isShowNotSupported: Boolean,
                 renderRegistry: RenderRegistry,
-                measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
         )
 }
 ```
@@ -719,9 +719,9 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 - `renderRegistry`: The render registry for the current configuration:
     - Used by helper utilities such as `buildChildNodeAnnotatedString` to recursively render child nodes;
     - Lets your builder compose with other registered inline builders instead of re‑implementing traversal.
-- `measureContext`: Text measurement context:
-    - Useful when your builder needs the actual text size to make layout decisions (truncation, wrapping, placeholder width, etc.);
-    - Most simple builders can ignore it and rely on default metrics.
+- `nodeStringBuilderContext`: Node string build context:
+    - Provides grouped subcontexts for layout (`layoutContext`), text style (`designContext`), and platform/system access (`systemContext`);
+    - Use `nodeStringBuilderContext.layoutContext` when text measurement or density conversion is needed.
 
 **Implementation notes**
 
@@ -768,7 +768,7 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         // 1. Register rich inline content under a unique key
         val key = "icon-${node.id}"
@@ -955,7 +955,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val linkInteractionListener =
             actionHandler?.let {
@@ -976,7 +976,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
                 renderRegistry,
                 actionHandler,
                 isShowNotSupported,
-                measureContext,
+                nodeStringBuilderContext,
             )
         }
     }

@@ -554,7 +554,7 @@ class MentionInlineBuilder : IInlineNodeStringBuilder<MentionNode> {
 		indentLevel: Int,
 		isShowNotSupported: Boolean,
 		renderRegistry: RenderRegistry,
-		measureContext: TextMeasureContext,
+		nodeStringBuilderContext: NodeStringBuilderContext,
 	) {
 		pushStyle(markdownTheme.linkTextStyle)
 		append("@" + node.username)

@@ -32,7 +32,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     )
 }
 
@@ -45,7 +45,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
     renderRegistry: RenderRegistry,
     isShowNotSupported: Boolean,
     builder: AnnotatedString.Builder,
-    measureContext: TextMeasureContext,
+    nodeStringBuilderContext: NodeStringBuilderContext,
 ) {
     with(builder) {
         buildInlineNodeString(
@@ -56,7 +56,7 @@ fun <T : Node> IInlineNodeStringBuilder<T>.buildMarkdownInlineNodeString(
             indentLevel,
             isShowNotSupported,
             renderRegistry,
-            measureContext,
+            nodeStringBuilderContext,
         )
     }
 }

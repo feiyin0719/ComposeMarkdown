@@ -8,8 +8,8 @@ import androidx.compose.ui.text.withLink
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ast.MailLink
@@ -37,7 +37,7 @@ class MailLinkNodeStringBuilder(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val linkInteractionListener =
             actionHandler?.let {
@@ -62,7 +62,7 @@ class MailLinkNodeStringBuilder(
                 renderRegistry,
                 actionHandler,
                 isShowNotSupported,
-                measureContext,
+                nodeStringBuilderContext,
             )
         }
     }

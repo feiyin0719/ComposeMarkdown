@@ -12,8 +12,8 @@ import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.LoadingView
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
@@ -125,7 +125,7 @@ class ImageNodeStringBuilder(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val imageId = "image_${node.url}"
         val url = node.url.unescape()
@@ -176,7 +176,7 @@ class ImageRefNodeStringBuilder(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val referenceNode = node.getReferenceNode(node.document)
         val url =

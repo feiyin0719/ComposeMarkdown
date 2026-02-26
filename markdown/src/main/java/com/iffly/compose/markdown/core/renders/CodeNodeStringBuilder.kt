@@ -5,8 +5,8 @@ import androidx.compose.ui.text.withStyle
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.vladsch.flexmark.ast.Code
@@ -24,7 +24,7 @@ class CodeNodeStringBuilder : IInlineNodeStringBuilder<Code> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         withStyle(markdownTheme.code.toSpanStyle()) {
             append(node.contentText())

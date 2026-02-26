@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
@@ -84,9 +81,17 @@ private fun DefaultMarkdownText(
         val renderRegistry = currentRenderRegistry()
         val actionHandler = currentActionHandler()
         val isShowNotSupported = isShowNotSupported()
-        val measureContext =
-            rememberTextMeasureContext(
-                maxTextWidth = this.maxWidth,
+        val nodeStringBuilderContext =
+            rememberNodeStringBuilderContext(
+                textSizeConstraints =
+                    TextSizeConstraints(
+                        maxWidth = maxWidth,
+                        maxHeight = maxHeight,
+                        minWidth = minWidth,
+                        minHeight = minHeight,
+                    ),
+                textAlign = textAlign,
+                textStyle = textStyle,
             )
         val (text, inlineContent) =
             remember(
@@ -95,7 +100,7 @@ private fun DefaultMarkdownText(
                 renderRegistry,
                 isShowNotSupported,
                 actionHandler,
-                measureContext,
+                nodeStringBuilderContext,
             ) {
                 markdownText(
                     parent,
@@ -104,7 +109,7 @@ private fun DefaultMarkdownText(
                     actionHandler,
                     1,
                     isShowNotSupported,
-                    measureContext,
+                    nodeStringBuilderContext,
                 )
             }
         val inlineContentMap =
@@ -136,19 +141,6 @@ private fun DefaultMarkdownText(
     }
 }
 
-@Composable
-private fun rememberTextMeasureContext(maxTextWidth: Dp): TextMeasureContext {
-    val density = LocalDensity.current
-    val textMeasurer = rememberTextMeasurer()
-    return remember(density, textMeasurer, maxTextWidth) {
-        TextMeasureContext(
-            density = density,
-            textMeasurer = textMeasurer,
-            maxTextWidth = maxTextWidth,
-        )
-    }
-}
-
 fun markdownText(
     node: Node,
     markdownTheme: MarkdownTheme,
@@ -156,7 +148,7 @@ fun markdownText(
     actionHandler: ActionHandler? = null,
     indentLevel: Int = 0,
     isShowNotSupported: Boolean,
-    measureContext: TextMeasureContext,
+    nodeStringBuilderContext: NodeStringBuilderContext,
 ): Pair<AnnotatedString, Map<String, MarkdownInlineView>> {
     val inlineContentMap = mutableMapOf<String, MarkdownInlineView>()
 
@@ -174,7 +166,7 @@ fun markdownText(
                     renderRegistry,
                     isShowNotSupported,
                     this,
-                    measureContext,
+                    nodeStringBuilderContext,
                 )
             } else {
                 if (isShowNotSupported) {

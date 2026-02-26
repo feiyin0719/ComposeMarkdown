@@ -7,8 +7,8 @@ import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.MarkdownLinkInteractionListener
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.render.buildChildNodeAnnotatedString
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.ast.Link
@@ -24,7 +24,7 @@ private fun AnnotatedString.Builder.buildStyleString(
     renderRegistry: RenderRegistry,
     actionHandler: ActionHandler?,
     isShowNotSupported: Boolean,
-    measureContext: TextMeasureContext,
+    nodeStringBuilderContext: NodeStringBuilderContext,
 ) {
     buildChildNodeAnnotatedString(
         node,
@@ -34,7 +34,7 @@ private fun AnnotatedString.Builder.buildStyleString(
         renderRegistry,
         actionHandler,
         isShowNotSupported,
-        measureContext,
+        nodeStringBuilderContext,
     )
 }
 
@@ -51,7 +51,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val linkInteractionListener =
             actionHandler?.let {
@@ -72,7 +72,7 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
                 renderRegistry,
                 actionHandler,
                 isShowNotSupported,
-                measureContext,
+                nodeStringBuilderContext,
             )
         }
     }
@@ -92,7 +92,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val referenceNode = node.getReferenceNode(node.document)
         val url =
@@ -117,7 +117,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
                     renderRegistry,
                     actionHandler,
                     isShowNotSupported,
-                    measureContext,
+                    nodeStringBuilderContext,
                 )
             }
         } else {
@@ -131,7 +131,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
                 renderRegistry,
                 actionHandler,
                 isShowNotSupported,
-                measureContext,
+                nodeStringBuilderContext,
             )
         }
     }
@@ -151,7 +151,7 @@ class ReferenceNodeStringBuilder : IInlineNodeStringBuilder<Reference> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         // This builder is for the reference definition nodes, which typically do not render any text.
         // We can choose to render the reference label or simply ignore it.

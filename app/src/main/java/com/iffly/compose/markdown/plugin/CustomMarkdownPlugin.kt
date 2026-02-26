@@ -38,8 +38,8 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.parser.InlineParser
 import com.vladsch.flexmark.parser.InlineParserExtension
@@ -477,7 +477,7 @@ class MentionNodeStringBuilder : IInlineNodeStringBuilder<MentionNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         withStyle(
             SpanStyle(
@@ -500,7 +500,7 @@ class HashtagNodeStringBuilder : IInlineNodeStringBuilder<HashtagNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         withStyle(SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)) {
             append("#${node.hashtag}")
@@ -517,7 +517,7 @@ class HighlightNodeStringBuilder : IInlineNodeStringBuilder<HighlightNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         withStyle(
             SpanStyle(
@@ -540,7 +540,7 @@ class BadgeNodeStringBuilder : IInlineNodeStringBuilder<BadgeNode> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val (bg, fg) =
             when (node.badgeType.lowercase()) {

@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
@@ -41,7 +41,7 @@ open class InlineMathNodeStringBuilder<T : Node>(
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val latexBody =
             when (node) {
@@ -51,7 +51,7 @@ open class InlineMathNodeStringBuilder<T : Node>(
             }
         val placeholderId =
             "inline_math_$latexBody"
-        val latexConfig = textStyle.toLatexConfig(measureContext.density, paddingValues)
+        val latexConfig = textStyle.toLatexConfig(nodeStringBuilderContext.layoutContext.density, paddingValues)
         if (useAdaptiveInlineContent) {
             val height = textStyle.fontSize * 1.3f
             inlineContentMap[placeholderId] =
@@ -82,8 +82,8 @@ open class InlineMathNodeStringBuilder<T : Node>(
                 append(latexBody)
                 return
             }
-            val width = with(measureContext.density) { drawable.intrinsicWidth.toSp() }
-            val height = with(measureContext.density) { drawable.intrinsicHeight.toSp() }
+            val width = with(nodeStringBuilderContext.layoutContext.density) { drawable.intrinsicWidth.toSp() }
+            val height = with(nodeStringBuilderContext.layoutContext.density) { drawable.intrinsicHeight.toSp() }
             inlineContentMap[placeholderId] =
                 MarkdownInlineView.MarkdownRichTextInlineContent(
                     RichTextInlineContent.EmbeddedRichTextInlineContent(

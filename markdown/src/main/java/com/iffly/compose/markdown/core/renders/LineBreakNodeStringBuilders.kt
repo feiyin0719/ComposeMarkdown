@@ -4,8 +4,8 @@ import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
+import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
-import com.iffly.compose.markdown.render.TextMeasureContext
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.StringExt
 import com.vladsch.flexmark.ast.HardLineBreak
@@ -20,7 +20,7 @@ class SoftLineBreakNodeStringBuilder : IInlineNodeStringBuilder<SoftLineBreak> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         append(" ")
     }
@@ -35,7 +35,7 @@ class HardLineBreakNodeStringBuilder : IInlineNodeStringBuilder<HardLineBreak> {
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
-        measureContext: TextMeasureContext,
+        nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         append(StringExt.LINE_SEPARATOR)
     }
