@@ -39,19 +39,8 @@ data class TableTheme(
     val titleBackgroundColor: Color = Color.LightGray,
     val tableHeaderBackgroundColor: Color = Color.White,
     val tableCellBackgroundColor: Color = Color.White,
-    val cellTextStyle: TextStyle? =
-        TextStyle(
-            fontSize = 14.sp,
-            fontFamily = FontFamily.Default,
-            color = Color.Black,
-        ),
-    val headerTextStyle: TextStyle? =
-        TextStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Default,
-            color = Color.Black,
-        ),
+    val cellTextStyle: TextStyle? = null,
+    val headerTextStyle: TextStyle? = TextStyle(fontWeight = FontWeight.Bold),
     val copyTextStyle: TextStyle =
         TextStyle(
             fontSize = 12.sp,
@@ -76,7 +65,7 @@ class TableMarkdownPlugin(
 
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
-            TableCell::class.java to TableCellNodeStringBuilder(),
+            TableCell::class.java to TableCellNodeStringBuilder(tableTheme),
         )
 
     override fun extensions(): List<Extension> =

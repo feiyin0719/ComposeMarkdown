@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,6 +36,7 @@ import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.table.widget.BodyScope
 import com.iffly.compose.markdown.table.widget.RowScope
 import com.iffly.compose.markdown.table.widget.Table
@@ -89,22 +92,18 @@ class TableTitleRenderer(
  * Renderer for table cell.
  * @see TableWidgetRenderer
  */
-class TableCellRenderer(
-    private val tableTheme: TableTheme = TableTheme(),
-) : TableWidgetRenderer<TableCell> {
+class TableCellRenderer : TableWidgetRenderer<TableCell> {
     @Suppress("ComposableNaming")
     @Composable
     override fun invoke(
         node: TableCell,
         modifier: Modifier,
     ) {
-        val isHeader = node.parent is TableRow && node.parent?.parent is TableHead
         SelectionContainer {
             MarkdownText(
                 parent = node,
                 modifier = Modifier,
                 textAlign = node.alignment.toTextAlign(),
-                textStyle = if (isHeader) tableTheme.headerTextStyle else tableTheme.cellTextStyle,
             )
         }
     }
@@ -125,7 +124,7 @@ class TableRenderer(
     private val tableTitleRenderer: TableWidgetRenderer<TableBlock> =
         tableTitleRenderer ?: TableTitleRenderer(tableTheme)
     private val tableCellRenderer: TableWidgetRenderer<TableCell> =
-        tableCellRenderer ?: TableCellRenderer(tableTheme)
+        tableCellRenderer ?: TableCellRenderer()
 
     @Composable
     override fun Invoke(
@@ -146,7 +145,33 @@ class TableRenderer(
  * String builder for TableCell nodes.
  * @see CompositeChildNodeStringBuilder
  */
-class TableCellNodeStringBuilder : CompositeChildNodeStringBuilder<Node>()
+class TableCellNodeStringBuilder(
+    private val tableTheme: TableTheme,
+) : CompositeChildNodeStringBuilder<Node>() {
+    override fun getSpanStyle(
+        node: Node,
+        markdownTheme: MarkdownTheme,
+    ): SpanStyle? {
+        val isHeader = node.parent is TableRow && node.parent?.parent is TableHead
+        return if (isHeader) {
+            tableTheme.headerTextStyle?.toSpanStyle()
+        } else {
+            tableTheme.cellTextStyle?.toSpanStyle()
+        }
+    }
+
+    override fun getParagraphStyle(
+        node: Node,
+        markdownTheme: MarkdownTheme,
+    ): ParagraphStyle? {
+        val isHeader = node.parent is TableRow && node.parent?.parent is TableHead
+        return if (isHeader) {
+            tableTheme.headerTextStyle?.toParagraphStyle()
+        } else {
+            tableTheme.cellTextStyle?.toParagraphStyle()
+        }
+    }
+}
 
 /**
  * Composable function to render a markdown table.
