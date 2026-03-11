@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.material)
     api(libs.flexmark)
     api(libs.flexmark.ext.gfm.strikethrough)
+    api(libs.flexmark.html2md.converter)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)

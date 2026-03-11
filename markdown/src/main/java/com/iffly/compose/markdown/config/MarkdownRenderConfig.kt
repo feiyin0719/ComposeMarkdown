@@ -8,6 +8,7 @@ import com.iffly.compose.markdown.render.MarkdownTextRenderer
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.html.HtmlRenderer
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter
 import com.vladsch.flexmark.parser.InlineParserExtensionFactory
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.parser.block.CustomBlockParserFactory
@@ -31,6 +32,9 @@ class MarkdownRenderConfig {
     var htmlRenderer: HtmlRenderer
         private set
 
+    var htmlToMdConverter: FlexmarkHtmlConverter
+        private set
+
     var renderRegistry: RenderRegistry
         private set
 
@@ -39,11 +43,13 @@ class MarkdownRenderConfig {
         renderRegistry: RenderRegistry,
         parser: Parser,
         htmlRenderer: HtmlRenderer,
+        htmlToMdConverter: FlexmarkHtmlConverter,
     ) {
         this.markdownTheme = markdownTheme
         this.renderRegistry = renderRegistry
         this.parser = parser
         this.htmlRenderer = htmlRenderer
+        this.htmlToMdConverter = htmlToMdConverter
     }
 
     companion object {
@@ -214,6 +220,7 @@ class MarkdownRenderConfig {
             )
             val parserBuilder = Parser.builder(options)
             val htmlRendererBuilder = HtmlRenderer.builder(options)
+            val htmlToMdConverterBuilder = FlexmarkHtmlConverter.builder(options)
 
             plugins.forEach { plugin ->
                 plugin.inlineNodeStringBuilders().forEach { (nodeClass, builder) ->
@@ -252,6 +259,7 @@ class MarkdownRenderConfig {
                 ),
                 parserBuilder.build(),
                 htmlRendererBuilder.build(),
+                htmlToMdConverterBuilder.build(),
             )
         }
     }

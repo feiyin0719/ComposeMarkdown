@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":markdown-image"))
     implementation(project(":markdown-latex"))
     implementation(project(":markdown-autolink"))
+    implementation(project(":markdown-html"))
 //    implementation(libs.compose.markdown)
 //    implementation(libs.compose.markdown.task)
     testImplementation(libs.junit)

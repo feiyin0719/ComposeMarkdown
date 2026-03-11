@@ -86,4 +86,10 @@ val markdownExamples =
         ) { paddingValues ->
             AutolinkExample(paddingValues)
         },
+        MarkdownExample(
+            title = "HTML Block Example",
+            description = "Demonstrates HTML block rendering via HTML-to-Markdown conversion",
+        ) { paddingValues ->
+            HtmlBlockExample(paddingValues)
+        },
     )

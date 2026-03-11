@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/markdown" />
             <option value="$PROJECT_DIR$/markdown-autolink" />
+            <option value="$PROJECT_DIR$/markdown-html" />
             <option value="$PROJECT_DIR$/markdown-image" />
             <option value="$PROJECT_DIR$/markdown-latex" />
             <option value="$PROJECT_DIR$/markdown-table" />

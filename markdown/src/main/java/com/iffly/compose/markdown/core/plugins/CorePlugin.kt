@@ -12,6 +12,7 @@ import com.iffly.compose.markdown.core.renders.FencedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.HardLineBreakNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.HeadingNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.HeadingRenderer
+import com.iffly.compose.markdown.core.renders.HtmlInlineNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.IndentedCodeBlockRenderer
 import com.iffly.compose.markdown.core.renders.LinkNodeStringBuilder
 import com.iffly.compose.markdown.core.renders.LinkRefNodeStringBuilder
@@ -36,6 +37,7 @@ import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.HardLineBreak
 import com.vladsch.flexmark.ast.Heading
+import com.vladsch.flexmark.ast.HtmlInline
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.LinkRef
@@ -88,6 +90,7 @@ class CorePlugin : IMarkdownRenderPlugin {
             Strikethrough::class.java to StrikethroughNodeStringBuilder(),
             SoftLineBreak::class.java to SoftLineBreakNodeStringBuilder(),
             HardLineBreak::class.java to HardLineBreakNodeStringBuilder(),
+            HtmlInline::class.java to HtmlInlineNodeStringBuilder(),
             Link::class.java to LinkNodeStringBuilder(),
             LinkRef::class.java to LinkRefNodeStringBuilder(),
             Reference::class.java to ReferenceNodeStringBuilder(),
