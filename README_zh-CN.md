@@ -575,6 +575,7 @@ val config =
 
 | 插件 | 模块（artifact） | 描述 |
 |--------|-------------------|-------------|
+| HTML 内联标签 | markdown-html | 支持 HTML 内联标签（`<b>`、`<i>`、`<u>`、`<a>`、`<span>` 等）和 HTML 块级渲染，支持可扩展的自定义标签处理器 |
 | 表格支持 | markdown-table | 支持 GFM 表格 |
 | 图片支持 | markdown-image | 支持 Markdown 图片（集成 Coil） |
 | 任务列表 | markdown-task | 支持 GitHub 风格的任务列表复选框：`- [ ]` / `- [x]` |
@@ -585,6 +586,7 @@ val config =
 
 ```kotlin
 dependencies {
+	implementation("com.github.feiyin0719:markdown-html:<version>")
 	implementation("com.github.feiyin0719:markdown-table:<version>")
 	implementation("com.github.feiyin0719:markdown-image:<version>")
 	implementation("com.github.feiyin0719:markdown-task:<version>")
@@ -594,6 +596,51 @@ dependencies {
 ```
 
 如果只发布了根库（例如 `ComposeMarkdown`），这些模块可能已经被打包在其中，此时你可以直接导入相关类使用。
+
+### HTML 内联标签示例
+
+```kotlin
+// 方式 1：默认配置（支持 <b>、<i>、<u>、<del>、<a>、<span> 及 HTML 块级渲染）
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin())
+    .build()
+
+// 方式 2：添加自定义标签处理器（如 <mark>）
+class MarkTagHandler : HtmlInlineTagHandler {
+    override val tagNames = setOf("mark")
+
+    override fun onOpenTag(
+        tagName: String,
+        rawTag: String,
+        builder: AnnotatedString.Builder,
+        context: HtmlInlineTagContext,
+    ) {
+        builder.pushStyle(SpanStyle(background = Color.Yellow))
+    }
+}
+
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin(customTagHandlers = listOf(MarkTagHandler())))
+    .build()
+
+// 方式 3：覆盖默认标签处理器
+class MyBoldTagHandler : HtmlInlineTagHandler {
+    override val tagNames = setOf("b", "strong")
+
+    override fun onOpenTag(
+        tagName: String,
+        rawTag: String,
+        builder: AnnotatedString.Builder,
+        context: HtmlInlineTagContext,
+    ) {
+        builder.pushStyle(SpanStyle(fontWeight = FontWeight.Black, color = Color.Red))
+    }
+}
+
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin(customTagHandlers = listOf(MyBoldTagHandler())))
+    .build()
+```
 
 ### 表格示例
 

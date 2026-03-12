@@ -624,6 +624,7 @@ Currently supported official plugin modules:
 
 | Plugin | Module (artifact) | Description |
 |--------|-------------------|-------------|
+| HTML Inline | markdown-html | Supports HTML inline tags (`<b>`, `<i>`, `<u>`, `<a>`, `<span>`, etc.) and HTML block rendering, with extensible custom tag handlers |
 | Table | markdown-table | Supports GFM tables |
 | Image | markdown-image | Supports Markdown images with Coil integration |
 | Task List | markdown-task | Supports GitHub-style task list checkboxes: `- [ ]` / `- [x]` |
@@ -634,6 +635,7 @@ Currently supported official plugin modules:
 
 ```kotlin
 dependencies {
+    implementation("com.github.feiyin0719:markdown-html:<version>")
     implementation("com.github.feiyin0719:markdown-table:<version>")
     implementation("com.github.feiyin0719:markdown-image:<version>")
     implementation("com.github.feiyin0719:markdown-task:<version>")
@@ -643,6 +645,51 @@ dependencies {
 ```
 
 If only the root library (e.g. `ComposeMarkdown`) is published, these modules may already be bundled and you can just import their classes directly.
+
+### HTML Inline Example
+
+```kotlin
+// Option 1: Default (supports <b>, <i>, <u>, <del>, <a>, <span>, and HTML blocks)
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin())
+    .build()
+
+// Option 2: Add custom tag handlers (e.g. <mark>)
+class MarkTagHandler : HtmlInlineTagHandler {
+    override val tagNames = setOf("mark")
+
+    override fun onOpenTag(
+        tagName: String,
+        rawTag: String,
+        builder: AnnotatedString.Builder,
+        context: HtmlInlineTagContext,
+    ) {
+        builder.pushStyle(SpanStyle(background = Color.Yellow))
+    }
+}
+
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin(customTagHandlers = listOf(MarkTagHandler())))
+    .build()
+
+// Option 3: Override a default tag handler
+class MyBoldTagHandler : HtmlInlineTagHandler {
+    override val tagNames = setOf("b", "strong")
+
+    override fun onOpenTag(
+        tagName: String,
+        rawTag: String,
+        builder: AnnotatedString.Builder,
+        context: HtmlInlineTagContext,
+    ) {
+        builder.pushStyle(SpanStyle(fontWeight = FontWeight.Black, color = Color.Red))
+    }
+}
+
+val config = MarkdownRenderConfig.Builder()
+    .addPlugin(HtmlMarkdownPlugin(customTagHandlers = listOf(MyBoldTagHandler())))
+    .build()
+```
 
 ### Table Example
 

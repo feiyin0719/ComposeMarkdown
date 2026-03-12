@@ -54,9 +54,9 @@ fun HtmlBlockExample(
         ) {
             Text(
                 text =
-                    "HTML Block Rendering Demo\n" +
-                        "Demonstrates rendering of raw HTML blocks in Markdown\n" +
-                        "HTML is converted to Markdown AST for unified styling",
+                    "HTML Rendering Demo\n" +
+                        "HtmlBlock: HTML-to-Markdown conversion for unified styling\n" +
+                        "HtmlInline: push/pop style stack with CSS parsing",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
@@ -68,34 +68,66 @@ fun HtmlBlockExample(
                 """
                 # HTML Block Example
 
-                This example demonstrates HTML block rendering using the HtmlMarkdownPlugin.
+                ## HTML Block Rendering
 
-                ## Inline HTML in Markdown
+                HTML blocks are converted to Markdown AST for unified styling.
 
-                Regular markdown text with **bold** and *italic*.
-
-                <p>This is a <b>bold</b> paragraph rendered from HTML.</p>
+                <p>This is a <b>bold</b> paragraph rendered from HTML block.</p>
 
                 <div>
-                  <p>This is a paragraph inside a div.</p>
-                  <p>With <i>italic</i> and <b>bold</b> text.</p>
+                  <p>Paragraph inside a div with <i>italic</i> and <b>bold</b> text.</p>
                 </div>
-
-                ## HTML Line Breaks
-
-                <p>Line one<br>Line two<br>Line three</p>
-
-                ## HTML Lists
 
                 <ul>
                   <li>HTML List Item 1</li>
                   <li>HTML List Item 2</li>
-                  <li>HTML List Item 3</li>
                 </ul>
+
+                ---
+
+                # HTML Inline Example
+
+                ## Basic Inline Styles
+
+                Text with <b>bold</b> and <i>italic</i> and <u>underline</u> and <del>strikethrough</del> formatting.
+
+                Nested: <b><i>bold italic</i></b> and <b><u>bold underline</u></b>.
+
+                Alternative tags: <strong>strong</strong> and <em>emphasis</em> and <s>strike</s>.
+
+                ## Line Breaks
+
+                Line one<br>Line two<br/>Line three<br />Line four.
+
+                ## Links
+
+                Visit <a href="https://github.com">GitHub</a> or <a href="https://google.com">Google</a> for more info.
+
+                Mixed: **Markdown bold** with <a href="https://example.com">HTML link</a> inside.
+
+                ## Span with Inline CSS
+
+                <span style="color: red">Red text</span> and <span style="color: blue">blue text</span> and <span style="color: green">green text</span>.
+
+                <span style="color: #FF6600">Orange hex color</span> and <span style="color: rgb(128, 0, 255)">Purple RGB color</span>.
+
+                <span style="background-color: yellow; color: black">Highlighted text</span> with background.
+
+                <span style="font-weight: bold; color: darkred">Bold dark red</span> and <span style="font-style: italic; color: darkblue">Italic dark blue</span>.
+
+                <span style="font-size: 24px; color: purple">Large purple text</span> and <span style="font-size: 12px">small text</span>.
+
+                <span style="text-decoration: underline; color: #1976D2">Underlined styled text</span>.
+
+                ## Mixed Markdown and HTML Inline
+
+                **Bold markdown** with <span style="color: red">red span</span> and *italic markdown* together.
+
+                A paragraph with <b>HTML bold</b>, **Markdown bold**, <i>HTML italic</i>, and *Markdown italic* all mixed.
 
                 ## Back to Markdown
 
-                This is regular **Markdown** content after the HTML blocks.
+                This is regular **Markdown** content after the HTML sections.
 
                 - Markdown list item 1
                 - Markdown list item 2

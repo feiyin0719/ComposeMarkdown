@@ -1,4 +1,4 @@
-package com.iffly.compose.markdown.core.renders
+package com.iffly.compose.markdown.html
 
 import androidx.compose.ui.text.AnnotatedString
 import com.iffly.compose.markdown.ActionHandler
@@ -10,9 +10,12 @@ import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.StringExt
 import com.vladsch.flexmark.ast.HtmlInline
 
-class HtmlInlineNodeStringBuilder : IInlineNodeStringBuilder<HtmlInline> {
+class HtmlInlineNodeStringBuilder(
+    private val tagHandlers: Map<String, HtmlInlineTagHandler>,
+) : IInlineNodeStringBuilder<HtmlInline> {
     companion object {
         private val BR_REGEX = Regex("""<br\s*/?>""", RegexOption.IGNORE_CASE)
+        private val TAG_NAME_REGEX = Regex("""</?(\w+)""")
     }
 
     override fun AnnotatedString.Builder.buildInlineNodeString(
@@ -26,8 +29,36 @@ class HtmlInlineNodeStringBuilder : IInlineNodeStringBuilder<HtmlInline> {
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         val text = node.chars.toString().trim()
+
         if (BR_REGEX.matches(text)) {
             append(StringExt.LINE_SEPARATOR)
+            return
+        }
+
+        val tagName =
+            TAG_NAME_REGEX
+                .find(text)
+                ?.groupValues
+                ?.get(1)
+                ?.lowercase() ?: return
+        val handler = tagHandlers[tagName] ?: return
+
+        val context =
+            HtmlInlineTagContext(
+                node = node,
+                inlineContentMap = inlineContentMap,
+                markdownTheme = markdownTheme,
+                actionHandler = actionHandler,
+                indentLevel = indentLevel,
+                isShowNotSupported = isShowNotSupported,
+                renderRegistry = renderRegistry,
+                nodeStringBuilderContext = nodeStringBuilderContext,
+            )
+
+        if (text.startsWith("</")) {
+            handler.onCloseTag(tagName, this, context)
+        } else {
+            handler.onOpenTag(tagName, text, this, context)
         }
     }
 }

@@ -64,7 +64,7 @@ interface ActionHandler {
     }
 }
 
-internal class MarkdownLinkInteractionListener(
+class MarkdownLinkInteractionListener(
     private val actionHandler: ActionHandler,
     private val node: Node,
 ) : LinkInteractionListener {
