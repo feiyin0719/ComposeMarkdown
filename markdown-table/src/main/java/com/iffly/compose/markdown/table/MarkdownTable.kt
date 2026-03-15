@@ -297,9 +297,10 @@ private fun Modifier.cellModifier(
     if (columnsCount <= 2) {
         fillMaxSize()
     } else {
+        val maxWidth = if (minWidth > 167.dp) minWidth else 167.dp
         fillMaxHeight()
             .wrapContentWidth()
-            .widthIn(max = 167.dp, min = minWidth)
+            .widthIn(max = maxWidth, min = minWidth)
     }
 
 private fun Modifier.boxModifier(
