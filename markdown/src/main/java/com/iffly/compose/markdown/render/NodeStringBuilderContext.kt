@@ -37,6 +37,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import com.iffly.compose.markdown.config.currentHtmlToMdConverter
+import com.iffly.compose.markdown.config.currentParser
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter
+import com.vladsch.flexmark.parser.Parser
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -46,6 +50,8 @@ import kotlinx.coroutines.CoroutineScope
  * @property systemContext The context for system interactions, including context, clipboard, haptic feedback, etc.
  */
 data class NodeStringBuilderContext(
+    val parser: Parser,
+    val htmlToMdConverter: FlexmarkHtmlConverter,
     val layoutContext: TextLayoutContext,
     val designContext: TextStyleContext,
     val systemContext: SystemContext,
@@ -151,6 +157,8 @@ fun rememberNodeStringBuilderContext(
     val resource = LocalResources.current
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
+    val parser = currentParser()
+    val htmlToMdConverter = currentHtmlToMdConverter()
 
     val mergedTextStyle = systemTextStyle.merge(textStyle)
 
@@ -174,8 +182,12 @@ fun rememberNodeStringBuilderContext(
         softwareKeyboardController,
         focusManager,
         scope,
+        parser,
+        htmlToMdConverter,
     ) {
         NodeStringBuilderContext(
+            parser = parser,
+            htmlToMdConverter = htmlToMdConverter,
             layoutContext =
                 TextLayoutContext(
                     density = density,
