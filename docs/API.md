@@ -11,6 +11,7 @@
   - [MarkdownView (async)](#markdownview-async)
   - [MarkdownView (node)](#markdownview-node)
   - [LazyMarkdownView](#lazymarkdownview)
+  - [LazyMarkdownColumn](#lazymarkdowncolumn)
 - [Configuration](#configuration)
   - [MarkdownRenderConfig](#markdownrenderconfig)
   - [MarkdownRenderConfig.Builder](#markdownrenderconfigbuilder)
@@ -205,6 +206,52 @@ fun LazyMarkdownView(
 
 - Best suited for *read-only* long-form content like books, large docs, etc.
 - For editable or frequently changing content, prefer the async `MarkdownView` with your own pagination or diffing.
+
+---
+
+### LazyMarkdownColumn
+
+Displays markdown content using `LazyColumn` for efficient rendering. Unlike `LazyMarkdownView` which lazily loads and parses content from a file in chunks, `LazyMarkdownColumn` parses the entire content upfront and only uses `LazyColumn` for display — each top-level block becomes a separate lazy item.
+
+**Signature** (from `LazyMarkdownColumn.kt`):
+
+```kotlin
+@Composable
+fun LazyMarkdownColumn(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    lazyListState: LazyListState = rememberLazyListState(),
+)
+```
+
+**Parameters**
+
+- `content`: Markdown text to render.
+- `markdownRenderConfig`: Same config as used by `MarkdownView`.
+- `modifier`: Applied to the internal `LazyColumn`.
+- `showNotSupportedText`: Whether to show text for unsupported elements.
+- `actionHandler`: Optional handler for actions inside the markdown content.
+- `lazyListState`: The `LazyListState` for external scroll control. Defaults to `rememberLazyListState()`.
+
+**Usage notes**
+
+- Best for medium-to-large markdown content where you want `LazyColumn` scrolling behavior instead of `verticalScroll`.
+- Supports external scroll control via the `lazyListState` parameter.
+
+**Example**
+
+```kotlin
+val config = remember { MarkdownRenderConfig.Builder().build() }
+
+LazyMarkdownColumn(
+    content = markdownText,
+    markdownRenderConfig = config,
+    modifier = Modifier.fillMaxSize(),
+)
+```
 
 ---
 

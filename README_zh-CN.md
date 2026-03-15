@@ -514,6 +514,37 @@ LazyMarkdownView(
 
 > 关于 `ChunkLoaderConfig` 的详细配置，请查看源码与 [docs/API.md](docs/API.md)。
 
+#### 5. LazyColumn 显示版本（LazyMarkdownColumn）
+
+当你希望使用 `LazyColumn` 高效渲染 Markdown 内容时（仅组合可见项），使用 `LazyMarkdownColumn`。与 `LazyMarkdownView` 不同，它会预先解析全部内容，仅使用 `LazyColumn` 进行显示。
+
+```kotlin
+@Composable
+fun LazyMarkdownColumn(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    lazyListState: LazyListState = rememberLazyListState(),
+)
+```
+
+基本示例：
+
+```kotlin
+@Composable
+fun LazyMarkdownExample() {
+    val config = remember { MarkdownRenderConfig.Builder().build() }
+
+    LazyMarkdownColumn(
+        content = longMarkdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+```
+
 ### 自定义区块渲染器（`IBlockRenderer`）
 
 你可以为任意 Flexmark 的 `Block` 类型提供自定义渲染器。

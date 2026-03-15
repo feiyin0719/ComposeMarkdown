@@ -563,6 +563,37 @@ LazyMarkdownView(
 
 > For detailed configuration of `ChunkLoaderConfig`, see the source and [docs/API.md](docs/API.md).
 
+#### 5. LazyColumn Display Version (LazyMarkdownColumn)
+
+When you want to display markdown content in a `LazyColumn` for efficient rendering (only visible items are composed), use `LazyMarkdownColumn`. Unlike `LazyMarkdownView`, this parses the entire content upfront and only uses `LazyColumn` for display.
+
+```kotlin
+@Composable
+fun LazyMarkdownColumn(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    lazyListState: LazyListState = rememberLazyListState(),
+)
+```
+
+Basic example:
+
+```kotlin
+@Composable
+fun LazyMarkdownExample() {
+    val config = remember { MarkdownRenderConfig.Builder().build() }
+
+    LazyMarkdownColumn(
+        content = longMarkdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+```
+
 ### Custom Block Renderer (`IBlockRenderer`)
 
 You can provide a custom renderer for any Flexmark `Block` type.

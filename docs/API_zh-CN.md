@@ -11,6 +11,7 @@
   - [MarkdownView（异步）](#markdownview-异步)
   - [MarkdownView（节点）](#markdownview-节点)
   - [LazyMarkdownView](#lazymarkdownview)
+  - [LazyMarkdownColumn](#lazymarkdowncolumn)
   - [MarkdownChildren](#markdownchildren)
 - [配置](#配置)
   - [MarkdownRenderConfig](#markdownrenderconfig)
@@ -206,6 +207,52 @@ fun LazyMarkdownView(
 
 - 适合只读的长篇内容，比如书籍、大型文档等。
 - 若是可编辑或频繁变动的内容，更推荐使用异步版 `MarkdownView`，并自行实现分页或 diff 逻辑。
+
+---
+
+### LazyMarkdownColumn
+
+使用 `LazyColumn` 高效显示 Markdown 内容。与 `LazyMarkdownView` 不同，`LazyMarkdownColumn` 会预先解析全部内容，仅使用 `LazyColumn` 进行显示——每个顶层块作为一个独立的 lazy item。
+
+**函数签名**（来自 `LazyMarkdownColumn.kt`）：
+
+```kotlin
+@Composable
+fun LazyMarkdownColumn(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    lazyListState: LazyListState = rememberLazyListState(),
+)
+```
+
+**参数**
+
+- `content`：要渲染的 Markdown 文本。
+- `markdownRenderConfig`：与 `MarkdownView` 相同的渲染配置。
+- `modifier`：应用于内部 `LazyColumn` 的修饰符。
+- `showNotSupportedText`：是否对不支持的元素显示文本提示。
+- `actionHandler`：可选，处理文档内的交互行为。
+- `lazyListState`：用于外部滚动控制的 `LazyListState`，默认为 `rememberLazyListState()`。
+
+**使用建议**
+
+- 适合中到大型的 Markdown 内容，需要 `LazyColumn` 滚动行为而非 `verticalScroll`。
+- 支持通过 `lazyListState` 参数进行外部滚动控制。
+
+**示例**
+
+```kotlin
+val config = remember { MarkdownRenderConfig.Builder().build() }
+
+LazyMarkdownColumn(
+    content = markdownText,
+    markdownRenderConfig = config,
+    modifier = Modifier.fillMaxSize(),
+)
+```
 
 ---
 
