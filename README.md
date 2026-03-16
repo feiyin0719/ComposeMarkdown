@@ -5,6 +5,9 @@
 A powerful and highly customizable Jetpack Compose Markdown rendering library that supports rich
 Markdown syntax and custom styling.
 
+> **Need cross-platform support?**
+> Check out [ComposeMarkdownMultiplatform](https://github.com/niceFuture0723/ComposeMarkdownMultiplatform) — it supports Android, iOS, Desktop, and WebAssembly with a single codebase.
+
 ## Table of Contents
 
 - [Features](#-features)
@@ -918,8 +921,9 @@ We welcome contributions! To get started:
 2. Create a feature branch: `git checkout -b feat/my-feature`
 3. Make your changes (keep scope focused; add tests when possible)
 4. Run checks locally (examples):
-   - `./gradlew build` – compile & run tests
-   - `./gradlew lintKotlin detekt` (if configured)
+   - `./gradlew ktlintFormat` – format code with ktlint
+   - `./gradlew ktlintCheck` – verify code style
+   - `./gradlew assemble` – compile & run tests
 5. Commit using conventional prefixes:
    - `feat:` new feature
    - `fix:` bug fix
