@@ -7,7 +7,9 @@ import com.iffly.compose.markdown.config.currentHtmlToMdConverter
 import com.iffly.compose.markdown.config.currentParser
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownChildren
+import com.iffly.compose.markdown.render.MarkdownText
 import com.vladsch.flexmark.ast.HtmlBlock
+import com.vladsch.flexmark.util.ast.Document
 
 class HtmlBlockRenderer : IBlockRenderer<HtmlBlock> {
     @Composable
@@ -25,6 +27,15 @@ class HtmlBlockRenderer : IBlockRenderer<HtmlBlock> {
                 val markdown = htmlToMdConverter.convert(html)
                 parser.parse(markdown)
             }
-        MarkdownChildren(parent = document, modifier = modifier)
+        if (document.isSingleHtmlBlock()) {
+            MarkdownText(parent = node, modifier = modifier)
+        } else {
+            MarkdownChildren(parent = document, modifier = modifier)
+        }
+    }
+
+    private fun Document.isSingleHtmlBlock(): Boolean {
+        val firstChild = firstChild ?: return false
+        return firstChild is HtmlBlock && firstChild.next == null
     }
 }

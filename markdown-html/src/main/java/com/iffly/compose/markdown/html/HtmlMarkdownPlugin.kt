@@ -37,5 +37,6 @@ class HtmlMarkdownPlugin(
     override fun inlineNodeStringBuilders(): Map<Class<out Node>, IInlineNodeStringBuilder<*>> =
         mapOf(
             HtmlInline::class.java to HtmlInlineNodeStringBuilder(tagHandlerMap),
+            HtmlBlock::class.java to FallbackHtmlBlockNodeStringBuilder(),
         )
 }
