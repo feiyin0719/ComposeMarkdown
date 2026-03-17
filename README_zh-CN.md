@@ -105,7 +105,7 @@ coil = "2.5.0"
 [libraries]
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-compose-markdown = { group = "com.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
+compose-markdown = { group = "io.github.feiyin0719", name = "ComposeMarkdown", version.ref = "compose-markdown" }
 ```
 
 然后在模块 `build.gradle.kts` 中添加依赖：
@@ -620,12 +620,12 @@ val config =
 
 ```kotlin
 dependencies {
-	implementation("com.github.feiyin0719:markdown-html:<version>")
-	implementation("com.github.feiyin0719:markdown-table:<version>")
-	implementation("com.github.feiyin0719:markdown-image:<version>")
-	implementation("com.github.feiyin0719:markdown-task:<version>")
-	implementation("com.github.feiyin0719:markdown-latex:<version>")
-	implementation("com.github.feiyin0719:markdown-autolink:<version>")
+	implementation("io.github.feiyin0719:markdown-html:<version>")
+	implementation("io.github.feiyin0719:markdown-table:<version>")
+	implementation("io.github.feiyin0719:markdown-image:<version>")
+	implementation("io.github.feiyin0719:markdown-task:<version>")
+	implementation("io.github.feiyin0719:markdown-latex:<version>")
+	implementation("io.github.feiyin0719:markdown-autolink:<version>")
 }
 ```
 
