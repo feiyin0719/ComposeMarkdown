@@ -5,7 +5,7 @@
 一个功能强大、可高度定制的 Jetpack Compose Markdown 渲染库，支持丰富的 Markdown 语法和自定义样式。
 
 > **需要支持跨平台？**
-> 请使用 [ComposeMarkdownMultiplatform](https://github.com/niceFuture0723/ComposeMarkdownMultiplatform) — 一套代码同时支持 Android、iOS、Desktop 和 WebAssembly。
+> 请使用 [ComposeMarkdownMultiplatform](https://github.com/feiyin0719/ComposeMarkdownMultiplatform) — 一套代码同时支持 Android、iOS、Desktop 和 WebAssembly。
 
 ## 目录
 

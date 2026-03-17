@@ -6,7 +6,7 @@ A powerful and highly customizable Jetpack Compose Markdown rendering library th
 Markdown syntax and custom styling.
 
 > **Need cross-platform support?**
-> Check out [ComposeMarkdownMultiplatform](https://github.com/niceFuture0723/ComposeMarkdownMultiplatform) — it supports Android, iOS, Desktop, and WebAssembly with a single codebase.
+> Check out [ComposeMarkdownMultiplatform](https://github.com/feiyin0719/ComposeMarkdownMultiplatform) — it supports Android, iOS, Desktop, and WebAssembly with a single codebase.
 
 ## Table of Contents
 
