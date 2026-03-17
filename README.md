@@ -87,16 +87,7 @@ fun MarkdownChildren(
 
 ### Add Dependency
 
-1. Add `jitpack.io` repository to your project:
-
-```kotlin
-repositories {
-    ...
-    maven(url = "https://jitpack.io")
-}
-```
-
-2. Add the dependency to your project's `build.gradle.kts` :
+Add the dependency to your project's `build.gradle.kts` :
    define library module in your `./gradle/libs.versions.toml` file:
 
 ```toml

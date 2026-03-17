@@ -86,16 +86,7 @@ fun MarkdownChildren(
 
 ### 添加依赖
 
-1. 在项目中添加 `jitpack.io` 仓库：
-
-```kotlin
-repositories {
-	...
-	maven(url = "https://jitpack.io")
-}
-```
-
-2. 在项目的 `build.gradle.kts` 中添加依赖：在 `./gradle/libs.versions.toml` 中定义库：
+在项目的 `build.gradle.kts` 中添加依赖：在 `./gradle/libs.versions.toml` 中定义库：
 
 ```toml
 [versions]
