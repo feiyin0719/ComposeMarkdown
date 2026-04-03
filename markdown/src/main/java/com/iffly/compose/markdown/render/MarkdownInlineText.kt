@@ -23,9 +23,15 @@ import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
 
 /**
- * A renderer for markdown text nodes.
+ * Functional interface for custom rendering of inline markdown text.
+ *
+ * This allows replacing the default [MarkdownInlineText] implementation with a
+ * custom composable via [RenderRegistry].
+ *
+ * @see MarkdownInlineText
+ * @see RenderRegistry.markdownInlineTextRenderer
  */
-fun interface MarkdownTextRenderer {
+fun interface MarkdownInlineTextRenderer {
     /**
      * @param parent The root node of the markdown content to be rendered.
      * @param modifier The modifier to be applied to the rich text.
@@ -42,26 +48,38 @@ fun interface MarkdownTextRenderer {
 }
 
 /**
- * A Composable that renders markdown content as rich text.
- * @param parent The root node of the markdown content to be rendered.
+ * Renders a single inline text node (e.g. Paragraph, Heading) as styled rich text.
+ *
+ * This is the leaf-level composable in the rendering pipeline: it walks the node's
+ * inline children (bold, italic, links, code spans, etc.), builds an [AnnotatedString],
+ * and displays it via [RichText]. It is called by block-level renderers such as
+ * [com.iffly.compose.markdown.core.renders.TextBlockRenderer].
+ *
+ * **Not to be confused with a top-level Markdown rendering entry point.** For rendering
+ * an entire Markdown document, use
+ * [com.iffly.compose.markdown.MarkdownView] instead.
+ *
+ * @param parent The AST node whose inline children will be rendered.
  * @param modifier The modifier to be applied to the rich text.
  * @param textAlign The alignment of the text.
  * @param textStyle The style to be applied to the text.
+ *
+ * @see MarkdownInlineTextRenderer
  */
 @Composable
-fun MarkdownText(
+fun MarkdownInlineText(
     parent: Node,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     textStyle: TextStyle? = null,
 ) {
     val renderRegistry = currentRenderRegistry()
-    renderRegistry.markdownTextRenderer?.invoke(
+    renderRegistry.markdownInlineTextRenderer?.invoke(
         parent = parent,
         modifier = modifier,
         textAlign = textAlign,
         textStyle = textStyle,
-    ) ?: DefaultMarkdownText(
+    ) ?: DefaultMarkdownInlineText(
         parent = parent,
         modifier = modifier,
         textAlign = textAlign,
@@ -70,7 +88,7 @@ fun MarkdownText(
 }
 
 @Composable
-private fun DefaultMarkdownText(
+private fun DefaultMarkdownInlineText(
     parent: Node,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,

@@ -77,7 +77,7 @@ private fun DefaultMarkdownContent(
         }
 
         else -> {
-            MarkdownText(node, modifier = modifier)
+            MarkdownInlineText(node, modifier = modifier)
         }
     }
 }

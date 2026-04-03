@@ -36,8 +36,8 @@ import com.iffly.compose.markdown.config.AbstractMarkdownRenderPlugin
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
+import com.iffly.compose.markdown.render.MarkdownInlineText
 import com.iffly.compose.markdown.render.MarkdownInlineView
-import com.iffly.compose.markdown.render.MarkdownText
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.MarkdownTheme
@@ -461,7 +461,7 @@ class AlertBlockRenderer : IBlockRenderer<AlertBlock> {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-                    MarkdownText(node)
+                    MarkdownInlineText(node)
                 }
             }
         }

@@ -4,7 +4,7 @@ import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownContentRenderer
-import com.iffly.compose.markdown.render.MarkdownTextRenderer
+import com.iffly.compose.markdown.render.MarkdownInlineTextRenderer
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.html.HtmlRenderer
@@ -73,7 +73,7 @@ class MarkdownRenderConfig {
 
         private var markdownTheme: MarkdownTheme? = null
 
-        private var markdownTextRenderer: MarkdownTextRenderer? = null
+        private var markdownInlineTextRenderer: MarkdownInlineTextRenderer? = null
 
         private var markdownContentRenderer: MarkdownContentRenderer? = null
 
@@ -145,12 +145,12 @@ class MarkdownRenderConfig {
         }
 
         /**
-         * Sets the [MarkdownTextRenderer] for rendering markdown text nodes.
-         * @param renderer The [MarkdownTextRenderer] to set.
+         * Sets the [MarkdownInlineTextRenderer] for rendering inline markdown text nodes.
+         * @param renderer The [MarkdownInlineTextRenderer] to set.
          * @return The [Builder] instance for chaining.
          */
-        fun markdownTextRenderer(renderer: MarkdownTextRenderer): Builder {
-            this.markdownTextRenderer = renderer
+        fun markdownInlineTextRenderer(renderer: MarkdownInlineTextRenderer): Builder {
+            this.markdownInlineTextRenderer = renderer
             return this
         }
 
@@ -255,7 +255,7 @@ class MarkdownRenderConfig {
                     blockRenderers.toMap(),
                     inlineNodeStringBuilders.toMap(),
                     markdownContentRenderer,
-                    markdownTextRenderer,
+                    markdownInlineTextRenderer,
                 ),
                 parserBuilder.build(),
                 htmlRendererBuilder.build(),

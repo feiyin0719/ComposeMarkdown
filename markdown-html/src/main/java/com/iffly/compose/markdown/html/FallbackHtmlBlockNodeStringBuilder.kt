@@ -15,7 +15,7 @@ import com.vladsch.flexmark.ast.HtmlBlock
  * This is used by [HtmlBlockRenderer] when [FlexmarkHtmlConverter] converts an HTML block
  * but the resulting Markdown is re-parsed into another single [HtmlBlock] (i.e. the converter
  * could not map the HTML to any Markdown syntax). In that case, [HtmlBlockRenderer] falls back
- * to [MarkdownText] to render the original HTML as plain text, preventing infinite recursion.
+ * to [MarkdownInlineText] to render the original HTML as plain text, preventing infinite recursion.
  */
 class FallbackHtmlBlockNodeStringBuilder : IInlineNodeStringBuilder<HtmlBlock> {
     override fun AnnotatedString.Builder.buildInlineNodeString(

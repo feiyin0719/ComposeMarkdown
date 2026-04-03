@@ -3,7 +3,7 @@ package com.iffly.compose.markdown.core.renders
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.render.IBlockRenderer
-import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.render.MarkdownInlineText
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.util.ast.Block
@@ -12,7 +12,7 @@ import com.vladsch.flexmark.util.ast.Block
  * Base renderer for block nodes that render text content.
  * @param T The type of the block node, must be a subclass of [Block].
  * @see IBlockRenderer
- * @see MarkdownText
+ * @see MarkdownInlineText
  */
 open class TextBlockRenderer<T> : IBlockRenderer<T> where T : Block {
     @Composable
@@ -20,7 +20,7 @@ open class TextBlockRenderer<T> : IBlockRenderer<T> where T : Block {
         node: T,
         modifier: Modifier,
     ) {
-        MarkdownText(parent = node, modifier = modifier)
+        MarkdownInlineText(parent = node, modifier = modifier)
     }
 }
 

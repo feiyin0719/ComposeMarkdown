@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.render.CompositeChildNodeStringBuilder
 import com.iffly.compose.markdown.render.IBlockRenderer
-import com.iffly.compose.markdown.render.MarkdownText
+import com.iffly.compose.markdown.render.MarkdownInlineText
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.table.widget.BodyScope
 import com.iffly.compose.markdown.table.widget.RowScope
@@ -100,7 +100,7 @@ class TableCellRenderer : TableWidgetRenderer<TableCell> {
         modifier: Modifier,
     ) {
         SelectionContainer {
-            MarkdownText(
+            MarkdownInlineText(
                 parent = node,
                 modifier = Modifier,
                 textAlign = node.alignment.toTextAlign(),

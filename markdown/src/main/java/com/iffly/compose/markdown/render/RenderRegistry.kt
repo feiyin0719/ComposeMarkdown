@@ -8,13 +8,13 @@ import com.vladsch.flexmark.util.ast.Node
  * @param blockRenderers A map of block renderers.
  * @param inlineNodeStringBuilders A map of inline node string builders.
  * @param markdownContentRenderer An optional renderer for markdown content nodes.
- * @param markdownTextRenderer An optional renderer for markdown text nodes.
+ * @param markdownInlineTextRenderer An optional renderer for inline markdown text nodes.
  */
 data class RenderRegistry(
     private val blockRenderers: Map<Class<out Block>, IBlockRenderer<*>>,
     private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>,
     val markdownContentRenderer: MarkdownContentRenderer? = null,
-    val markdownTextRenderer: MarkdownTextRenderer? = null,
+    val markdownInlineTextRenderer: MarkdownInlineTextRenderer? = null,
 ) {
     @Suppress("UNCHECKED_CAST")
     fun getBlockRenderer(blockClass: Class<out Block>): IBlockRenderer<Block>? = blockRenderers[blockClass] as? IBlockRenderer<Block>
