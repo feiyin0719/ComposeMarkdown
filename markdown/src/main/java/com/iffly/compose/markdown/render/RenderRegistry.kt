@@ -1,6 +1,7 @@
 package com.iffly.compose.markdown.render
 
 import com.vladsch.flexmark.util.ast.Block
+import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 
 /**
@@ -22,4 +23,29 @@ data class RenderRegistry(
     @Suppress("UNCHECKED_CAST")
     fun getInlineNodeStringBuilder(nodeClass: Class<out Node>): IInlineNodeStringBuilder<Node>? =
         inlineNodeStringBuilders[nodeClass] as? IInlineNodeStringBuilder<Node>
+
+    /**
+     * Creates an augmented [RenderRegistry] for Text-based rendering ([MarkdownText]).
+     *
+     * For each block renderer that has no corresponding [IInlineNodeStringBuilder],
+     * a [BlockRendererInlineStringBuilder] wrapper is created and registered. A
+     * [DocumentInlineStringBuilder] is also added if not already present.
+     *
+     * This allows [MarkdownText] to render all block nodes as inline content
+     * without modifying the base registry at config-build time.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun textModeRegistry(): RenderRegistry {
+        val augmented = inlineNodeStringBuilders.toMutableMap()
+        if (!augmented.containsKey(Document::class.java)) {
+            augmented[Document::class.java] = DocumentInlineStringBuilder()
+        }
+        for ((blockClass, renderer) in blockRenderers) {
+            if (!augmented.containsKey(blockClass)) {
+                augmented[blockClass] =
+                    BlockRendererInlineStringBuilder(renderer as IBlockRenderer<Block>)
+            }
+        }
+        return copy(inlineNodeStringBuilders = augmented.toMap())
+    }
 }

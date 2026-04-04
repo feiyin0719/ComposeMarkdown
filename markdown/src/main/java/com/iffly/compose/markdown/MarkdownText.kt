@@ -1,7 +1,6 @@
 package com.iffly.compose.markdown
 
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
@@ -12,28 +11,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
-import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.render.MarkdownInlineView
-import com.iffly.compose.markdown.render.NodeStringBuilderContext
-import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.render.TextSizeConstraints
 import com.iffly.compose.markdown.render.markdownText
 import com.iffly.compose.markdown.render.rememberNodeStringBuilderContext
-import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.richtext.RichText
-import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
-import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
-import com.vladsch.flexmark.ast.Heading
-import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,7 +39,7 @@ import kotlinx.coroutines.withContext
  * this component renders the entire Markdown document through a single [RichText] composable.
  * Text-containing blocks (Paragraph, Heading) are merged into a single [AnnotatedString],
  * enabling cross-paragraph text selection. Non-text blocks (code blocks, block quotes, lists, etc.)
- * are rendered as [StandaloneInlineContent][RichTextInlineContent.StandaloneInlineContent]
+ * are rendered as [EmbeddedRichTextInlineContent][RichTextInlineContent.EmbeddedRichTextInlineContent]
  * using existing [IBlockRenderer][com.iffly.compose.markdown.render.IBlockRenderer] implementations.
  *
  * This is a **complementary** approach to [MarkdownView], best suited for documents where
@@ -59,6 +52,14 @@ import kotlinx.coroutines.withContext
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param overflow How visual overflow should be handled.
+ * @param softWrap Whether the text should wrap softly.
+ * @param textAlign The alignment of the text.
+ * @param maxLines The maximum number of lines to display.
+ * @param minLines The minimum number of lines to display.
+ * @param letterSpacing The spacing between letters.
+ * @param textDecoration The text decoration to apply.
+ * @param onTextLayout Callback invoked when the text layout is computed.
  * @param onError Composable to display in case of an error during parsing.
  *
  * @see MarkdownView
@@ -70,6 +71,14 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val parser = markdownRenderConfig.parser
@@ -92,6 +101,14 @@ fun MarkdownText(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                overflow = overflow,
+                softWrap = softWrap,
+                textAlign = textAlign,
+                maxLines = maxLines,
+                minLines = minLines,
+                letterSpacing = letterSpacing,
+                textDecoration = textDecoration,
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -114,6 +131,14 @@ fun MarkdownText(
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param overflow How visual overflow should be handled.
+ * @param softWrap Whether the text should wrap softly.
+ * @param textAlign The alignment of the text.
+ * @param maxLines The maximum number of lines to display.
+ * @param minLines The minimum number of lines to display.
+ * @param letterSpacing The spacing between letters.
+ * @param textDecoration The text decoration to apply.
+ * @param onTextLayout Callback invoked when the text layout is computed.
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
@@ -127,6 +152,14 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     parseDispatcher: CoroutineDispatcher? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
@@ -159,6 +192,14 @@ fun MarkdownText(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                overflow = overflow,
+                softWrap = softWrap,
+                textAlign = textAlign,
+                maxLines = maxLines,
+                minLines = minLines,
+                letterSpacing = letterSpacing,
+                textDecoration = textDecoration,
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -179,6 +220,14 @@ fun MarkdownText(
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param overflow How visual overflow should be handled.
+ * @param softWrap Whether the text should wrap softly.
+ * @param textAlign The alignment of the text.
+ * @param maxLines The maximum number of lines to display.
+ * @param minLines The minimum number of lines to display.
+ * @param letterSpacing The spacing between letters.
+ * @param textDecoration The text decoration to apply.
+ * @param onTextLayout Callback invoked when the text layout is computed.
  *
  * @see MarkdownView
  */
@@ -189,27 +238,59 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, actionHandler) {
-        MarkdownTextContent(node, modifier)
+        MarkdownTextContent(
+            node = node,
+            modifier = modifier,
+            overflow = overflow,
+            softWrap = softWrap,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            minLines = minLines,
+            letterSpacing = letterSpacing,
+            textDecoration = textDecoration,
+            onTextLayout = onTextLayout,
+        )
     }
 }
 
 /**
- * Internal composable that builds a document-level [AnnotatedString] and renders it
- * via [RichText]. Text blocks (Paragraph, Heading) are merged directly into the
- * AnnotatedString; other blocks are wrapped as [StandaloneInlineContent]
- * [RichTextInlineContent.StandaloneInlineContent] delegating to their
- * [IBlockRenderer][com.iffly.compose.markdown.render.IBlockRenderer].
+ * Internal composable that builds a document-level [AnnotatedString][androidx.compose.ui.text.AnnotatedString]
+ * and renders it via [RichText].
+ *
+ * All node types are handled uniformly through [markdownText]: text blocks
+ * (Paragraph, Heading) are merged directly into the AnnotatedString via their
+ * registered [IInlineNodeStringBuilder][com.iffly.compose.markdown.render.IInlineNodeStringBuilder],
+ * while other blocks are wrapped as embedded inline content by
+ * [BlockRendererInlineStringBuilder][com.iffly.compose.markdown.render.BlockRendererInlineStringBuilder]
+ * (lazily registered via [RenderRegistry.textModeRegistry][com.iffly.compose.markdown.render.RenderRegistry.textModeRegistry]).
  */
 @Composable
 private fun MarkdownTextContent(
     node: Node,
     modifier: Modifier = Modifier,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     BoxWithConstraints(modifier = modifier) {
         val theme = currentTheme()
-        val renderRegistry = currentRenderRegistry()
+        val baseRegistry = currentRenderRegistry()
+        val renderRegistry = remember(baseRegistry) { baseRegistry.textModeRegistry() }
         val actionHandler = currentActionHandler()
         val isShowNotSupported = isShowNotSupported()
         val nodeStringBuilderContext =
@@ -221,7 +302,7 @@ private fun MarkdownTextContent(
                         minWidth = minWidth,
                         minHeight = minHeight,
                     ),
-                textAlign = TextAlign.Start,
+                textAlign = textAlign ?: TextAlign.Start,
             )
 
         val (text, inlineContentMap) =
@@ -233,11 +314,12 @@ private fun MarkdownTextContent(
                 actionHandler,
                 nodeStringBuilderContext,
             ) {
-                buildDocumentAnnotatedString(
-                    document = node,
-                    theme = theme,
+                markdownText(
+                    node = node,
+                    markdownTheme = theme,
                     renderRegistry = renderRegistry,
                     actionHandler = actionHandler,
+                    indentLevel = 1,
                     isShowNotSupported = isShowNotSupported,
                     nodeStringBuilderContext = nodeStringBuilderContext,
                 )
@@ -263,78 +345,14 @@ private fun MarkdownTextContent(
                     .wrapContentHeight()
                     .widthIn(minWidth, maxWidth),
             style = theme.textStyle,
+            overflow = overflow,
+            softWrap = softWrap,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            minLines = minLines,
+            letterSpacing = letterSpacing,
+            textDecoration = textDecoration,
+            onTextLayout = onTextLayout,
         )
     }
-}
-
-/**
- * Walks the document AST and builds a single [AnnotatedString] with inline content.
- *
- * - [Paragraph] and [Heading] nodes: their inline content is built via [markdownText] and
- *   appended directly into the AnnotatedString (enabling cross-paragraph text selection).
- * - Other block nodes: inserted as [StandaloneInlineContent]
- *   [RichTextInlineContent.StandaloneInlineContent] placeholders.
- *   Their rendering delegates to [MarkdownBlock] which uses the registered
- *   [IBlockRenderer][com.iffly.compose.markdown.render.IBlockRenderer].
- */
-private fun buildDocumentAnnotatedString(
-    document: Node,
-    theme: MarkdownTheme,
-    renderRegistry: RenderRegistry,
-    actionHandler: ActionHandler?,
-    isShowNotSupported: Boolean,
-    nodeStringBuilderContext: NodeStringBuilderContext,
-): Pair<AnnotatedString, Map<String, MarkdownInlineView>> {
-    val inlineContentMap = mutableMapOf<String, MarkdownInlineView>()
-
-    val annotatedString =
-        buildAnnotatedString {
-            var child = document.firstChild
-            var isFirst = true
-
-            while (child != null) {
-                if (!isFirst) {
-                    append('\n')
-                }
-
-                when (child) {
-                    is Paragraph, is Heading -> {
-                        val (childText, childInlines) =
-                            markdownText(
-                                node = child,
-                                markdownTheme = theme,
-                                renderRegistry = renderRegistry,
-                                actionHandler = actionHandler,
-                                indentLevel = 1,
-                                isShowNotSupported = isShowNotSupported,
-                                nodeStringBuilderContext = nodeStringBuilderContext,
-                            )
-                        append(childText)
-                        inlineContentMap.putAll(childInlines)
-                    }
-
-                    else -> {
-                        val blockId = "block_${System.identityHashCode(child)}"
-                        val blockNode = child
-                        appendStandaloneInlineTextContent(blockId)
-                        inlineContentMap[blockId] =
-                            MarkdownInlineView.MarkdownRichTextInlineContent(
-                                RichTextInlineContent.StandaloneInlineContent(
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) { mod ->
-                                    MarkdownContent(
-                                        node = blockNode,
-                                        modifier = mod,
-                                    )
-                                },
-                            )
-                    }
-                }
-
-                isFirst = false
-                child = child.next
-            }
-        }
-
-    return Pair(annotatedString, inlineContentMap)
 }

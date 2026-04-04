@@ -92,4 +92,10 @@ val markdownExamples =
         ) { paddingValues ->
             HtmlBlockExample(paddingValues)
         },
+        MarkdownExample(
+            title = "MarkdownText Example",
+            description = "Text-based rendering with cross-paragraph selection support",
+        ) { paddingValues ->
+            MarkdownTextExample(paddingValues)
+        },
     )

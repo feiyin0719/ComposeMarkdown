@@ -12,6 +12,9 @@
   - [MarkdownView (node)](#markdownview-node)
   - [LazyMarkdownView](#lazymarkdownview)
   - [LazyMarkdownColumn](#lazymarkdowncolumn)
+  - [MarkdownText (sync)](#markdowntext-sync)
+  - [MarkdownText (async)](#markdowntext-async)
+  - [MarkdownText (node)](#markdowntext-node)
 - [Configuration](#configuration)
   - [MarkdownRenderConfig](#markdownrenderconfig)
   - [MarkdownRenderConfig.Builder](#markdownrenderconfigbuilder)
@@ -298,6 +301,131 @@ fun MarkdownChildren(
 Use this when implementing a custom `IBlockRenderer` (e.g., for a custom container block) where you need to render nested content with standard spacing rules.
 Note that `MarkdownChildren` provides a container layout (like `Column`); you can customize it with `modifier`.
 
+
+---
+
+### MarkdownText (sync)
+
+Text-based rendering that renders the entire Markdown document through a single `RichText` composable, enabling cross-paragraph text selection. Parses the Markdown string synchronously inside a `remember` block.
+
+**Signature** (from `MarkdownText.kt`):
+
+```kotlin
+@Composable
+fun MarkdownText(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**Parameters**
+
+- `content`: The Markdown string to parse and render.
+- `markdownRenderConfig`: The configuration for parsing and rendering.
+- `modifier`: Modifier applied to the root layout.
+- `showNotSupportedText`: Whether to show text for unsupported elements.
+- `actionHandler`: Optional handler for link clicks and other actions.
+- `overflow`: How visual overflow is handled (`TextOverflow.Clip`, `Ellipsis`, etc.).
+- `softWrap`: Whether to break text at soft line breaks.
+- `textAlign`: Text alignment.
+- `maxLines` / `minLines`: Line count constraints for the rendered text.
+- `letterSpacing`: Spacing between characters.
+- `textDecoration`: Text decorations (underline, strikethrough).
+- `onTextLayout`: Callback invoked with `TextLayoutResult` after text layout.
+- `onError`: Optional composable to display when parsing fails.
+
+**Example**
+
+```kotlin
+SelectionContainer {
+    MarkdownText(
+        content = markdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.padding(16.dp),
+        maxLines = 10,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+```
+
+---
+
+### MarkdownText (async)
+
+Asynchronous version that parses on a background dispatcher. Distinguished from the sync version by the `parseDispatcher` and `onLoading` parameters.
+
+**Signature** (from `MarkdownText.kt`):
+
+```kotlin
+@Composable
+fun MarkdownText(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    parseDispatcher: CoroutineDispatcher? = null,
+    onLoading: (@Composable () -> Unit)? = null,
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**Additional Parameters**
+
+- `parseDispatcher`: The `CoroutineDispatcher` to parse on. Defaults to `MarkdownThreadPool.dispatcher`.
+- `onLoading`: Optional composable shown while parsing is in progress.
+
+---
+
+### MarkdownText (node)
+
+Pre-parsed version that accepts a flexmark `Node` directly.
+
+**Signature** (from `MarkdownText.kt`):
+
+```kotlin
+@Composable
+fun MarkdownText(
+    node: Node,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+)
+```
+
+**Notes**
+
+- The `Node` instance is usually produced by `markdownRenderConfig.parser.parse(content)`.
+- This overload does not handle loading or error states; you manage them yourself.
 
 ---
 

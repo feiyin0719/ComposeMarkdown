@@ -13,6 +13,9 @@
   - [LazyMarkdownView](#lazymarkdownview)
   - [LazyMarkdownColumn](#lazymarkdowncolumn)
   - [MarkdownChildren](#markdownchildren)
+  - [MarkdownText（同步）](#markdowntext-同步)
+  - [MarkdownText（异步）](#markdowntext-异步)
+  - [MarkdownText（节点）](#markdowntext-节点)
 - [配置](#配置)
   - [MarkdownRenderConfig](#markdownrenderconfig)
   - [MarkdownRenderConfig.Builder](#markdownrenderconfigbuilder)
@@ -299,6 +302,131 @@ fun MarkdownChildren(
 当你实现自定义的 `IBlockRenderer`（例如自定义容器块）并需要以标准的间距规则渲染嵌套内容时使用。
 注意：`MarkdownChildren` 提供容器布局（如 `Column`），你可以通过 `modifier` 自定义。
 
+
+---
+
+### MarkdownText（同步）
+
+基于文本的渲染方式，将整个 Markdown 文档通过单个 `RichText` 可组合函数渲染，支持跨段落文本选择。在 `remember` 代码块中同步解析 Markdown 字符串。
+
+**函数签名**（来自 `MarkdownText.kt`）：
+
+```kotlin
+@Composable
+fun MarkdownText(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**参数说明**
+
+- `content`：要解析和渲染的 Markdown 字符串。
+- `markdownRenderConfig`：解析和渲染的配置。
+- `modifier`：应用于根布局的 Modifier。
+- `showNotSupportedText`：是否显示不支持元素的文本。
+- `actionHandler`：可选的链接点击和其他操作处理器。
+- `overflow`：视觉溢出处理方式（`TextOverflow.Clip`、`Ellipsis` 等）。
+- `softWrap`：是否在软换行处断行。
+- `textAlign`：文本对齐方式。
+- `maxLines` / `minLines`：渲染文本的行数约束。
+- `letterSpacing`：字间距。
+- `textDecoration`：文本装饰（下划线、删除线）。
+- `onTextLayout`：文本布局后的回调，返回 `TextLayoutResult`。
+- `onError`：解析失败时显示的可选可组合函数。
+
+**示例**
+
+```kotlin
+SelectionContainer {
+    MarkdownText(
+        content = markdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.padding(16.dp),
+        maxLines = 10,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+```
+
+---
+
+### MarkdownText（异步）
+
+异步版本，在后台调度器上解析。通过 `parseDispatcher` 和 `onLoading` 参数与同步版本区分。
+
+**函数签名**（来自 `MarkdownText.kt`）：
+
+```kotlin
+@Composable
+fun MarkdownText(
+    content: String,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    parseDispatcher: CoroutineDispatcher? = null,
+    onLoading: (@Composable () -> Unit)? = null,
+    onError: (@Composable (Throwable) -> Unit)? = null,
+)
+```
+
+**额外参数**
+
+- `parseDispatcher`：用于解析的 `CoroutineDispatcher`。默认为 `MarkdownThreadPool.dispatcher`。
+- `onLoading`：解析过程中显示的可选可组合函数。
+
+---
+
+### MarkdownText（节点）
+
+预解析版本，直接接受 flexmark `Node` 对象。
+
+**函数签名**（来自 `MarkdownText.kt`）：
+
+```kotlin
+@Composable
+fun MarkdownText(
+    node: Node,
+    markdownRenderConfig: MarkdownRenderConfig,
+    modifier: Modifier = Modifier,
+    showNotSupportedText: Boolean = false,
+    actionHandler: ActionHandler? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+)
+```
+
+**注意**
+
+- `Node` 实例通常通过 `markdownRenderConfig.parser.parse(content)` 获得。
+- 此重载不处理加载或错误状态，需要自行管理。
 
 ---
 

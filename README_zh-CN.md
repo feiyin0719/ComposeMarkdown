@@ -15,6 +15,7 @@
 - [快速开始](#-快速开始)
 - [核心组件](#-核心组件)
 - [样式定制](#-样式定制)
+- [MarkdownText（文本渲染模式）](#-markdowntext文本渲染模式)
 - [高级特性](#-高级特性)
 - [插件](#-插件)
 - [API 概览](#-api-概览)
@@ -293,6 +294,64 @@ val markdownTheme =
 ```
 
 你可以将该主题传入 `MarkdownRenderConfig.Builder().markdownTheme(markdownTheme)`。
+
+## 📝 MarkdownText（文本渲染模式）
+
+`MarkdownText` 是一种替代渲染方式，它将整个 Markdown 文档通过单个 `RichText` 可组合函数渲染，不同于 `MarkdownView` 将每个块作为 `Column` 中独立的可组合函数渲染。
+
+**核心优势**：像 Compose 原生 `Text` 一样使用——支持 `maxLines`、`overflow` 等标准文本参数。你可以限制显示行数（例如 `maxLines = 3` 配合 `overflow = TextOverflow.Ellipsis`）来创建可折叠的预览效果，就像使用普通 `Text` 一样。同时支持跨段落文本选择，只需包裹在 `SelectionContainer` 中即可。
+
+非文本块（代码块、引用块、列表、表格等）作为内联内容嵌入，根据实际内容自动调整大小。
+
+### 使用方法
+
+```kotlin
+// 行数限制的预览（像 Text 一样）
+MarkdownText(
+    content = markdownContent,
+    modifier = Modifier.padding(16.dp),
+    maxLines = 3,
+    overflow = TextOverflow.Ellipsis,
+)
+
+// 完整渲染并支持文本选择
+SelectionContainer {
+    MarkdownText(
+        content = markdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.padding(16.dp),
+        actionHandler = object : ActionHandler {
+            override fun handleUrlClick(url: String, node: Node) {
+                // 处理链接点击
+            }
+        },
+    )
+}
+```
+
+### 三种重载
+
+| 重载 | 关键参数 | 适用场景 |
+|----------|--------------|----------|
+| **同步** | `content: String` | 小型/中型文档，立即解析 |
+| **异步** | `content: String` + `parseDispatcher` | 大型文档，后台解析并支持 `onLoading` |
+| **预解析** | `node: Node` | 自行管理解析逻辑 |
+
+### 文本参数
+
+`MarkdownText` 支持标准 Compose 文本参数：
+
+- `overflow` — 视觉溢出处理方式（`TextOverflow.Clip`、`Ellipsis` 等）
+- `softWrap` — 是否在软换行处断行
+- `textAlign` — 文本对齐方式
+- `maxLines` / `minLines` — 行数约束
+- `letterSpacing` — 字间距
+- `textDecoration` — 文本装饰（下划线、删除线）
+- `onTextLayout` — 文本布局结果回调
+
+> **何时使用哪种？**
+> - 当你需要独立的块布局且不需要跨段落选择时，使用 `MarkdownView`。
+> - 当你需要行数限制（`maxLines`）、文本溢出控制或跨段落文本选择时，使用 `MarkdownText`——它的行为和标准 Compose `Text` 一样。
 
 ## 🔧 高级特性
 

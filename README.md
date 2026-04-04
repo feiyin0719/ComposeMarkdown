@@ -16,6 +16,7 @@ Markdown syntax and custom styling.
 - [Quick Start](#-quick-start)
 - [Core Components](#-core-components)
 - [Style Customization](#-style-customization)
+- [MarkdownText (Text-based Rendering)](#-markdowntext-text-based-rendering)
 - [Advanced Features](#-advanced-features)
 - [Plugins](#-plugins)
 - [API Overview](#-api-overview)
@@ -310,6 +311,64 @@ val markdownTheme =
 ```
 
 You can pass this theme into `MarkdownRenderConfig.Builder().markdownTheme(markdownTheme)`.
+
+## 📝 MarkdownText (Text-based Rendering)
+
+`MarkdownText` is an alternative rendering approach that renders the entire Markdown document through a single `RichText` composable, unlike `MarkdownView` which renders each block as a separate composable in a `Column`.
+
+**Key advantage**: Works just like Compose's built-in `Text` — supports `maxLines`, `overflow`, and other standard text parameters. You can limit the number of displayed lines (e.g., `maxLines = 3` with `overflow = TextOverflow.Ellipsis`) to create collapsible previews, just as you would with a regular `Text` composable. It also enables cross-paragraph text selection when wrapped in `SelectionContainer`.
+
+Non-text blocks (code blocks, block quotes, lists, tables, etc.) are embedded as inline content that adjusts its size based on actual content.
+
+### Usage
+
+```kotlin
+// Line-limited preview (like Text)
+MarkdownText(
+    content = markdownContent,
+    modifier = Modifier.padding(16.dp),
+    maxLines = 3,
+    overflow = TextOverflow.Ellipsis,
+)
+
+// Full rendering with text selection
+SelectionContainer {
+    MarkdownText(
+        content = markdownContent,
+        markdownRenderConfig = config,
+        modifier = Modifier.padding(16.dp),
+        actionHandler = object : ActionHandler {
+            override fun handleUrlClick(url: String, node: Node) {
+                // Handle link clicks
+            }
+        },
+    )
+}
+```
+
+### Three Overloads
+
+| Overload | Key Parameter | Use Case |
+|----------|--------------|----------|
+| **Sync** | `content: String` | Small/medium documents, instant parsing |
+| **Async** | `content: String` + `parseDispatcher` | Large documents, background parsing with `onLoading` |
+| **Pre-parsed** | `node: Node` | When you manage parsing yourself |
+
+### Text Parameters
+
+`MarkdownText` supports standard Compose text parameters:
+
+- `overflow` — How to handle visual overflow (`TextOverflow.Clip`, `Ellipsis`, etc.)
+- `softWrap` — Whether to break text at soft line breaks
+- `textAlign` — Text alignment
+- `maxLines` / `minLines` — Line count constraints
+- `letterSpacing` — Spacing between characters
+- `textDecoration` — Text decorations (underline, strikethrough)
+- `onTextLayout` — Callback for text layout results
+
+> **When to use which?**
+> - Use `MarkdownView` when you need independent block layout and don't need cross-paragraph selection.
+> - Use `MarkdownText` when you need line count limits (`maxLines`), text overflow control, or cross-paragraph text selection — it behaves like a standard Compose `Text`.
 
 ## 🔧 Advanced Features
 
