@@ -95,7 +95,9 @@ fun LatexMathExample(
                 which solves ${'$'}ax^2 + bx + c = 0$.
                 
                 Multiple math segments in one line: Speed is ${'$'}v=\frac{d}{t}$, force is ${'$'}F=ma$, energy is ${'$'}E=mc^2$.
-                
+
+                URL with math in same paragraph: The integral ${'$'}\int_{0}^{\infty} \frac{x^2}{e^x - 1} dx = \frac{\pi^4}{15}$ is derived at [Wikipedia](https://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law), where ${'$'}\sum_{n=1}^{\infty} \frac{1}{n^4} = \frac{\pi^4}{90}$.
+
                 ---
                 ${"$$"} a^2 + b^2 = c^2 ${"$$"}
                 

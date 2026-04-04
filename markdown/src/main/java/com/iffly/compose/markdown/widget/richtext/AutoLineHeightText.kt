@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -126,7 +127,7 @@ private fun rememberAdjustedText(text: AnnotatedString): Pair<AnnotatedString, M
         }.distinctUntilChanged()
             .mapNotNull { layoutResult ->
                 layoutResult?.let {
-                    if (adjustedText != it.layoutInput.text) {
+                    if (!adjustedText.hasEqualLayoutText(it.layoutInput.text)) {
                         // Text has changed, skip processing
                         return@let null
                     }
@@ -161,24 +162,39 @@ private fun buildAdjustLineHeightText(
                     it.startIndex
                 }.fastForEach {
                     if (it.startIndex > lastIndex) {
-                        // add new ParagraphStyle will create a new line, so we need to remove the last line separator
-                        // to avoid extra empty line
-                        appendAndRemoveLastLineSeparator(
-                            currentText.subSequence(
-                                lastIndex,
+                        // Plain text segment
+                        val plainText = currentText.subSequence(lastIndex, it.startIndex)
+                        if (plainText.lastOrNull() == '\n' &&
+                            wouldSplitParagraphAnnotation(
+                                currentText,
+                                it.startIndex - 1,
                                 it.startIndex,
-                            ),
-                        )
+                            )
+                        ) {
+                            // Drop trailing \n to avoid splitting paragraph annotation
+                            append(currentText.subSequence(lastIndex, it.startIndex - 1))
+                        } else {
+                            append(plainText)
+                        }
                     }
-                    withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
-                        // add new ParagraphStyle will create a new line, so we need to remove the last line separator
-                        // to avoid extra empty line
-                        appendAndRemoveLastLineSeparator(
-                            currentText.subSequence(
-                                it.startIndex,
-                                it.endIndex,
-                            ),
+                    // Adjusted segment
+                    val segmentText = currentText.subSequence(it.startIndex, it.endIndex)
+                    val endsWithNewline = segmentText.lastOrNull() == '\n'
+                    if (endsWithNewline &&
+                        wouldSplitParagraphAnnotation(
+                            currentText,
+                            it.endIndex - 1,
+                            it.endIndex,
                         )
+                    ) {
+                        // Drop trailing \n to avoid splitting paragraph annotation
+                        withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
+                            append(segmentText.subSequence(0, segmentText.length - 1))
+                        }
+                    } else {
+                        withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
+                            append(segmentText)
+                        }
                     }
                     lastIndex = it.endIndex
                 }
@@ -189,11 +205,82 @@ private fun buildAdjustLineHeightText(
     return newText
 }
 
-private fun AnnotatedString.Builder.appendAndRemoveLastLineSeparator(subSegment: AnnotatedString) {
-    if (subSegment.lastOrNull() == '\n') {
-        append(subSegment.subSequence(0, subSegment.length - 1))
-    } else {
-        append(subSegment)
+/**
+ * Check if a \n at [newlinePos] would split a ParagraphStyle annotation.
+ * Returns true if any ParagraphStyle annotation in [currentText] covers
+ * the \n position AND extends beyond [segmentEnd].
+ */
+private fun wouldSplitParagraphAnnotation(
+    currentText: AnnotatedString,
+    newlinePos: Int,
+    segmentEnd: Int,
+): Boolean {
+    val styles = currentText.paragraphStyles
+    if (styles.isEmpty()) return false
+    // Binary search: find last style with start <= newlinePos
+    var low = 0
+    var high = styles.size - 1
+    var idx = -1
+    while (low <= high) {
+        val mid = (low + high) ushr 1
+        if (styles[mid].start <= newlinePos) {
+            idx = mid
+            low = mid + 1
+        } else {
+            high = mid - 1
+        }
+    }
+    if (idx == -1) return false
+    val ps = styles[idx]
+    return newlinePos < ps.end && ps.end > segmentEnd
+}
+
+/**
+ * Compare two AnnotatedStrings for layout equality.
+ * Compares all annotations, but for LinkAnnotation excludes linkInteractionListener
+ * (onClick lambdas that change on recomposition without affecting layout).
+ */
+private fun AnnotatedString.hasEqualLayoutText(other: AnnotatedString): Boolean {
+    if (this.text != other.text) return false
+    if (this.getStringAnnotations(0, this.text.length) !=
+        other.getStringAnnotations(0, other.text.length)
+    ) {
+        return false
+    }
+    if (!this.hasEqualLinkAnnotations(other)) return false
+    return true
+}
+
+/**
+ * Compare LinkAnnotations between two AnnotatedStrings, ignoring linkInteractionListener.
+ */
+private fun AnnotatedString.hasEqualLinkAnnotations(other: AnnotatedString): Boolean {
+    val thisLinks = this.getLinkAnnotations(0, this.text.length)
+    val otherLinks = other.getLinkAnnotations(0, other.text.length)
+    if (thisLinks.size != otherLinks.size) return false
+    return thisLinks.zip(otherLinks).all { (a, b) ->
+        a.start == b.start && a.end == b.end && a.tag == b.tag &&
+                a.item.equalsIgnoringListener(b.item)
+    }
+}
+
+private fun LinkAnnotation.equalsIgnoringListener(other: LinkAnnotation): Boolean {
+    if (this::class != other::class) return false
+    return when (this) {
+        is LinkAnnotation.Url -> {
+            other as LinkAnnotation.Url
+            this.url == other.url && this.styles == other.styles
+        }
+
+        is LinkAnnotation.Clickable -> {
+            other as LinkAnnotation.Clickable
+            this.tag == other.tag && this.styles == other.styles
+        }
+
+        else -> {
+            // For any other LinkAnnotation types, fall back to full equality check
+            this == other
+        }
     }
 }
 
