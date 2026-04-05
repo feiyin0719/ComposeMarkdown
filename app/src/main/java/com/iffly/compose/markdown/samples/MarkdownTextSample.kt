@@ -29,7 +29,6 @@ fun MarkdownTextExample(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState()),
     ) {
-
         SelectionContainer {
             MarkdownText(
                 content =
@@ -82,9 +81,10 @@ fun MarkdownTextExample(
                     *End of MarkdownText example.*
                     """.trimIndent(),
                 markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .wrapContentHeight(),
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .wrapContentHeight(),
                 actionHandler =
                     object : ActionHandler {
                         override fun handleUrlClick(

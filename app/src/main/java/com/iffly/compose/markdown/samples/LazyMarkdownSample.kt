@@ -60,15 +60,17 @@ fun LazyMarkdownExample(
         errorMessage?.let { error ->
             Text(text = error)
         } ?: markdownFile?.let { file ->
-            val config = remember {
-                MarkdownRenderConfig.Builder()
-                    .addPlugin(TableMarkdownPlugin())
-                     .addPlugin(HtmlMarkdownPlugin())
-                    .addPlugin(ImageMarkdownPlugin())
-                    .addPlugin(MarkdownMathPlugin())
-                    .addPlugin(TaskMarkdownRenderPlugin())
-                    .build()
-            }
+            val config =
+                remember {
+                    MarkdownRenderConfig
+                        .Builder()
+                        .addPlugin(TableMarkdownPlugin())
+                        .addPlugin(HtmlMarkdownPlugin())
+                        .addPlugin(ImageMarkdownPlugin())
+                        .addPlugin(MarkdownMathPlugin())
+                        .addPlugin(TaskMarkdownRenderPlugin())
+                        .build()
+                }
 
             LazyMarkdownView(
                 file = file,
