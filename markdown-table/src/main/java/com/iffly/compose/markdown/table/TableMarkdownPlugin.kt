@@ -15,7 +15,6 @@ import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.vladsch.flexmark.ext.tables.TableBlock
 import com.vladsch.flexmark.ext.tables.TableCell
-import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.Extension
@@ -70,6 +69,6 @@ class TableMarkdownPlugin(
 
     override fun extensions(): List<Extension> =
         listOf(
-            TablesExtension.create(),
+            SafeTablesExtension.create(),
         )
 }

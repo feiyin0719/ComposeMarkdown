@@ -16,6 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.LazyMarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.html.HtmlMarkdownPlugin
+import com.iffly.compose.markdown.image.ImageMarkdownPlugin
+import com.iffly.compose.markdown.latex.MarkdownMathPlugin
+import com.iffly.compose.markdown.table.TableMarkdownPlugin
+import com.iffly.compose.markdown.task.TaskMarkdownRenderPlugin
 import java.io.File
 import java.io.FileOutputStream
 
@@ -55,7 +60,15 @@ fun LazyMarkdownExample(
         errorMessage?.let { error ->
             Text(text = error)
         } ?: markdownFile?.let { file ->
-            val config = MarkdownRenderConfig.Builder().build()
+            val config = remember {
+                MarkdownRenderConfig.Builder()
+                    .addPlugin(TableMarkdownPlugin())
+                     .addPlugin(HtmlMarkdownPlugin())
+                    .addPlugin(ImageMarkdownPlugin())
+                    .addPlugin(MarkdownMathPlugin())
+                    .addPlugin(TaskMarkdownRenderPlugin())
+                    .build()
+            }
 
             LazyMarkdownView(
                 file = file,
