@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.iffly.compose.markdown"
+    namespace = "com.iffly.compose.markdown.app"
     compileSdk = 36
 
     defaultConfig {
