@@ -96,7 +96,9 @@ fun MarkdownBlock(
 
     val renderer = renderRegistry.getBlockRenderer(node::class.java)
     if (renderer != null) {
-        renderer.Invoke(node, modifier)
+        if (!renderer.shouldSkipRender(node)) {
+            renderer.Invoke(node, modifier)
+        }
     } else {
         // Fallback to rendering children if no renderer is found
         Log.i(
@@ -144,17 +146,22 @@ fun MarkdownChildren(
 ) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
         onBeforeAll?.invoke(parent)
+        val renderRegistry = currentRenderRegistry()
         var child = parent.firstChild
         while (child != null) {
-            key(child) {
-                onBeforeChild?.invoke(child, parent)
-                MarkdownContent(
-                    node = child,
-                    modifier = childModifierFactory(child),
-                )
-                onAfterChild?.invoke(child, parent)
-                if (child.next != null && showSpacer) {
-                    Spacer(Modifier.height(spacerHeight))
+            val isBlock = child is Block
+            val skip = isBlock && renderRegistry.shouldSkipRender(child as Block)
+            if (!skip) {
+                key(child) {
+                    onBeforeChild?.invoke(child, parent)
+                    MarkdownContent(
+                        node = child,
+                        modifier = childModifierFactory(child),
+                    )
+                    onAfterChild?.invoke(child, parent)
+                    if (child.next != null && showSpacer) {
+                        Spacer(Modifier.height(spacerHeight))
+                    }
                 }
             }
             child = child.next

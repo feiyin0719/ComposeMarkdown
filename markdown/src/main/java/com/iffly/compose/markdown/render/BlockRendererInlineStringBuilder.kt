@@ -126,19 +126,24 @@ private fun AnnotatedString.Builder.appendSpacer(
     markdownTheme: MarkdownTheme,
     nodeStringBuilderContext: NodeStringBuilderContext,
 ) {
-    val spacerHeightSp = with(nodeStringBuilderContext.layoutContext.density) {
-        markdownTheme.spacerTheme.spacerHeight.toSp().times(0.9)
-    }
+    val spacerHeightSp =
+        with(nodeStringBuilderContext.layoutContext.density) {
+            markdownTheme.spacerTheme.spacerHeight
+                .toSp()
+                .times(0.9)
+        }
     withStyle(
         ParagraphStyle(
             lineHeight = spacerHeightSp,
-            lineHeightStyle = LineHeightStyle(
-                alignment = LineHeightStyle.Alignment.Center,
-                trim = LineHeightStyle.Trim.Both,
-            ),
-            platformStyle = PlatformParagraphStyle(
-                includeFontPadding = false,
-            ),
+            lineHeightStyle =
+                LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+            platformStyle =
+                PlatformParagraphStyle(
+                    includeFontPadding = false,
+                ),
         ),
     ) {
         withStyle(

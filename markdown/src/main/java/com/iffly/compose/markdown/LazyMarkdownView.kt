@@ -20,6 +20,7 @@ import com.iffly.compose.markdown.chunkloader.MarkdownChunkLoader
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownContent
+import com.vladsch.flexmark.util.ast.Block
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.io.File
 
@@ -118,17 +119,21 @@ fun LazyMarkdownView(
         actionHandler = actionHandler,
     ) {
         val theme = markdownRenderConfig.markdownTheme
+        val renderRegistry = markdownRenderConfig.renderRegistry
         LazyColumn(
             modifier = modifier,
             state = listState,
         ) {
             itemsIndexed(nodes, key = { index, node -> System.identityHashCode(node) }) { index, node ->
-                MarkdownContent(
-                    node = node,
-                    modifier = Modifier,
-                )
-                if (index != nodes.lastIndex && theme.spacerTheme.showSpacer) {
-                    Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+                val skip = node is Block && renderRegistry.shouldSkipRender(node)
+                if (!skip) {
+                    MarkdownContent(
+                        node = node,
+                        modifier = Modifier,
+                    )
+                    if (index != nodes.lastIndex && theme.spacerTheme.showSpacer) {
+                        Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+                    }
                 }
             }
         }

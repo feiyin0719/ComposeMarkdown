@@ -260,7 +260,7 @@ private fun AnnotatedString.hasEqualLinkAnnotations(other: AnnotatedString): Boo
     if (thisLinks.size != otherLinks.size) return false
     return thisLinks.zip(otherLinks).all { (a, b) ->
         a.start == b.start && a.end == b.end && a.tag == b.tag &&
-                a.item.equalsIgnoringListener(b.item)
+            a.item.equalsIgnoringListener(b.item)
     }
 }
 

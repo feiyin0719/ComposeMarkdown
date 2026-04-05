@@ -11,6 +11,13 @@ import com.vladsch.flexmark.util.ast.Block
  */
 interface IBlockRenderer<in T> where T : Block {
     /**
+     * Whether to skip rendering for the given node entirely.
+     * When true, the block will not be rendered and no spacer will be added around it.
+     * Default is false.
+     */
+    fun shouldSkipRender(node: T): Boolean = false
+
+    /**
      * Composable function to render the given block node.
      * @param node The block node to render.
      * @param modifier Modifier to be applied to the rendered content.

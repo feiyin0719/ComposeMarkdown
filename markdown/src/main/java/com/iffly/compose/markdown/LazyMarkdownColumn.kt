@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.render.MarkdownContent
+import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 
 /**
@@ -58,17 +59,21 @@ fun LazyMarkdownColumn(
         actionHandler = actionHandler,
     ) {
         val theme = markdownRenderConfig.markdownTheme
+        val renderRegistry = markdownRenderConfig.renderRegistry
         LazyColumn(
             modifier = modifier,
             state = lazyListState,
         ) {
             itemsIndexed(children, key = { index, node -> System.identityHashCode(node) }) { index, node ->
-                MarkdownContent(
-                    node = node,
-                    modifier = Modifier,
-                )
-                if (index != children.lastIndex && theme.spacerTheme.showSpacer) {
-                    Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+                val skip = node is Block && renderRegistry.shouldSkipRender(node)
+                if (!skip) {
+                    MarkdownContent(
+                        node = node,
+                        modifier = Modifier,
+                    )
+                    if (index != children.lastIndex && theme.spacerTheme.showSpacer) {
+                        Spacer(Modifier.height(theme.spacerTheme.spacerHeight))
+                    }
                 }
             }
         }
