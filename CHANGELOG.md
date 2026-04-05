@@ -37,7 +37,7 @@ first, then runs inline parsing on each cell independently.
 
 #### `AutoLineHeightText` recomposition stability
 - Fixed `AnnotatedString` equality check: excluded `LinkAnnotation` listeners that
-  change on every recomposition, preventing unnecessary re-layout
+  change on every recomposition, which caused the line height adjustment calculation to be skipped
 - Fixed trailing newline removal logic: replaced unconditional removal with a binary
   search check to avoid truncating `ParagraphStyle` annotations
 
@@ -74,5 +74,5 @@ MarkdownText(
 再对每个单元格独立执行 inline 解析。
 
 #### `AutoLineHeightText` 重组稳定性
-- 修复 `AnnotatedString` 相等性判断：排除每次重组都会变化的 `LinkAnnotation` 回调，避免不必要的重新布局
+- 修复 `AnnotatedString` 相等性判断：排除每次重组都会变化的 `LinkAnnotation` 回调，该问题会导致行高调整计算被跳过
 - 修复段落尾部换行符移除逻辑，改用二分查找精确判断是否会截断 `ParagraphStyle` 注解
