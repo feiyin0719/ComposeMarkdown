@@ -153,57 +153,46 @@ private fun rememberAdjustedText(text: AnnotatedString): Pair<AnnotatedString, M
 private fun buildAdjustLineHeightText(
     currentText: AnnotatedString,
     requests: List<AdjustLineHeightRequest>,
-): AnnotatedString {
-    val newText =
-        buildAnnotatedString {
-            var lastIndex = 0
-            requests
-                .sortedBy {
-                    it.startIndex
-                }.fastForEach {
-                    if (it.startIndex > lastIndex) {
-                        // Plain text segment
-                        val plainText = currentText.subSequence(lastIndex, it.startIndex)
-                        if (plainText.lastOrNull() == '\n' &&
-                            wouldSplitParagraphAnnotation(
-                                currentText,
-                                it.startIndex - 1,
-                                it.startIndex,
-                            )
-                        ) {
-                            // Drop trailing \n to avoid splitting paragraph annotation
-                            append(currentText.subSequence(lastIndex, it.startIndex - 1))
-                        } else {
-                            append(plainText)
-                        }
-                    }
-                    // Adjusted segment
-                    val segmentText = currentText.subSequence(it.startIndex, it.endIndex)
-                    val endsWithNewline = segmentText.lastOrNull() == '\n'
-                    if (endsWithNewline &&
-                        wouldSplitParagraphAnnotation(
-                            currentText,
-                            it.endIndex - 1,
-                            it.endIndex,
-                        )
-                    ) {
-                        // Drop trailing \n to avoid splitting paragraph annotation
-                        withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
-                            append(segmentText.subSequence(0, segmentText.length - 1))
-                        }
-                    } else {
-                        withStyle(ParagraphStyle(lineHeight = it.lineHeight)) {
-                            append(segmentText)
-                        }
-                    }
-                    lastIndex = it.endIndex
+): AnnotatedString =
+    buildAnnotatedString {
+        var lastIndex = 0
+        requests.sortedBy { it.startIndex }.fastForEach { request ->
+            // 1. Append plain text gap before this request
+            if (request.startIndex > lastIndex) {
+                val gapEnd = request.startIndex
+                if (currentText[gapEnd - 1] == '\n' &&
+                    wouldSplitParagraphAnnotation(currentText, gapEnd - 1, gapEnd)
+                ) {
+                    // Drop trailing \n to avoid splitting paragraph annotation
+                    if (gapEnd - 1 > lastIndex) append(currentText.subSequence(lastIndex, gapEnd - 1))
+                } else {
+                    append(currentText.subSequence(lastIndex, gapEnd))
                 }
-            if (lastIndex < currentText.length) {
-                append(currentText.subSequence(lastIndex, currentText.length))
             }
+
+            // 2. Append adjusted segment with modified lineHeight
+            val endsWithNewline = currentText[request.endIndex - 1] == '\n'
+            val contentEnd = if (endsWithNewline) request.endIndex - 1 else request.endIndex
+            // Apply adjusted lineHeight only to content (excluding trailing \n)
+            if (request.startIndex < contentEnd) {
+                withStyle(ParagraphStyle(lineHeight = request.lineHeight)) {
+                    append(currentText.subSequence(request.startIndex, contentEnd))
+                }
+            }
+            // Trailing \n keeps original lineHeight, or is dropped if it would split paragraph
+            if (endsWithNewline &&
+                !wouldSplitParagraphAnnotation(currentText, request.endIndex - 1, request.endIndex)
+            ) {
+                append(currentText.subSequence(contentEnd, request.endIndex))
+            }
+
+            lastIndex = request.endIndex
         }
-    return newText
-}
+        // 3. Append remaining text after last request
+        if (lastIndex < currentText.length) {
+            append(currentText.subSequence(lastIndex, currentText.length))
+        }
+    }
 
 /**
  * Check if a \n at [newlinePos] would split a ParagraphStyle annotation.
