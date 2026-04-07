@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.8
+
+### Bug Fixes
+
+#### `AutoLineHeightText` Bounds Check
+- Added guard check for `startIndex < contentEnd` in `buildAdjustLineHeightText`
+  to prevent `IllegalArgumentException` when trailing newline causes `contentEnd`
+  to equal or precede `startIndex` (e.g. placeholder alternateText containing `\n`)
+
+---
+
+## 更新日志
+
+## 0.1.8
+
+### Bug 修复
+
+#### `AutoLineHeightText` 边界检查
+- 在 `buildAdjustLineHeightText` 中增加 `startIndex < contentEnd` 的边界检查，
+  防止尾部换行符导致 `contentEnd` 等于或小于 `startIndex` 时抛出
+  `IllegalArgumentException`（例如 placeholder 的 alternateText 包含 `\n` 的情况）
+
+---
+
 ## 0.1.7
 
 ### New Features
