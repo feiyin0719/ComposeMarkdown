@@ -98,4 +98,10 @@ val markdownExamples =
         ) { paddingValues ->
             MarkdownTextExample(paddingValues)
         },
+        MarkdownExample(
+            title = "List Layout Test",
+            description = "Tests list rendering with long text, mixed languages, deep nesting, and inline styles",
+        ) { paddingValues ->
+            ListLayoutTestExample(paddingValues)
+        },
     )

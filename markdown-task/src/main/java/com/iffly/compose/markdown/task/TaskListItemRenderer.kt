@@ -1,26 +1,32 @@
 package com.iffly.compose.markdown.task
 
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
 import com.iffly.compose.markdown.core.renders.BaseListItemRenderer
 import com.iffly.compose.markdown.core.renders.ListItemMarkerRenderer
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
 
 /**
  * The default marker renderer for task list items.
+ * Draws a checkbox marker (☑ or ☐) using [drawText].
  * @see ListItemMarkerRenderer
  */
 class TaskListMarkerRenderer : ListItemMarkerRenderer<TaskListItem> {
-    @Composable
-    override fun invoke(
+    override fun measureMarker(
+        textMeasurer: TextMeasurer,
         node: TaskListItem,
-        modifier: Modifier,
-    ) {
-        BasicText(
-            text = if (node.isItemDoneMarker) "☑" else "☐",
-            modifier = modifier,
-        )
+        style: TextStyle,
+    ): TextLayoutResult {
+        val marker = if (node.isItemDoneMarker) "☑" else "☐"
+        return textMeasurer.measure(marker, style)
+    }
+
+    override fun DrawScope.drawMarker(textLayoutResult: TextLayoutResult) {
+        drawText(textLayoutResult, topLeft = Offset(0f, 0f))
     }
 }
 
