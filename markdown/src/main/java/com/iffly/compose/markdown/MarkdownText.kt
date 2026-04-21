@@ -352,7 +352,7 @@ private fun MarkdownTextContent(
             minLines = minLines,
             letterSpacing = letterSpacing,
             textDecoration = textDecoration,
-            onTextLayout = onTextLayout,
+            onTextLayout = { _, result -> onTextLayout(result) },
         )
     }
 }

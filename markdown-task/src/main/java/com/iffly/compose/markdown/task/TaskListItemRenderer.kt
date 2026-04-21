@@ -7,7 +7,9 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import com.iffly.compose.markdown.core.renders.BaseListItemRenderer
+import com.iffly.compose.markdown.core.renders.FirstLineMetrics
 import com.iffly.compose.markdown.core.renders.ListItemMarkerRenderer
+import com.iffly.compose.markdown.style.MarkerAlignment
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
 
 /**
@@ -25,8 +27,13 @@ class TaskListMarkerRenderer : ListItemMarkerRenderer<TaskListItem> {
         return textMeasurer.measure(marker, style)
     }
 
-    override fun DrawScope.drawMarker(textLayoutResult: TextLayoutResult) {
-        drawText(textLayoutResult, topLeft = Offset(0f, 0f))
+    override fun DrawScope.drawMarker(
+        textLayoutResult: TextLayoutResult,
+        firstLineMetrics: FirstLineMetrics,
+        alignment: MarkerAlignment,
+    ) {
+        val yOffset = firstLineMetrics.computeMarkerYOffset(textLayoutResult, alignment)
+        drawText(textLayoutResult, topLeft = Offset(0f, yOffset))
     }
 }
 

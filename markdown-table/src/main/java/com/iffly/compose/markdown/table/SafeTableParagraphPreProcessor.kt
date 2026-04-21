@@ -14,8 +14,11 @@ import com.vladsch.flexmark.parser.block.ParagraphPreProcessorFactory
 import com.vladsch.flexmark.parser.block.ParserState
 import com.vladsch.flexmark.parser.core.ReferencePreProcessorFactory
 import com.vladsch.flexmark.util.ast.DoNotDecorate
+import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.data.DataHolder
 import com.vladsch.flexmark.util.sequence.BasedSequence
+import java.util.Locale
+import java.util.regex.Pattern
 
 /**
  * A safe replacement for Flexmark's TableParagraphPreProcessor that splits table rows
@@ -96,7 +99,7 @@ internal class SafeTableParagraphPreProcessor(
         val separatorColumns = alignments.size
 
         val tableBlock = TableBlock(tableLines)
-        var section: com.vladsch.flexmark.util.ast.Node =
+        var section: Node =
             TableHead(tableLines[0].subSequence(0, 0))
         tableBlock.appendChild(section)
 
@@ -242,13 +245,13 @@ internal class SafeTableParagraphPreProcessor(
                 override fun apply(state: ParserState): ParagraphPreProcessor = SafeTableParagraphPreProcessor(state.properties)
             }
 
-        internal fun getTableHeaderSeparator(minColumnDashes: Int): java.util.regex.Pattern {
+        internal fun getTableHeaderSeparator(minColumnDashes: Int): Pattern {
             val minCol = if (minColumnDashes >= 1) minColumnDashes else 1
             val minColDash = if (minColumnDashes >= 2) minColumnDashes - 1 else 1
             val minColDashes = if (minColumnDashes >= 3) minColumnDashes - 2 else 1
             val col =
                 String.format(
-                    java.util.Locale.US,
+                    Locale.US,
                     "(?:\\s*-{%d,}\\s*|\\s*:-{%d,}\\s*|\\s*-{%d,}:\\s*|\\s*:-{%d,}:\\s*)",
                     minCol,
                     minColDash,
@@ -256,8 +259,7 @@ internal class SafeTableParagraphPreProcessor(
                     minColDashes,
                 )
             val regex = "\\|${col}\\|?\\s*|${col}\\|\\s*|\\|?(?:${col}\\|)+${col}\\|?\\s*"
-            return java.util.regex.Pattern
-                .compile(regex)
+            return Pattern.compile(regex)
         }
 
         /**

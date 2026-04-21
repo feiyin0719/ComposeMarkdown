@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -21,9 +22,11 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import com.iffly.compose.markdown.config.LocalNodeDataMap
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.MarkdownChildren
+import com.iffly.compose.markdown.style.MarkerAlignment
 import com.iffly.compose.markdown.util.StringExt.FIGURE_SPACE
 import com.iffly.compose.markdown.util.getIndentLevel
 import com.iffly.compose.markdown.util.getMarkerText
@@ -71,6 +74,74 @@ class OrderedListRenderer : ListRenderer<OrderedList>()
 class BulletListRenderer : ListRenderer<BulletList>()
 
 /**
+ * Layout metrics of the first line of text inside a ListItem content area.
+ * Used to vertically align the list marker with the first line of text.
+ *
+ * All coordinates are relative to the ListItem's content area origin.
+ */
+@Immutable
+data class FirstLineMetrics(
+    /** Top of the first line, in pixels. */
+    val top: Float,
+    /** Bottom of the first line, in pixels. */
+    val bottom: Float,
+    /** Baseline of the first line, in pixels. */
+    val baseline: Float,
+) {
+    companion object {
+        val Unspecified = FirstLineMetrics(0f, 0f, 0f)
+
+        /**
+         * Extract [FirstLineMetrics] from a [TextLayoutResult].
+         * Returns [Unspecified] if the result has no lines.
+         */
+        fun fromTextLayoutResult(textLayoutResult: TextLayoutResult): FirstLineMetrics =
+            if (textLayoutResult.lineCount > 0) {
+                FirstLineMetrics(
+                    top = textLayoutResult.getLineTop(0),
+                    bottom = textLayoutResult.getLineBottom(0),
+                    baseline = textLayoutResult.getLineBaseline(0),
+                )
+            } else {
+                Unspecified
+            }
+    }
+
+    /**
+     * Compute the vertical offset for the marker based on the given [MarkerAlignment].
+     * @param markerTextLayoutResult The layout result of the marker text.
+     * @param alignment The desired alignment mode.
+     * @return The y-offset to apply when drawing the marker.
+     */
+    fun computeMarkerYOffset(
+        markerTextLayoutResult: TextLayoutResult,
+        alignment: MarkerAlignment,
+    ): Float {
+        if (markerTextLayoutResult.lineCount == 0) return 0f
+        return when (alignment) {
+            MarkerAlignment.Top -> {
+                top - markerTextLayoutResult.getLineTop(0)
+            }
+
+            MarkerAlignment.Bottom -> {
+                bottom - markerTextLayoutResult.getLineBottom(0)
+            }
+
+            MarkerAlignment.Center -> {
+                val contentCenter = (top + bottom) / 2f
+                val markerCenter =
+                    (markerTextLayoutResult.getLineTop(0) + markerTextLayoutResult.getLineBottom(0)) / 2f
+                contentCenter - markerCenter
+            }
+
+            MarkerAlignment.Baseline -> {
+                baseline - markerTextLayoutResult.getLineBaseline(0)
+            }
+        }
+    }
+}
+
+/**
  * Interface for rendering ListItem markers via [DrawScope].
  * The marker is drawn on canvas instead of being a separate composable,
  * so it does not participate in text selection and avoids extra `\n` when copying.
@@ -97,13 +168,21 @@ interface ListItemMarkerRenderer<in T : ListItem> {
     /**
      * Draw the marker in the given [DrawScope] using a pre-measured [TextLayoutResult].
      * @param textLayoutResult The result returned by [measureMarker].
+     * @param firstLineMetrics The first line metrics of the ListItem content text,
+     * used to vertically align the marker with the first line.
+     * @param alignment The vertical alignment mode for the marker.
      */
-    fun DrawScope.drawMarker(textLayoutResult: TextLayoutResult)
+    fun DrawScope.drawMarker(
+        textLayoutResult: TextLayoutResult,
+        firstLineMetrics: FirstLineMetrics,
+        alignment: MarkerAlignment = MarkerAlignment.Baseline,
+    )
 }
 
 /**
  * The default implementation of [ListItemMarkerRenderer].
- * Draws the bullet point or ordered number marker using [drawText].
+ * Draws the bullet point or ordered number marker using [drawText],
+ * aligned to the first line of text based on the given [MarkerAlignment].
  * @param T The type of ListItem.
  */
 class ListItemMarkerRendererImpl<T : ListItem> : ListItemMarkerRenderer<T> {
@@ -116,8 +195,13 @@ class ListItemMarkerRendererImpl<T : ListItem> : ListItemMarkerRenderer<T> {
         return textMeasurer.measure(marker, style)
     }
 
-    override fun DrawScope.drawMarker(textLayoutResult: TextLayoutResult) {
-        drawText(textLayoutResult, topLeft = Offset(0f, 0f))
+    override fun DrawScope.drawMarker(
+        textLayoutResult: TextLayoutResult,
+        firstLineMetrics: FirstLineMetrics,
+        alignment: MarkerAlignment,
+    ) {
+        val yOffset = firstLineMetrics.computeMarkerYOffset(textLayoutResult, alignment)
+        drawText(textLayoutResult, topLeft = Offset(0f, yOffset))
     }
 }
 
@@ -161,6 +245,8 @@ open class BaseListItemRenderer<T : ListItem>(
             )
         val markerOffset = markerTextLayoutResult.size.width + spacerWidthPx.toInt()
 
+        val nodeDataMap = LocalNodeDataMap.current
+
         Layout(
             content = {
                 if (node.parent?.firstChild != node && intentLevel > 0) {
@@ -185,8 +271,10 @@ open class BaseListItemRenderer<T : ListItem>(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .drawBehind {
+                        val metrics = nodeDataMap[node] as? FirstLineMetrics
+                        val alignment = if (metrics != null) listTheme.markerAlignment else MarkerAlignment.Top
                         with(markerRenderer) {
-                            drawMarker(markerTextLayoutResult)
+                            drawMarker(markerTextLayoutResult, metrics ?: FirstLineMetrics.Unspecified, alignment)
                         }
                     },
         ) { measurables, constraints ->

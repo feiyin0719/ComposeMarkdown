@@ -203,11 +203,29 @@ data class SpacerTheme(
 )
 
 /**
- * Theme for lists in Markdown.
+ * Vertical alignment of the list marker relative to the first line of content text.
+ */
+enum class MarkerAlignment {
+    /** Align the top of the marker with the top of the first line. */
+    Top,
+
+    /** Align the center of the marker with the center of the first line. */
+    Center,
+
+    /** Align the bottom of the marker with the bottom of the first line. */
+    Bottom,
+
+    /** Align the baseline of the marker with the baseline of the first line (default). */
+    Baseline,
+}
+
+/**
+ * Theme for list blocks.
  * @param markerSpacerWidth The width of the spacer between the marker and the content.
- * @param showSpacerInTightList Whether to show spacer in tight lists.
+ * @param showSpacerInTightList Whether to show the spacer in tight lists.
  * @param tightListSpacerHeight The height of the spacer in tight lists.
- * @param markerTextStyle The text style for the list markers.
+ * @param markerTextStyle The text style for the marker.
+ * @param markerAlignment The vertical alignment of the marker relative to the first line of content text.
  */
 @Immutable
 data class ListTheme(
@@ -220,6 +238,7 @@ data class ListTheme(
             fontSize = 17.sp,
             textAlign = TextAlign.End,
         ),
+    val markerAlignment: MarkerAlignment = MarkerAlignment.Baseline,
 )
 
 /**

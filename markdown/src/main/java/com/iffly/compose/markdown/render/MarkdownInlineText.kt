@@ -11,14 +11,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.config.LocalNodeDataMap
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTheme
 import com.iffly.compose.markdown.config.isShowNotSupported
+import com.iffly.compose.markdown.core.renders.FirstLineMetrics
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.contentText
 import com.iffly.compose.markdown.util.isInQuoteBlock
 import com.iffly.compose.markdown.widget.richtext.RichText
+import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.collections.immutable.toImmutableMap
 
@@ -146,6 +149,12 @@ private fun DefaultMarkdownInlineText(
             (textStyle ?: theme.textStyle).merge(
                 theme.blockQuoteTheme.textStyle.takeIf { isInQuote },
             )
+
+        val isFirstChildOfListItem =
+            parent.parent is ListItem && parent == parent.parent?.firstChild
+        val listItemNode = if (isFirstChildOfListItem) parent.parent else null
+        val nodeDataMap = if (listItemNode != null) LocalNodeDataMap.current else null
+
         RichText(
             text = text,
             inlineContent = inlineContentMap.toImmutableMap(),
@@ -155,6 +164,14 @@ private fun DefaultMarkdownInlineText(
                     .widthIn(minWidth, maxWidth),
             textAlign = textAlign,
             style = mergedTextStyle,
+            onTextLayout =
+                listItemNode?.let { targetNode ->
+                    { segmentIndex, textLayoutResult ->
+                        if (segmentIndex == 0) {
+                            nodeDataMap?.set(targetNode, FirstLineMetrics.fromTextLayoutResult(textLayoutResult))
+                        }
+                    }
+                },
         )
     }
 }

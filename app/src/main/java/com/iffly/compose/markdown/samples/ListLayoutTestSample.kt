@@ -168,6 +168,60 @@ fun ListLayoutTestExample(
                     19. Item 19
                     20. Item 20
 
+                    ---
+
+                    ## 9. Marker–Content Line Height Mismatch
+
+                    Test that the marker aligns to the baseline of the first line of text when the content line height differs from the marker's.
+
+                    ### 9.1 Heading Inside List Item
+
+                    - # Heading 1 in list
+                    - ## Heading 2 in list
+                    - ### Heading 3 in list
+                    - Normal text after headings
+
+                    ### 9.2 Mixed Font Sizes in First Line
+
+                    - **Large bold text** followed by normal text, the marker should align with the baseline of the first line.
+                    - *Small italic text* and then some longer content to verify alignment when italic causes different metrics.
+                    - `code span at the start` which may use a different font family and size from the marker.
+
+                    ### 9.3 Loose List with Blockquote as First Content
+
+                    1. First item — normal paragraph.
+
+                    2. > This item starts with a blockquote. The marker should still align to the first line of the blockquote text.
+
+                    3. ```
+                       Code block as first content
+                       ```
+
+                    4. Normal item after code block items.
+
+                    ### 9.4 Superscript / Subscript Affecting Line Height
+
+                    - E = mc^2^ — superscript in the first line may increase the line top.
+                    - H~2~O — subscript in the first line may increase the line bottom.
+                    - Normal item for comparison.
+
+                    ### 9.5 Nested List with Different Line Heights
+
+                    - Outer item with normal text
+                      - ## Nested heading item
+                        - ### Deeper nested heading
+                          - Normal nested item
+
+                    1. Outer ordered item
+                       1. ## Nested ordered heading
+                          1. Normal nested content
+
+                    ### 9.6 Inline Image Affecting Line Height
+
+                    - ![icon](https://via.placeholder.com/40x40) Image at the start of a list item may increase the line height beyond the marker's natural height.
+                    - Normal item for comparison.
+                    - Text before ![icon](https://via.placeholder.com/24x24) image mid-sentence and more text following.
+
                     """.trimIndent(),
                 markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
                 modifier = Modifier.padding(16.dp),
