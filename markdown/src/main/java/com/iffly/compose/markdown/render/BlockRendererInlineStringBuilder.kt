@@ -111,7 +111,7 @@ class DocumentInlineStringBuilder : IInlineNodeStringBuilder<Document> {
                 renderRegistry = renderRegistry,
                 nodeStringBuilderContext = nodeStringBuilderContext,
             )
-            if (child.next != null) {
+            if (child.next != null && markdownTheme.spacerTheme.showSpacer) {
                 appendSpacer(
                     markdownTheme = markdownTheme,
                     nodeStringBuilderContext = nodeStringBuilderContext,

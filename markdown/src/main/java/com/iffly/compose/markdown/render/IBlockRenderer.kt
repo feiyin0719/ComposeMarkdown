@@ -18,6 +18,14 @@ interface IBlockRenderer<in T> where T : Block {
     fun shouldSkipRender(node: T): Boolean = false
 
     /**
+     * Whether this block renderer supports text-mode rendering via [MarkdownText].
+     * When false, this renderer will not be wrapped as inline content in
+     * [RenderRegistry.textModeRegistry] and the block will not appear in text mode.
+     * Default is true.
+     */
+    fun supportTextMode(): Boolean = true
+
+    /**
      * Composable function to render the given block node.
      * @param node The block node to render.
      * @param modifier Modifier to be applied to the rendered content.

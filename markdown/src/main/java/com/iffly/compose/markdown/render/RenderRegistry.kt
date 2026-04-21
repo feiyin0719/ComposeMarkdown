@@ -50,7 +50,7 @@ data class RenderRegistry(
             augmented[Document::class.java] = DocumentInlineStringBuilder()
         }
         for ((blockClass, renderer) in blockRenderers) {
-            if (!augmented.containsKey(blockClass)) {
+            if (!augmented.containsKey(blockClass) && renderer.supportTextMode()) {
                 augmented[blockClass] =
                     BlockRendererInlineStringBuilder(renderer as IBlockRenderer<Block>)
             }
