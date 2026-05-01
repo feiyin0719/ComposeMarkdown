@@ -1,5 +1,67 @@
 # Changelog
 
+## 0.1.9
+
+### New Features
+
+#### Syntax Highlighting (`BasicSyntaxHighlighter`)
+Added `BasicSyntaxHighlighter`, a built-in regex-based implementation of `CodeAnnotator` that applies token-level syntax highlighting to code blocks.
+- Supports Kotlin, Java, Python, JavaScript, TypeScript, Go, Rust, C/C++, Swift, and more
+- Six configurable token categories: keyword, string, comment, number, annotation, type
+- `CodeColors` data class added to the `style` package for per-token color customization
+- `codeColors` field added to `CodeBlockTheme` for theme-level color configuration
+- All code block renderers default to `BasicSyntaxHighlighter()`; pass `null` to disable highlighting
+
+#### List Marker Alignment (`MarkerAlignment`)
+Added `MarkerAlignment` enum to `ListTheme` for controlling the vertical alignment of list markers relative to the first line of content.
+- Options: `Top`, `Center`, `Bottom`, `Baseline` (default)
+- Uses `FirstLineMetrics` for precise baseline-relative positioning
+
+### Improvements
+
+#### List Marker Rendering
+Replaced the `Row + Text + Spacer` layout for list markers with a custom `Layout + drawBehind` canvas approach. Markers no longer participate in text selection, eliminating spurious newlines when copying list content.
+
+#### `IBlockRenderer.supportTextMode()`
+Added `supportTextMode()` default method to `IBlockRenderer`. Renderers returning `false` are excluded from `RenderRegistry.textModeRegistry()`, giving fine-grained control over which blocks render in text mode (e.g. `MarkdownText`).
+
+#### Text-Mode Spacer Handling
+`DocumentInlineStringBuilder` now respects the `showSpacer` theme setting when building text-mode output, preventing unwanted blank lines in single-string rendering.
+
+---
+
+## 更新日志
+
+## 0.1.9
+
+### 新增功能
+
+#### 语法高亮（`BasicSyntaxHighlighter`）
+新增内置正则表达式语法高亮器 `BasicSyntaxHighlighter`，实现 `CodeAnnotator` 接口，对代码块进行 Token 级别着色。
+- 支持 Kotlin、Java、Python、JavaScript、TypeScript、Go、Rust、C/C++、Swift 等语言
+- 六种可配置 Token 类型：关键字、字符串、注释、数字、注解、类型
+- `style` 包新增 `CodeColors` 数据类，用于自定义各 Token 颜色
+- `CodeBlockTheme` 新增 `codeColors` 字段，支持主题层面统一配置颜色
+- 所有代码块渲染器默认使用 `BasicSyntaxHighlighter()`，传入 `null` 可禁用高亮
+
+#### 列表标记对齐（`MarkerAlignment`）
+`ListTheme` 新增 `MarkerAlignment` 枚举，控制列表标记相对于内容首行的垂直对齐方式。
+- 可选值：`Top`、`Center`、`Bottom`、`Baseline`（默认）
+- 使用 `FirstLineMetrics` 实现精确的基线对齐定位
+
+### 改进
+
+#### 列表标记渲染
+将列表标记的 `Row + Text + Spacer` 布局替换为 `Layout + drawBehind` Canvas 绘制方案。标记不再参与文字选择，彻底消除复制列表内容时产生的多余换行符。
+
+#### `IBlockRenderer.supportTextMode()`
+`IBlockRenderer` 接口新增 `supportTextMode()` 默认方法。返回 `false` 的渲染器将从 `RenderRegistry.textModeRegistry()` 中排除，可精细控制哪些块参与文本模式渲染（如 `MarkdownText`）。
+
+#### 文本模式 Spacer 处理
+`DocumentInlineStringBuilder` 在构建文本模式输出时现遵循主题的 `showSpacer` 设置，避免单字符串渲染时产生多余空行。
+
+---
+
 ## 0.1.8
 
 ### Bug Fixes
