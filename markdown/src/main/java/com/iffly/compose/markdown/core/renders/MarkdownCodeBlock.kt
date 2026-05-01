@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.iffly.compose.markdown.config.currentActionHandler
 import com.iffly.compose.markdown.config.currentTheme
@@ -29,6 +30,36 @@ import com.iffly.compose.markdown.widget.SelectionFormatText
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.util.ast.Block
+
+/**
+ * Transforms raw code text into a styled [AnnotatedString] for display in a code block.
+ *
+ * Implement this interface to apply any kind of per-character or per-token styling —
+ * syntax highlighting, diff coloring, error underlining, etc.
+ *
+ * The [annotate] method is called once per rendered code block. Returning a plain
+ * [AnnotatedString] with no spans is equivalent to unstyled rendering.
+ *
+ * @see BasicSyntaxHighlighter for a ready-made implementation.
+ */
+fun interface CodeAnnotator {
+    /**
+     * Produces a styled [AnnotatedString] for the given code block.
+     *
+     * @param code The raw code text extracted from the block (may include a trailing newline).
+     * @param language The language info string from the fenced code fence (e.g. `"kotlin"`,
+     *   `"python"`). Empty string for indented code blocks or when no language was specified.
+     * @param node The originating AST block node, available for advanced use cases such as
+     *   reading custom attributes or node metadata.
+     * @return A styled [AnnotatedString]. Returning [AnnotatedString(code)][AnnotatedString]
+     *   is valid and produces plain text.
+     */
+    fun annotate(
+        code: String,
+        language: String,
+        node: Block,
+    ): AnnotatedString
+}
 
 /**
  * A widget for code blocks, including fenced and indented code blocks.
@@ -140,9 +171,15 @@ class CodeHeaderRenderer<T : Block>(
  * Displays the code content with line numbers.
  * You can override this to provide a custom content renderer.
  * @param T The type of the code block.
+ * @param codeAnnotator Optional [CodeAnnotator] to apply styling to the code text.
+ *   Receives the raw code, the language hint, and the AST node; returns a styled
+ *   [AnnotatedString]. Defaults to `null` (plain unstyled text).
+ * @see BasicSyntaxHighlighter
  * @see CodeWidgetRenderer
  */
-class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
+class CodeContentRenderer<T : Block>(
+    private val codeAnnotator: CodeAnnotator? = BasicSyntaxHighlighter(),
+) : CodeWidgetRenderer<T> {
     @Suppress("ComposableNaming")
     @Composable
     override fun invoke(
@@ -153,12 +190,16 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
             return
         }
         val contentTheme = currentTheme().codeBlockTheme.contentTheme
+        val language = if (block is FencedCodeBlock) block.info.toString() else ""
         val codeText =
             when (block) {
                 is FencedCodeBlock -> block.contentChars.toString()
                 is IndentedCodeBlock -> block.contentChars.toString()
                 else -> return
             }
+        val annotatedCode =
+            (codeAnnotator ?: BasicSyntaxHighlighter(colors = currentTheme().codeBlockTheme.codeColors))
+                .annotate(codeText, language, block)
         val scrollModifier =
             if (contentTheme.height != null) {
                 val scrollState = rememberScrollState()
@@ -170,7 +211,7 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
             }
         DisableSelectionWrapper(disabled = contentTheme.disableSelection) {
             LineNumberText(
-                text = codeText,
+                text = annotatedCode,
                 textStyle = contentTheme.codeTextStyle,
                 lineNumberStyle = contentTheme.lineNumberTextStyle,
                 contentPadding = contentTheme.contentPadding,
@@ -192,24 +233,28 @@ class CodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
 
 /**
  * Base implementation of [CodeRenderer] that provides default rendering for code blocks.
- * The implementation is column includes a header with language info and a copy button,
+ * The implementation is a column that includes a header with language info and a copy button,
  * as well as the code content with line numbers.
  * You can override specific parts by providing custom renderers for copy, content, and header.
  * @param T The type of the code block.
  * @param renderCopyOverride Optional custom renderer for the copy button.
  * @param renderContentOverride Optional custom renderer for the code content.
  * @param renderHeaderOverride Optional custom renderer for the code block header.
+ * @param codeAnnotator Optional [CodeAnnotator] forwarded to the default [CodeContentRenderer]
+ *   when [renderContentOverride] is `null`. Ignored if [renderContentOverride] is provided.
  * @see IBlockRenderer
  * @see CodeWidgetRenderer
+ * @see BasicSyntaxHighlighter
  */
 class CodeRenderer<T : Block>(
     renderCopyOverride: CodeWidgetRenderer<T>? = null,
     renderContentOverride: CodeWidgetRenderer<T>? = null,
     renderHeaderOverride: CodeWidgetRenderer<T>? = null,
+    codeAnnotator: CodeAnnotator? = BasicSyntaxHighlighter(),
 ) : IBlockRenderer<T> {
     private val renderCopy: CodeWidgetRenderer<T> = renderCopyOverride ?: CopyRenderer()
     private val renderContent: CodeWidgetRenderer<T> =
-        renderContentOverride ?: CodeContentRenderer()
+        renderContentOverride ?: CodeContentRenderer(codeAnnotator = codeAnnotator)
 
     private val renderHeader: CodeWidgetRenderer<T> =
         renderHeaderOverride ?: CodeHeaderRenderer(renderCopy = renderCopy)
@@ -259,18 +304,22 @@ class CodeRenderer<T : Block>(
  * @param renderCopyOverride Optional custom renderer for the copy button.
  * @param renderContentOverride Optional custom renderer for the code content.
  * @param renderHeaderOverride Optional custom renderer for the code block header.
+ * @param codeAnnotator Optional [CodeAnnotator] forwarded to the default [CodeContentRenderer]
+ *   when [renderContentOverride] is `null`.
  * @see IBlockRenderer
  * @see CodeRenderer
- * @see CodeWidgetRenderer
+ * @see BasicSyntaxHighlighter
  */
 class FencedCodeBlockRenderer(
     renderCopyOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
     renderContentOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
     renderHeaderOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
+    codeAnnotator: CodeAnnotator? = BasicSyntaxHighlighter(),
 ) : IBlockRenderer<FencedCodeBlock> by CodeRenderer(
         renderCopyOverride,
         renderContentOverride,
         renderHeaderOverride,
+        codeAnnotator,
     )
 
 /**
@@ -278,16 +327,20 @@ class FencedCodeBlockRenderer(
  * @param renderCopyOverride Optional custom renderer for the copy button.
  * @param renderContentOverride Optional custom renderer for the code content.
  * @param renderHeaderOverride Optional custom renderer for the code block header.
+ * @param codeAnnotator Optional [CodeAnnotator] forwarded to the default [CodeContentRenderer]
+ *   when [renderContentOverride] is `null`.
  * @see IBlockRenderer
  * @see CodeRenderer
- * @see CodeWidgetRenderer
+ * @see BasicSyntaxHighlighter
  */
 class IndentedCodeBlockRenderer(
     renderCopyOverride: CodeWidgetRenderer<IndentedCodeBlock>? = null,
     renderContentOverride: CodeWidgetRenderer<IndentedCodeBlock>? = null,
     renderHeaderOverride: CodeWidgetRenderer<IndentedCodeBlock>? = null,
+    codeAnnotator: CodeAnnotator? = BasicSyntaxHighlighter(),
 ) : IBlockRenderer<IndentedCodeBlock> by CodeRenderer(
         renderCopyOverride,
         renderContentOverride,
         renderHeaderOverride,
+        codeAnnotator,
     )

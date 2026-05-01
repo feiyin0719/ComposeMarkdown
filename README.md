@@ -960,8 +960,20 @@ be added in the future.
 
 ### Q: How to customize syntax highlighting for code blocks?
 
-A: You can implement custom syntax highlighting by creating a custom `CodeBlockRenderer` and
-integrating third-party syntax highlighting libraries.
+A: The library includes `BasicSyntaxHighlighter` — a built-in `CodeAnnotator` supporting 20+
+languages. Pass it as `codeAnnotator` when constructing `FencedCodeBlockRenderer`:
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addBlockRenderer(
+        FencedCodeBlock::class.java,
+        FencedCodeBlockRenderer(codeAnnotator = BasicSyntaxHighlighter()),
+    )
+    .build()
+```
+
+You can also implement the `CodeAnnotator` fun interface yourself to integrate any
+third-party syntax highlighting library.
 
 ## 🤝 Contributing
 

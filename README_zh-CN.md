@@ -885,7 +885,18 @@ A: 当前支持 CommonMark 标准语法和 GFM 表格。未来会逐步增加更
 
 ### Q: 如何自定义代码块的语法高亮？
 
-A: 你可以通过实现自定义的 `CodeBlockRenderer` 并集成三方语法高亮库来实现自定义高亮效果。
+A: 库内置了 `BasicSyntaxHighlighter`，这是一个开箱即用的 `CodeAnnotator` 实现，支持 20 余种常用语言。在构造 `FencedCodeBlockRenderer` 时将其作为 `codeAnnotator` 参数传入即可：
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addBlockRenderer(
+        FencedCodeBlock::class.java,
+        FencedCodeBlockRenderer(codeAnnotator = BasicSyntaxHighlighter()),
+    )
+    .build()
+```
+
+你也可以自行实现 `CodeAnnotator` 函数式接口，接入任意第三方语法高亮库。
 
 ## 🤝 贡献指南
 

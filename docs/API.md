@@ -1296,6 +1296,7 @@ File: `core/renders/MarkdownCodeBlock.kt`
 
 This module contains composable widgets for fenced and indented code blocks:
 
+- `CodeAnnotator` – fun interface for styling raw code text as an `AnnotatedString` (e.g. syntax highlighting).
 - `CodeWidgetRenderer<T : Block>` – fun interface for small code block widgets.
 - `CopyRenderer<T>` – default "Copy" button.
 - `CodeHeaderRenderer<T>` – default header with language label and copy button.
@@ -1304,6 +1305,10 @@ This module contains composable widgets for fenced and indented code blocks:
 - `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer` – concrete `IBlockRenderer` implementations.
 
 ```kotlin
+fun interface CodeAnnotator {
+    fun annotate(code: String, language: String, node: Block): AnnotatedString
+}
+
 fun interface CodeWidgetRenderer<T : Block> {
     @Composable
     operator fun invoke(block: T, modifier: Modifier)
@@ -1313,10 +1318,12 @@ class FencedCodeBlockRenderer(
     renderCopyOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
     renderContentOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
     renderHeaderOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
+    codeAnnotator: CodeAnnotator? = null,
 ) : IBlockRenderer<FencedCodeBlock> by CodeRenderer(
         renderCopyOverride,
         renderContentOverride,
         renderHeaderOverride,
+        codeAnnotator,
     )
 ```
 
@@ -1327,6 +1334,63 @@ class FencedCodeBlockRenderer(
 - `showHeader`, `showCopyButton`
 - `codeTitleTextStyle`, `codeCopyTextStyle`
 - `contentTheme` (code font, line numbers, padding, height, softWrap, etc.)
+
+**Syntax highlighting with `BasicSyntaxHighlighter`**
+
+The library ships a ready-made `CodeAnnotator` that applies regex-based token coloring for 20+
+languages. Pass a `BasicSyntaxHighlighter` instance as `codeAnnotator` to enable it:
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addBlockRenderer(
+        FencedCodeBlock::class.java,
+        FencedCodeBlockRenderer(
+            codeAnnotator = BasicSyntaxHighlighter(),
+        ),
+    )
+    .addBlockRenderer(
+        IndentedCodeBlock::class.java,
+        IndentedCodeBlockRenderer(
+            codeAnnotator = BasicSyntaxHighlighter(),
+        ),
+    )
+    .build()
+```
+
+Customize the token colors via `CodeColors`:
+
+```kotlin
+val highlighter = BasicSyntaxHighlighter(
+    colors = CodeColors(
+        keyword    = Color(0xFF569CD6),
+        string     = Color(0xFFCE9178),
+        comment    = Color(0xFF6A9955),
+        number     = Color(0xFFB5CEA8),
+        annotation = Color(0xFFDCDC00),
+        type       = Color(0xFF4EC9B0),
+    )
+)
+```
+
+Supported languages (fenced code fence info string, case-insensitive):
+`kotlin`, `java`, `javascript`/`js`, `typescript`/`ts`, `python`, `swift`, `rust`, `go`, `dart`,
+`c`, `cpp`/`c++`, `cs`/`csharp`/`c#`, `ruby`, `php`, `sql`, `bash`/`sh`/`shell`/`zsh`,
+`css`, `html`, `xml`, `yaml`/`yml`, `toml`, `json`.
+
+Implement `CodeAnnotator` directly to integrate any third-party syntax highlighter:
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .addBlockRenderer(
+        FencedCodeBlock::class.java,
+        FencedCodeBlockRenderer(
+            codeAnnotator = CodeAnnotator { code, language, _ ->
+                myHighlighter.highlight(code, language)
+            },
+        ),
+    )
+    .build()
+```
 
 **Customising only the copy button**
 
@@ -1396,8 +1460,7 @@ val config = MarkdownRenderConfig.Builder()
 
 **Customising the content widget**
 
-If you want to fully control how code is displayed (e.g. plug in a syntax highlighter, or show only
-part of the code with "show more"):
+If you want to fully control how code is displayed (e.g. show only part of the code with "show more"):
 
 ```kotlin
 class CustomCodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
@@ -1425,9 +1488,10 @@ val config = MarkdownRenderConfig.Builder()
     .build()
 ```
 
-You can mix and match `renderCopyOverride`, `renderHeaderOverride`, and `renderContentOverride`
-when constructing `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer`, depending on which part
-of the widget you want to take over.
+You can mix and match `codeAnnotator`, `renderCopyOverride`, `renderHeaderOverride`, and
+`renderContentOverride` when constructing `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer`,
+depending on which part of the widget you want to take over. Note that `codeAnnotator` is forwarded
+to the default `CodeContentRenderer` and is ignored when `renderContentOverride` is provided.
 
 ---
 

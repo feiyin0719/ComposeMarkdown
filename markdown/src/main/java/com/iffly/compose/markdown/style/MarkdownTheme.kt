@@ -254,6 +254,7 @@ data class ListTheme(
  * @param headerModifier The modifier for the code block header.
  * @param showHeader Whether to show the header.
  * @param showCopyButton Whether to show the copy button.
+ * @param codeColors The color configuration for syntax highlighting via [com.iffly.compose.markdown.core.renders.BasicSyntaxHighlighter].
  * @see CodeContentTheme
  */
 @Immutable
@@ -282,6 +283,7 @@ data class CodeBlockTheme(
     val headerModifier: Modifier = Modifier.padding(horizontal = 17.dp),
     val showHeader: Boolean = true,
     val showCopyButton: Boolean = true,
+    val codeColors: CodeColors = CodeColors(),
 ) {
     /**
      * Theme for the code content within a code block.

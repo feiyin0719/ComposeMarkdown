@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +45,7 @@ import kotlinx.collections.immutable.toImmutableList
  */
 @Composable
 fun LineNumberText(
-    text: String,
+    text: AnnotatedString,
     modifier: Modifier = Modifier,
     lineNumberStyle: TextStyle =
         MaterialTheme.typography.labelSmall.copy(
@@ -76,7 +77,7 @@ fun LineNumberText(
     var textLayoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
     val originalLineStartOffset =
         remember(text) {
-            text
+            text.text
                 .withIndex()
                 .filter { it.value == '\n' }
                 .map { it.index + 1 }

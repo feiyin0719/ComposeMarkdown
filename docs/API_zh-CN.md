@@ -1268,14 +1268,19 @@ val config = MarkdownRenderConfig.Builder()
 
 该模块包含用于围栏代码块和缩进代码块的 Composable 组件：
 
+- `CodeAnnotator` —— 将原始代码文本转换为带样式 `AnnotatedString` 的函数式接口（如语法高亮）。
 - `CodeWidgetRenderer<T : Block>` —— 小型代码块子组件的函数式接口。
-- `CopyRenderer<T>` —— 默认“复制”按钮。
+- `CopyRenderer<T>` —— 默认”复制”按钮。
 - `CodeHeaderRenderer<T>` —— 默认头部区域，包含语言标签和复制按钮。
 - `CodeContentRenderer<T>` —— 默认代码内容展示，带行号和可选滚动。
 - `CodeRenderer<T : Block>` —— 组合头部 + 内容的基础实现。
 - `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer` —— 针对围栏 / 缩进代码块的具体 `IBlockRenderer` 实现。
 
 ```kotlin
+fun interface CodeAnnotator {
+    fun annotate(code: String, language: String, node: Block): AnnotatedString
+}
+
 fun interface CodeWidgetRenderer<T : Block> {
  @Composable
  operator fun invoke(block: T, modifier: Modifier)
@@ -1285,10 +1290,12 @@ class FencedCodeBlockRenderer(
  renderCopyOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
  renderContentOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
  renderHeaderOverride: CodeWidgetRenderer<FencedCodeBlock>? = null,
+ codeAnnotator: CodeAnnotator? = null,
 ) : IBlockRenderer<FencedCodeBlock> by CodeRenderer(
   renderCopyOverride,
   renderContentOverride,
   renderHeaderOverride,
+  codeAnnotator,
  )
 ```
 
@@ -1300,6 +1307,62 @@ class FencedCodeBlockRenderer(
 - `codeTitleTextStyle`、`codeCopyTextStyle`
 - `contentTheme`（代码字体、行号、内边距、高度、是否软换行等）。
 
+**使用 `BasicSyntaxHighlighter` 实现语法高亮**
+
+库内置了一个基于正则表达式的 `CodeAnnotator` 实现，支持 20 余种常用语言。将 `BasicSyntaxHighlighter` 实例作为 `codeAnnotator` 传入即可启用：
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+ .addBlockRenderer(
+  FencedCodeBlock::class.java,
+  FencedCodeBlockRenderer(
+   codeAnnotator = BasicSyntaxHighlighter(),
+  ),
+ )
+ .addBlockRenderer(
+  IndentedCodeBlock::class.java,
+  IndentedCodeBlockRenderer(
+   codeAnnotator = BasicSyntaxHighlighter(),
+  ),
+ )
+ .build()
+```
+
+通过 `CodeColors` 自定义各类 Token 的颜色：
+
+```kotlin
+val highlighter = BasicSyntaxHighlighter(
+ colors = CodeColors(
+  keyword    = Color(0xFF569CD6),
+  string     = Color(0xFFCE9178),
+  comment    = Color(0xFF6A9955),
+  number     = Color(0xFFB5CEA8),
+  annotation = Color(0xFFDCDC00),
+  type       = Color(0xFF4EC9B0),
+ )
+)
+```
+
+支持的语言（围栏代码块 info 字符串，不区分大小写）：
+`kotlin`、`java`、`javascript`/`js`、`typescript`/`ts`、`python`、`swift`、`rust`、`go`、`dart`、
+`c`、`cpp`/`c++`、`cs`/`csharp`/`c#`、`ruby`、`php`、`sql`、`bash`/`sh`/`shell`/`zsh`、
+`css`、`html`、`xml`、`yaml`/`yml`、`toml`、`json`。
+
+也可以直接实现 `CodeAnnotator` 接口，接入任意第三方语法高亮库：
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+ .addBlockRenderer(
+  FencedCodeBlock::class.java,
+  FencedCodeBlockRenderer(
+   codeAnnotator = CodeAnnotator { code, language, _ ->
+    myHighlighter.highlight(code, language)
+   },
+  ),
+ )
+ .build()
+```
+
 **仅自定义复制按钮**
 
 ```kotlin
@@ -1309,7 +1372,7 @@ class IconCopyRenderer<T : Block> : CodeWidgetRenderer<T> {
   val actionHandler = currentActionHandler()
   Icon(
    imageVector = Icons.Default.ContentCopy,
-   contentDescription = "Copy code",
+   contentDescription = “Copy code”,
    modifier = modifier.clickable {
     actionHandler?.handleCopyClick(block)
    },
@@ -1346,7 +1409,7 @@ class CustomCodeHeaderRenderer<T : Block> : CodeWidgetRenderer<T> {
    horizontalArrangement = Arrangement.SpaceBetween,
    verticalAlignment = Alignment.CenterVertically,
   ) {
-   Text(text = language.ifBlank { "Code" }, style = theme.codeTitleTextStyle)
+   Text(text = language.ifBlank { “Code” }, style = theme.codeTitleTextStyle)
    // 可以在这里添加更多操作（运行、复制、展开等）
   }
   HorizontalDivider(
@@ -1368,7 +1431,7 @@ val config = MarkdownRenderConfig.Builder()
 
 **自定义内容区域**
 
-如果你希望完全掌控代码展示方式（例如接入语法高亮、仅展示部分代码并提供“展开更多”）：
+如果你希望完全掌控代码展示方式（例如仅展示部分代码并提供”展开更多”）：
 
 ```kotlin
 class CustomCodeContentRenderer<T : Block> : CodeWidgetRenderer<T> {
@@ -1396,7 +1459,7 @@ val config = MarkdownRenderConfig.Builder()
  .build()
 ```
 
-在构造 `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer` 时，你可以按需组合 `renderCopyOverride`、`renderHeaderOverride` 和 `renderContentOverride`，只接管你关心的部分。
+在构造 `FencedCodeBlockRenderer` / `IndentedCodeBlockRenderer` 时，你可以按需组合 `codeAnnotator`、`renderCopyOverride`、`renderHeaderOverride` 和 `renderContentOverride`，只接管你关心的部分。注意：`codeAnnotator` 会转发给默认的 `CodeContentRenderer`，若已提供 `renderContentOverride` 则 `codeAnnotator` 不会生效。
 
 ---
 
