@@ -3,6 +3,7 @@ package com.iffly.compose.markdown.widget
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -23,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
@@ -59,14 +62,16 @@ fun LineNumberText(
             fontSize = 12.sp,
             lineHeight = 16.sp,
         ),
-    contentPadding: PaddingValues = PaddingValues(4.dp),
+    contentPadding: PaddingValues = remember { PaddingValues(4.dp) },
     lineNumberPadding: PaddingValues =
-        PaddingValues(
-            start = 4.dp,
-            top = 4.dp,
-            bottom = 4.dp,
-            end = 16.dp,
-        ),
+        remember {
+            PaddingValues(
+                start = 4.dp,
+                top = 4.dp,
+                bottom = 4.dp,
+                end = 16.dp,
+            )
+        },
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
@@ -74,27 +79,132 @@ fun LineNumberText(
     showLineNumber: Boolean = true,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
 ) {
-    var textLayoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
+    if (showLineNumber) {
+        NumberedText(
+            text = text,
+            modifier = modifier,
+            lineNumberStyle = lineNumberStyle,
+            textStyle = textStyle,
+            contentPadding = contentPadding,
+            lineNumberPadding = lineNumberPadding,
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
+            minLines = minLines,
+            onTextLayout = onTextLayout,
+        )
+    } else {
+        PlainText(
+            text = text,
+            modifier = modifier,
+            textStyle = textStyle,
+            contentPadding = contentPadding,
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
+            minLines = minLines,
+            onTextLayout = onTextLayout,
+        )
+    }
+}
+
+@Composable
+private fun NumberedText(
+    text: AnnotatedString,
+    lineNumberStyle: TextStyle,
+    textStyle: TextStyle,
+    contentPadding: PaddingValues,
+    lineNumberPadding: PaddingValues,
+    overflow: TextOverflow,
+    softWrap: Boolean,
+    maxLines: Int,
+    minLines: Int,
+    modifier: Modifier = Modifier,
+    onTextLayout: ((TextLayoutResult) -> Unit)? = null,
+) {
+    var visualLineStartOffset by remember(text.text) {
+        mutableStateOf<ImmutableList<Int>>(persistentListOf())
+    }
     val originalLineStartOffset =
-        remember(text) {
-            text.text
-                .withIndex()
-                .filter { it.value == '\n' }
-                .map { it.index + 1 }
-                .toMutableList()
-                .apply { add(0, 0) } // Add start of first line
-                .toList()
-        }
-    val visualLineStartOffset =
-        remember(textLayoutResult) {
-            textLayoutResult?.let { result ->
-                val lineCount = result.lineCount
-                List(lineCount) { lineIndex ->
-                    result.getLineStart(lineIndex)
+        remember(text.text) {
+            buildList {
+                add(0)
+                text.text.forEachIndexed { index, character ->
+                    if (character == '\n') add(index + 1)
                 }
-            } ?: emptyList()
+            }.toImmutableList()
+        }
+    val resolvedLineNumberStyle =
+        remember(lineNumberStyle, textStyle.lineHeight) {
+            lineNumberStyle.copy(lineHeight = textStyle.lineHeight)
         }
 
+    Row(modifier = modifier) {
+        LineNumberGutter(
+            originalLineStartOffset = originalLineStartOffset,
+            visualLineStartOffset = visualLineStartOffset,
+            modifier = Modifier.wrapContentSize(),
+            lineNumberStyle = resolvedLineNumberStyle,
+            paddingValues = lineNumberPadding,
+        )
+        CodeText(
+            text = text,
+            textStyle = textStyle,
+            contentPadding = contentPadding,
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
+            minLines = minLines,
+            onTextLayout = { result ->
+                val newVisualLineStartOffset =
+                    List(result.lineCount) { lineIndex -> result.getLineStart(lineIndex) }
+                        .toImmutableList()
+                if (visualLineStartOffset != newVisualLineStartOffset) {
+                    visualLineStartOffset = newVisualLineStartOffset
+                }
+                onTextLayout?.invoke(result)
+            },
+        )
+    }
+}
+
+@Composable
+private fun PlainText(
+    text: AnnotatedString,
+    textStyle: TextStyle,
+    contentPadding: PaddingValues,
+    overflow: TextOverflow,
+    softWrap: Boolean,
+    maxLines: Int,
+    minLines: Int,
+    modifier: Modifier = Modifier,
+    onTextLayout: ((TextLayoutResult) -> Unit)? = null,
+) {
+    Row(modifier = modifier) {
+        CodeText(
+            text = text,
+            textStyle = textStyle,
+            contentPadding = contentPadding,
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
+            minLines = minLines,
+            onTextLayout = onTextLayout ?: emptyOnTextLayout,
+        )
+    }
+}
+
+@Composable
+private fun RowScope.CodeText(
+    text: AnnotatedString,
+    textStyle: TextStyle,
+    contentPadding: PaddingValues,
+    overflow: TextOverflow,
+    softWrap: Boolean,
+    maxLines: Int,
+    minLines: Int,
+    onTextLayout: (TextLayoutResult) -> Unit = emptyOnTextLayout,
+) {
     val scrollModifier =
         if (!softWrap) {
             val scrollState = rememberScrollState()
@@ -105,36 +215,20 @@ fun LineNumberText(
             Modifier
         }
 
-    Row(modifier = modifier) {
-        if (showLineNumber) {
-            LineNumberGutter(
-                originalLineStartOffset = originalLineStartOffset.toImmutableList(),
-                visualLineStartOffset = visualLineStartOffset.toImmutableList(),
-                modifier = Modifier.wrapContentSize(),
-                lineNumberStyle =
-                    lineNumberStyle.copy(
-                        lineHeight = textStyle.lineHeight,
-                    ),
-                paddingValues = lineNumberPadding,
-            )
-        }
-
-        Text(
-            text = text,
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .padding(contentPadding)
-                    .then(scrollModifier),
-            style = textStyle,
-            softWrap = softWrap,
-            overflow = overflow,
-            maxLines = maxLines,
-            minLines = minLines,
-            onTextLayout = {
-                textLayoutResult = it
-                onTextLayout?.invoke(it)
-            },
-        )
-    }
+    Text(
+        text = text,
+        modifier =
+            Modifier
+                .weight(1f)
+                .padding(contentPadding)
+                .then(scrollModifier),
+        style = textStyle,
+        softWrap = softWrap,
+        overflow = overflow,
+        maxLines = maxLines,
+        minLines = minLines,
+        onTextLayout = onTextLayout,
+    )
 }
+
+private val emptyOnTextLayout: (TextLayoutResult) -> Unit = {}
