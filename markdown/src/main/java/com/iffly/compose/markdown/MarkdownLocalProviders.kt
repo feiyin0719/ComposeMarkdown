@@ -14,6 +14,7 @@ import com.iffly.compose.markdown.config.LocalRenderDependencies
 import com.iffly.compose.markdown.config.LocalRenderRegistryProvider
 import com.iffly.compose.markdown.config.LocalShowNotSupportedProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.render.RenderRegistry
 import com.vladsch.flexmark.util.ast.Node
 
 @Composable
@@ -22,13 +23,14 @@ internal fun MarkdownLocalProviders(
     showNotSupportedText: Boolean,
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
+    renderRegistry: RenderRegistry = markdownRenderConfig.renderRegistry,
     content: @Composable () -> Unit,
 ) {
     val theme = markdownRenderConfig.markdownTheme
     val htmlRenderer = markdownRenderConfig.htmlRenderer
     val nodeDataMap = remember { mutableStateMapOf<Node, Any>() }
     CompositionLocalProvider(
-        LocalRenderRegistryProvider provides markdownRenderConfig.renderRegistry,
+        LocalRenderRegistryProvider provides renderRegistry,
         LocalParserProvider provides markdownRenderConfig.parser,
         LocalMarkdownThemeProvider provides theme,
         LocalShowNotSupportedProvider provides showNotSupportedText,

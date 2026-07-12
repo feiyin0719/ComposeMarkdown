@@ -923,6 +923,11 @@ MarkdownText(
 val imageLoader = nodeStringBuilderContext.renderDependencies["imageLoader"] as? ImageLoader
 ```
 
+`rememberMarkdownAnnotatedStringResult(...)` is the shared annotated-string builder used by both
+`MarkdownText` and `MarkdownInlineText`. It reads the active `RenderRegistry` from the current
+Markdown provider rather than accepting a registry argument. `MarkdownText` overrides that local
+with the cached text-mode registry; regular inline rendering keeps the base registry.
+
 **Implementation notes**
 
 - When adding styling, prefer using `pushStyle` / `pop`, `withLink`, and similar `AnnotatedString.Builder` helpers instead of rebuilding the whole string from scratch.

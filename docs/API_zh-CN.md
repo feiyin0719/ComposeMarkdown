@@ -922,6 +922,11 @@ MarkdownText(
 val imageLoader = nodeStringBuilderContext.renderDependencies["imageLoader"] as? ImageLoader
 ```
 
+`rememberMarkdownAnnotatedStringResult(...)` 是 `MarkdownText` 与 `MarkdownInlineText` 共用的
+AnnotatedString 构建入口。它不接收 registry 参数，而是读取当前 Markdown provider 中的
+`RenderRegistry`。`MarkdownText` 会在 provider 层覆盖为缓存的 text-mode registry；普通内联渲染
+继续使用基础 registry。
+
 **实现建议**
 
 - 在扩展 `buildInlineNodeString` 时优先使用 `pushStyle` / `pop`、`withLink` 等 Compose 提供的 API 叠加样式，而不是重新构造整段文本。

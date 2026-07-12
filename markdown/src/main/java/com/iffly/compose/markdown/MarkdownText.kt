@@ -17,18 +17,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
-import com.iffly.compose.markdown.config.currentActionHandler
-import com.iffly.compose.markdown.config.currentRenderRegistry
 import com.iffly.compose.markdown.config.currentTheme
-import com.iffly.compose.markdown.config.isShowNotSupported
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
-import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.TextSizeConstraints
-import com.iffly.compose.markdown.render.markdownText
-import com.iffly.compose.markdown.render.rememberNodeStringBuilderContext
+import com.iffly.compose.markdown.render.rememberMarkdownAnnotatedStringResult
 import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -255,11 +249,16 @@ fun MarkdownText(
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
+    val textModeRegistry =
+        remember(markdownRenderConfig.renderRegistry) {
+            markdownRenderConfig.renderRegistry.textModeRegistry()
+        }
     MarkdownLocalProviders(
         markdownRenderConfig = markdownRenderConfig,
         showNotSupportedText = showNotSupportedText,
         actionHandler = actionHandler,
         renderDependencies = renderDependencies,
+        renderRegistry = textModeRegistry,
     ) {
         MarkdownTextContent(
             node = node,
@@ -302,57 +301,29 @@ private fun MarkdownTextContent(
 ) {
     BoxWithConstraints(modifier = modifier) {
         val theme = currentTheme()
-        val baseRegistry = currentRenderRegistry()
-        val renderRegistry = baseRegistry.textModeRegistry()
-        val actionHandler = currentActionHandler()
-        val isShowNotSupported = isShowNotSupported()
-        val nodeStringBuilderContext =
-            rememberNodeStringBuilderContext(
-                textSizeConstraints =
-                    TextSizeConstraints(
-                        maxWidth = maxWidth,
-                        maxHeight = maxHeight,
-                        minWidth = minWidth,
-                        minHeight = minHeight,
-                    ),
-                textAlign = textAlign ?: TextAlign.Start,
-            )
-
-        val (text, inlineContentMap) =
-            remember(
-                node,
-                theme,
-                renderRegistry,
-                isShowNotSupported,
-                actionHandler,
-                nodeStringBuilderContext,
-            ) {
-                markdownText(
-                    node = node,
-                    markdownTheme = theme,
-                    renderRegistry = renderRegistry,
-                    actionHandler = actionHandler,
-                    indentLevel = 1,
-                    isShowNotSupported = isShowNotSupported,
-                    nodeStringBuilderContext = nodeStringBuilderContext,
+        val textSizeConstraints =
+            remember(maxWidth, maxHeight, minWidth, minHeight) {
+                TextSizeConstraints(
+                    maxWidth = maxWidth,
+                    maxHeight = maxHeight,
+                    minWidth = minWidth,
+                    minHeight = minHeight,
                 )
             }
-
-        val richTextInlineContent =
-            remember(inlineContentMap) {
-                inlineContentMap
-                    .mapNotNull { (key, value) ->
-                        if (value is MarkdownInlineView.MarkdownRichTextInlineContent) {
-                            key to value.inlineContent
-                        } else {
-                            null
-                        }
-                    }.toMap()
+        val result =
+            rememberMarkdownAnnotatedStringResult(
+                node = node,
+                textSizeConstraints = textSizeConstraints,
+                textAlign = textAlign ?: TextAlign.Start,
+            )
+        val richTextOnTextLayout =
+            remember(onTextLayout) {
+                { _: Int, result: TextLayoutResult -> onTextLayout(result) }
             }
 
         RichText(
-            text = text,
-            inlineContent = richTextInlineContent.toImmutableMap(),
+            text = result.text,
+            inlineContent = result.inlineContent,
             modifier =
                 Modifier
                     .wrapContentHeight()
@@ -365,7 +336,7 @@ private fun MarkdownTextContent(
             minLines = minLines,
             letterSpacing = letterSpacing,
             textDecoration = textDecoration,
-            onTextLayout = { _, result -> onTextLayout(result) },
+            onTextLayout = richTextOnTextLayout,
         )
     }
 }
