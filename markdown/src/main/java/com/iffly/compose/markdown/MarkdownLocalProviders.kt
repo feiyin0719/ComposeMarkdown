@@ -10,6 +10,7 @@ import com.iffly.compose.markdown.config.LocalHtmlToMdConverterProvider
 import com.iffly.compose.markdown.config.LocalMarkdownThemeProvider
 import com.iffly.compose.markdown.config.LocalNodeDataMap
 import com.iffly.compose.markdown.config.LocalParserProvider
+import com.iffly.compose.markdown.config.LocalRenderDependencies
 import com.iffly.compose.markdown.config.LocalRenderRegistryProvider
 import com.iffly.compose.markdown.config.LocalShowNotSupportedProvider
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
@@ -20,6 +21,7 @@ internal fun MarkdownLocalProviders(
     markdownRenderConfig: MarkdownRenderConfig,
     showNotSupportedText: Boolean,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     content: @Composable () -> Unit,
 ) {
     val theme = markdownRenderConfig.markdownTheme
@@ -31,6 +33,7 @@ internal fun MarkdownLocalProviders(
         LocalMarkdownThemeProvider provides theme,
         LocalShowNotSupportedProvider provides showNotSupportedText,
         LocalActionHandlerProvider provides actionHandler,
+        LocalRenderDependencies provides renderDependencies,
         LocalHtmlRenderProvider provides htmlRenderer,
         LocalHtmlToMdConverterProvider provides markdownRenderConfig.htmlToMdConverter,
         LocalNodeDataMap provides nodeDataMap,

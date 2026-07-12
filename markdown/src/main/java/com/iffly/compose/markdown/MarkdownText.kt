@@ -52,6 +52,7 @@ import kotlinx.coroutines.withContext
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param overflow How visual overflow should be handled.
  * @param softWrap Whether the text should wrap softly.
  * @param textAlign The alignment of the text.
@@ -71,6 +72,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -101,6 +103,7 @@ fun MarkdownText(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                renderDependencies = renderDependencies,
                 overflow = overflow,
                 softWrap = softWrap,
                 textAlign = textAlign,
@@ -131,6 +134,7 @@ fun MarkdownText(
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param overflow How visual overflow should be handled.
  * @param softWrap Whether the text should wrap softly.
  * @param textAlign The alignment of the text.
@@ -152,6 +156,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -192,6 +197,7 @@ fun MarkdownText(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                renderDependencies = renderDependencies,
                 overflow = overflow,
                 softWrap = softWrap,
                 textAlign = textAlign,
@@ -220,6 +226,7 @@ fun MarkdownText(
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param overflow How visual overflow should be handled.
  * @param softWrap Whether the text should wrap softly.
  * @param textAlign The alignment of the text.
@@ -238,6 +245,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -247,7 +255,12 @@ fun MarkdownText(
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
-    MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, actionHandler) {
+    MarkdownLocalProviders(
+        markdownRenderConfig = markdownRenderConfig,
+        showNotSupportedText = showNotSupportedText,
+        actionHandler = actionHandler,
+        renderDependencies = renderDependencies,
+    ) {
         MarkdownTextContent(
             node = node,
             modifier = modifier,

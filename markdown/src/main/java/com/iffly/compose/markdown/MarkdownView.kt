@@ -40,6 +40,7 @@ internal sealed class MarkdownState {
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param onError Composable to display in case of an error during parsing.
  */
 @Composable
@@ -49,6 +50,7 @@ fun MarkdownView(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val parser = markdownRenderConfig.parser
@@ -74,6 +76,7 @@ fun MarkdownView(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                renderDependencies = renderDependencies,
             )
         }
 
@@ -92,6 +95,7 @@ fun MarkdownView(
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
@@ -103,6 +107,7 @@ fun MarkdownView(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     parseDispatcher: CoroutineDispatcher? = null,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
@@ -135,6 +140,7 @@ fun MarkdownView(
                 modifier = modifier,
                 showNotSupportedText = showNotSupportedText,
                 actionHandler = actionHandler,
+                renderDependencies = renderDependencies,
             )
         }
 
@@ -151,6 +157,7 @@ fun MarkdownView(
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  *
  */
 @Composable
@@ -160,8 +167,14 @@ fun MarkdownView(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
 ) {
-    MarkdownLocalProviders(markdownRenderConfig, showNotSupportedText, actionHandler) {
+    MarkdownLocalProviders(
+        markdownRenderConfig = markdownRenderConfig,
+        showNotSupportedText = showNotSupportedText,
+        actionHandler = actionHandler,
+        renderDependencies = renderDependencies,
+    ) {
         MarkdownContent(node, modifier)
     }
 }

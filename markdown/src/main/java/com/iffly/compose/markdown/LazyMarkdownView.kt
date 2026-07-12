@@ -33,6 +33,7 @@ import java.io.File
  * @param modifier Modifier to be applied to the LazyColumn.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param chunkLoaderConfig Configuration for the chunk loader, including parser dispatcher.
  * @param nestedPrefetchItemCount Number of items to prefetch before and after the visible items for smoother scrolling.
  * Note: The parserDispatcher in chunkLoaderConfig should be set to a background thread dispatcher
@@ -49,6 +50,7 @@ fun LazyMarkdownView(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
     nestedPrefetchItemCount: Int = 3,
 ) {
@@ -117,6 +119,7 @@ fun LazyMarkdownView(
         markdownRenderConfig,
         showNotSupportedText,
         actionHandler = actionHandler,
+        renderDependencies = renderDependencies,
     ) {
         val theme = markdownRenderConfig.markdownTheme
         val renderRegistry = markdownRenderConfig.renderRegistry

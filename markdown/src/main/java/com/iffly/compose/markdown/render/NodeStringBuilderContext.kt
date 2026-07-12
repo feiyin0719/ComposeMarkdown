@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.iffly.compose.markdown.config.currentHtmlToMdConverter
 import com.iffly.compose.markdown.config.currentParser
+import com.iffly.compose.markdown.config.currentRenderDependencies
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter
 import com.vladsch.flexmark.parser.Parser
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,7 @@ import kotlinx.coroutines.CoroutineScope
  * @property layoutContext The context for text layout, including density, text measurer, text alignment, and size constraints.
  * @property designContext The context for text design, including colors, text style, font family resolver, and layout direction.
  * @property systemContext The context for system interactions, including context, clipboard, haptic feedback, etc.
+ * @property renderDependencies Dependencies supplied by the caller for custom node string builders.
  */
 data class NodeStringBuilderContext(
     val parser: Parser,
@@ -55,6 +57,7 @@ data class NodeStringBuilderContext(
     val layoutContext: TextLayoutContext,
     val designContext: TextStyleContext,
     val systemContext: SystemContext,
+    val renderDependencies: Map<String, Any>,
 )
 
 /**
@@ -159,6 +162,7 @@ fun rememberNodeStringBuilderContext(
     val scope = rememberCoroutineScope()
     val parser = currentParser()
     val htmlToMdConverter = currentHtmlToMdConverter()
+    val renderDependencies = currentRenderDependencies()
 
     val mergedTextStyle = systemTextStyle.merge(textStyle)
 
@@ -184,6 +188,7 @@ fun rememberNodeStringBuilderContext(
         scope,
         parser,
         htmlToMdConverter,
+        renderDependencies,
     ) {
         NodeStringBuilderContext(
             parser = parser,
@@ -216,6 +221,7 @@ fun rememberNodeStringBuilderContext(
                     focusManager = focusManager,
                     coroutineScope = scope,
                 ),
+            renderDependencies = renderDependencies,
         )
     }
 }

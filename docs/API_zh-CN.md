@@ -50,6 +50,7 @@ fun MarkdownView(
  modifier: Modifier = Modifier,
  showNotSupportedText: Boolean = false,
  actionHandler: ActionHandler? = null,
+ renderDependencies: Map<String, Any> = emptyMap(),
  onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -86,6 +87,7 @@ fun MarkdownView(
  modifier: Modifier = Modifier,
  showNotSupportedText: Boolean = false,
  actionHandler: ActionHandler? = null,
+ renderDependencies: Map<String, Any> = emptyMap(),
  parseDispatcher: CoroutineDispatcher? = null,
  onLoading: (@Composable () -> Unit)? = null,
  onError: (@Composable (Throwable) -> Unit)? = null,
@@ -145,6 +147,7 @@ fun MarkdownView(
  modifier: Modifier = Modifier,
  showNotSupportedText: Boolean = false,
  actionHandler: ActionHandler? = null,
+ renderDependencies: Map<String, Any> = emptyMap(),
 )
 ```
 
@@ -189,6 +192,7 @@ fun LazyMarkdownView(
  modifier: Modifier = Modifier,
  showNotSupportedText: Boolean = false,
  actionHandler: ActionHandler? = null,
+ renderDependencies: Map<String, Any> = emptyMap(),
  chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(
   parserDispatcher = MarkdownThreadPool.dispatcher,
  ),
@@ -227,6 +231,7 @@ fun LazyMarkdownColumn(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     lazyListState: LazyListState = rememberLazyListState(),
 )
 ```
@@ -319,6 +324,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -377,6 +383,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -412,6 +419,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
     textAlign: TextAlign? = null,
@@ -895,7 +903,22 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
   - 查找其他已注册的内联构建器，实现组合式渲染。
 - `nodeStringBuilderContext`：节点字符串构建上下文：
   - 提供按职责分组的子上下文：布局（`layoutContext`）、文本样式（`designContext`）与系统能力（`systemContext`）；
-  - 当需要文本测量或密度转换时，使用 `nodeStringBuilderContext.layoutContext`。
+  - 当需要文本测量或密度转换时，使用 `nodeStringBuilderContext.layoutContext`；
+  - 通过 `nodeStringBuilderContext.renderDependencies` 读取调用方提供的对象。
+
+顶层渲染组件均接受 `renderDependencies: Map<String, Any>`。自定义 Composable renderer 可通过
+`currentRenderDependencies()` 读取该 Map；非 Composable 的节点字符串构建器则从
+`NodeStringBuilderContext` 读取同一份 Map：
+
+```kotlin
+MarkdownText(
+    content = markdown,
+    markdownRenderConfig = config,
+    renderDependencies = mapOf("imageLoader" to imageLoader),
+)
+
+val imageLoader = nodeStringBuilderContext.renderDependencies["imageLoader"] as? ImageLoader
+```
 
 **实现建议**
 

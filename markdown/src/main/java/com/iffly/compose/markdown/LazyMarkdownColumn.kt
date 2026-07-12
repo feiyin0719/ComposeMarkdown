@@ -25,6 +25,7 @@ import com.vladsch.flexmark.util.ast.Node
  * @param modifier Modifier to be applied to the LazyColumn.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the markdown content.
+ * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param lazyListState The state of the LazyColumn for scroll control.
  */
 @Composable
@@ -34,6 +35,7 @@ fun LazyMarkdownColumn(
     modifier: Modifier = Modifier,
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
+    renderDependencies: Map<String, Any> = emptyMap(),
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
     val parser = markdownRenderConfig.parser
@@ -57,6 +59,7 @@ fun LazyMarkdownColumn(
         markdownRenderConfig,
         showNotSupportedText,
         actionHandler = actionHandler,
+        renderDependencies = renderDependencies,
     ) {
         val theme = markdownRenderConfig.markdownTheme
         val renderRegistry = markdownRenderConfig.renderRegistry
