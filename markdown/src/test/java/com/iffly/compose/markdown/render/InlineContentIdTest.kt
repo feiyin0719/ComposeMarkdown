@@ -8,6 +8,7 @@ import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.iffly.compose.markdown.widget.richtext.getStandaloneInlineTextContentAnnotations
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class InlineContentIdTest {
@@ -72,6 +73,22 @@ class InlineContentIdTest {
         val annotation = builder.toAnnotatedString().getStandaloneInlineTextContentAnnotations().single()
         assertEquals(actualId, annotation.item)
         assertEquals("fallback", builder.toAnnotatedString().text)
+    }
+
+    @Test
+    fun `overwrite rejects a different annotation type`() {
+        val builder = AnnotatedString.Builder()
+        val inlineContent = mutableMapOf<String, MarkdownInlineView>()
+        builder.appendMarkdownInlineContent("shared", embeddedContent(), inlineContent)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            builder.appendMarkdownInlineContent(
+                id = "shared",
+                inlineContent = RichTextInlineContent.StandaloneInlineContent {},
+                inlineContentMap = inlineContent,
+                overwrite = true,
+            )
+        }
     }
 
     private fun embeddedContent(): RichTextInlineContent =

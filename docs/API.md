@@ -926,7 +926,9 @@ fun AnnotatedString.Builder.appendMarkdownInlineContent(
     new content under a deterministic suffix such as `_1` or `_2`. It returns the actual ID used.
 - With `overwrite = true`, the requested ID is reused and its map entry is replaced. Every
     annotation that references that ID, including annotations appended earlier, resolves to the
-    replacement. Use this only when all occurrences are stateless and semantically interchangeable.
+    replacement. Existing and replacement content must both be embedded or both be standalone;
+    cross-type overwrite is rejected. Use this only when all occurrences are stateless and
+    semantically interchangeable.
 - The helper automatically selects the embedded Compose annotation or the standalone RichText
     annotation from the supplied `RichTextInlineContent` subtype.
 

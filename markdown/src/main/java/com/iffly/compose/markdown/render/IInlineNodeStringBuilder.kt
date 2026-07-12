@@ -45,7 +45,8 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
  * When [overwrite] is `false`, an existing [id] is preserved and a deterministic occurrence
  * suffix is added to the new entry. When [overwrite] is `true`, the existing entry is replaced;
  * all annotations that reference [id], including ones appended earlier, then resolve to the new
- * content. Use overwrite only when those occurrences are semantically interchangeable.
+ * content. Existing and replacement content must use the same embedded or standalone annotation
+ * type. Use overwrite only when those occurrences are semantically interchangeable.
  *
  * Prefer this helper over writing to [inlineContentMap] and calling Compose's native
  * `appendInlineContent` directly, because the native API does not manage map key collisions.
@@ -65,6 +66,7 @@ fun AnnotatedString.Builder.appendMarkdownInlineContent(
     overwrite: Boolean = false,
 ): String {
     require(alternateText.isNotEmpty())
+    inlineContentMap.requireCompatibleOverwrite(id, inlineContent, overwrite)
     val actualId = inlineContentMap.resolveInlineContentId(id, overwrite)
     inlineContentMap[actualId] =
         MarkdownInlineView.MarkdownRichTextInlineContent(inlineContent)
@@ -79,6 +81,31 @@ fun AnnotatedString.Builder.appendMarkdownInlineContent(
     }
     return actualId
 }
+
+private fun Map<String, MarkdownInlineView>.requireCompatibleOverwrite(
+    id: String,
+    inlineContent: RichTextInlineContent,
+    overwrite: Boolean,
+) {
+    if (!overwrite) return
+    val existing =
+        (this[id] as? MarkdownInlineView.MarkdownRichTextInlineContent)?.inlineContent
+            ?: return
+    require(existing.hasSameAnnotationTypeAs(inlineContent)) {
+        "Cannot overwrite inline content '$id' with a different annotation type"
+    }
+}
+
+private fun RichTextInlineContent.hasSameAnnotationTypeAs(other: RichTextInlineContent): Boolean =
+    when (this) {
+        is RichTextInlineContent.EmbeddedRichTextInlineContent -> {
+            other is RichTextInlineContent.EmbeddedRichTextInlineContent
+        }
+
+        is RichTextInlineContent.StandaloneInlineContent -> {
+            other is RichTextInlineContent.StandaloneInlineContent
+        }
+    }
 
 private fun Map<String, MarkdownInlineView>.resolveInlineContentId(
     id: String,
