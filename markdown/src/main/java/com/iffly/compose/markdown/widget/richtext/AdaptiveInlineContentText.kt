@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMapIndexed
+import com.iffly.compose.markdown.util.toPlaceholderSp
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableMap
@@ -216,10 +217,10 @@ private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
                 val value = adaptiveInlineContent.getValue(key)
                 val placeable = placeables.getOrNull(index)
                 val width =
-                    placeable?.width?.let { with(density) { it.toSp() } }
+                    placeable?.width?.let(density::toPlaceholderSp)
                         ?: value.placeholder.width
                 val height =
-                    placeable?.height?.let { with(density) { it.toSp() } }
+                    placeable?.height?.let(density::toPlaceholderSp)
                         ?: value.placeholder.height
 
                 key to

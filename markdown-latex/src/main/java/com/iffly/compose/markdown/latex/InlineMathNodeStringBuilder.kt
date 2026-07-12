@@ -16,6 +16,7 @@ import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
 import com.iffly.compose.markdown.style.MarkdownTheme
+import com.iffly.compose.markdown.util.toPlaceholderSp
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.vladsch.flexmark.ext.gitlab.GitLabInlineMath
 import com.vladsch.flexmark.util.ast.Node
@@ -82,8 +83,9 @@ open class InlineMathNodeStringBuilder<T : Node>(
                 append(latexBody)
                 return
             }
-            val width = with(nodeStringBuilderContext.layoutContext.density) { drawable.intrinsicWidth.toSp() }
-            val height = with(nodeStringBuilderContext.layoutContext.density) { drawable.intrinsicHeight.toSp() }
+            val density = nodeStringBuilderContext.layoutContext.density
+            val width = density.toPlaceholderSp(drawable.intrinsicWidth)
+            val height = density.toPlaceholderSp(drawable.intrinsicHeight)
             inlineContentMap[placeholderId] =
                 MarkdownInlineView.MarkdownRichTextInlineContent(
                     RichTextInlineContent.EmbeddedRichTextInlineContent(
