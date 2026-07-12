@@ -887,9 +887,8 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 - `T`：要处理的内联节点类型，必须是 Flexmark `Node` 的子类，例如 `Text`、`Emphasis`、`StrongEmphasis`、`Link` 等。
 - `node`：当前内联节点实例，用于读取内容（如文本、链接 URL、强调级别等）。
 - `inlineContentMap`：用于注册富内联内容的可变 Map：
-  - key 为唯一字符串，value 为 `MarkdownInlineView`；
-  - 构建器通常会在这里放入 `MarkdownRichTextInlineContent`，然后在 `AnnotatedString` 中通过 `appendInlineContent(key, placeholder)` 引用；
-  - 注意：**key 稳定性等同于 Compose key**，若只更改内容不更改 key，会导致已有内联内容无法更新。
+  - key 用于关联 `MarkdownInlineView` 与最终 `AnnotatedString` 中的 annotation；
+  - 优先使用 `appendMarkdownInlineContent(...)`，由它原子地注册 Map 条目并追加正确的 embedded 或 standalone annotation。
 - `markdownTheme`：当前生效的 `MarkdownTheme`，你应优先从这里读取样式（`SpanStyle` / `ParagraphStyle` 等），而不是在代码中硬编码颜色和字号。
 - `actionHandler`：可选交互处理器，例如：
   - 在 `Link` 构建器中用来创建 `MarkdownLinkInteractionListener`；
@@ -907,6 +906,28 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
   - 提供按职责分组的子上下文：布局（`layoutContext`）、文本样式（`designContext`）与系统能力（`systemContext`）；
   - 当需要文本测量或密度转换时，使用 `nodeStringBuilderContext.layoutContext`；
   - 通过 `nodeStringBuilderContext.renderDependencies` 读取调用方提供的对象。
+
+**注册内联内容**
+
+不要分别修改 `inlineContentMap` 和追加 annotation，优先使用公共 helper：
+
+```kotlin
+fun AnnotatedString.Builder.appendMarkdownInlineContent(
+    id: String,
+    inlineContent: RichTextInlineContent,
+    inlineContentMap: MutableMap<String, MarkdownInlineView>,
+    alternateText: String = "\uFFFD",
+    overwrite: Boolean = false,
+): String
+```
+
+- 默认 `overwrite = false`：若 ID 已存在，保留原条目，并为新内容分配 `_1`、`_2` 等确定性后缀；返回值是实际使用的 ID。
+- `overwrite = true`：复用请求的 ID 并替换 Map 条目。此前及此后所有引用该 ID 的 annotation 都会解析到替换后的内容；仅当所有 occurrence 均无状态且语义可互换时使用。
+- helper 会根据 `RichTextInlineContent` 的类型自动追加 embedded Compose annotation 或 standalone RichText annotation。
+
+如果直接调用 Compose 原生 `appendInlineContent(...)` 或库的
+`appendStandaloneInlineTextContent(...)`，则必须自行管理 Map 与 ID。Map 对每个 ID 只能保存一个
+value；再次写入相同 ID 会让所有匹配的 annotation 都使用最后写入的内容。除非有意共享，否则必须生成唯一 ID。
 
 顶层渲染组件均接受 `renderDependencies: Map<String, Any>`。自定义 Composable renderer 可通过
 `currentRenderDependencies()` 读取该 Map；非 Composable 的节点字符串构建器则从
@@ -955,8 +976,7 @@ sealed interface MarkdownInlineView {
 
 - `MarkdownInlineView` 是 `inlineContentMap: MutableMap<String, MarkdownInlineView>` 中的 value 类型，传入 `IInlineNodeStringBuilder` 的实现。
 - `MarkdownRichTextInlineContent` 包裹了一个 `RichTextInlineContent`，该类型负责真正渲染内联的 Composable 元素（图标、chip、徽章、自定义小组件等）。
-- 内联构建器会在 `inlineContentMap` 中以唯一 key 注册条目，文本渲染器再通过 `AnnotatedString` 中的内联内容 key 来显示这些富内容。
-- 如果你只修改了inline content, 没有修改`inlineContentMap`中的key,它将不会更新
+- 内联构建器应使用 `appendMarkdownInlineContent(...)` 注册内容并追加匹配的 annotation，由 helper 统一处理 ID 冲突。
 
 **自定义内联构建器的概念示例**
 
@@ -972,16 +992,12 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
   renderRegistry: RenderRegistry,
   nodeStringBuilderContext: NodeStringBuilderContext,
  ) {
-  // 1. 使用唯一 key 注册富内联内容
-  val key = "icon-${node.id}"
-  inlineContentMap[key] =
-   MarkdownInlineView.MarkdownRichTextInlineContent(
-    inlineContent = /* 为该 icon 构建 RichTextInlineContent */
-     buildIconInlineContent(node),
-   )
-
-  // 2. 在文本中插入一个占位字符，并附带该 key
-  appendInlineContent(key, " ")
+    appendMarkdownInlineContent(
+     id = "icon-${node.id}",
+     inlineContent = buildIconInlineContent(node),
+     inlineContentMap = inlineContentMap,
+     alternateText = " ",
+    )
  }
 }
 ```

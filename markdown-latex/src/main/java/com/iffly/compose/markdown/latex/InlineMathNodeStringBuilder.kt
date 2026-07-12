@@ -3,7 +3,6 @@ package com.iffly.compose.markdown.latex
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -15,6 +14,7 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.appendMarkdownInlineContent
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.toPlaceholderSp
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
@@ -53,59 +53,59 @@ open class InlineMathNodeStringBuilder<T : Node>(
         val placeholderId =
             "inline_math_$latexBody"
         val latexConfig = textStyle.toLatexConfig(nodeStringBuilderContext.layoutContext.density, paddingValues)
-        if (useAdaptiveInlineContent) {
-            val height = textStyle.fontSize * 1.3f
-            inlineContentMap[placeholderId] =
-                MarkdownInlineView.MarkdownRichTextInlineContent(
-                    RichTextInlineContent.EmbeddedRichTextInlineContent(
-                        placeholder =
-                            Placeholder(
-                                width = 1.sp,
-                                height = height,
-                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                            ),
-                        adjustSizeByContent = true,
-                    ) {
-                        LatexImage(
-                            latex = latexBody,
-                            latexConfig = latexConfig,
-                            modifier = Modifier.wrapContentSize(),
-                        )
-                    },
-                )
-        } else {
-            val drawable =
-                LatexBitmapLoader.createDrawable(
-                    latexBody,
-                    latexConfig,
-                )
-            if (drawable == null) {
-                append(latexBody)
-                return
+        val inlineContent =
+            if (useAdaptiveInlineContent) {
+                val height = textStyle.fontSize * 1.3f
+                RichTextInlineContent.EmbeddedRichTextInlineContent(
+                    placeholder =
+                        Placeholder(
+                            width = 1.sp,
+                            height = height,
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                        ),
+                    adjustSizeByContent = true,
+                ) {
+                    LatexImage(
+                        latex = latexBody,
+                        latexConfig = latexConfig,
+                        modifier = Modifier.wrapContentSize(),
+                    )
+                }
+            } else {
+                val drawable =
+                    LatexBitmapLoader.createDrawable(
+                        latexBody,
+                        latexConfig,
+                    )
+                if (drawable == null) {
+                    append(latexBody)
+                    return
+                }
+                val density = nodeStringBuilderContext.layoutContext.density
+                val width = density.toPlaceholderSp(drawable.intrinsicWidth)
+                val height = density.toPlaceholderSp(drawable.intrinsicHeight)
+                RichTextInlineContent.EmbeddedRichTextInlineContent(
+                    placeholder =
+                        Placeholder(
+                            width = width,
+                            height = height,
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                        ),
+                ) {
+                    LatexImage(
+                        latex = latexBody,
+                        latexConfig = latexConfig,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
-            val density = nodeStringBuilderContext.layoutContext.density
-            val width = density.toPlaceholderSp(drawable.intrinsicWidth)
-            val height = density.toPlaceholderSp(drawable.intrinsicHeight)
-            inlineContentMap[placeholderId] =
-                MarkdownInlineView.MarkdownRichTextInlineContent(
-                    RichTextInlineContent.EmbeddedRichTextInlineContent(
-                        placeholder =
-                            Placeholder(
-                                width = width,
-                                height = height,
-                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                            ),
-                    ) {
-                        LatexImage(
-                            latex = latexBody,
-                            latexConfig = latexConfig,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    },
-                )
-        }
 
-        appendInlineContent(placeholderId, "${'$'}$latexBody${'$'}")
+        appendMarkdownInlineContent(
+            id = placeholderId,
+            inlineContent = inlineContent,
+            inlineContentMap = inlineContentMap,
+            alternateText = "${'$'}$latexBody${'$'}",
+        )
     }
 }
 

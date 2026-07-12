@@ -888,9 +888,8 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
 - `T`: The inline node type to handle, e.g. `Text`, `Emphasis`, `StrongEmphasis`, `Link`, etc.
 - `node`: The inline node instance. You read its contents (text, URL, emphasis level, etc.) to decide what spans or inline content to build.
 - `inlineContentMap`: A mutable map used to register rich inline content:
-    - Keys are unique strings; values are `MarkdownInlineView` instances.
-    - Builders typically insert `MarkdownRichTextInlineContent` here and then reference it from the `AnnotatedString` via `appendInlineContent(key, placeholder)`.
-    - Be aware: **keys behave like stable Compose keys** — if you change only the content and keep the same key, existing inline content will not be recreated.
+    - Keys identify `MarkdownInlineView` instances referenced by annotations in the resulting `AnnotatedString`.
+    - Prefer `appendMarkdownInlineContent(...)`, which registers the map entry and appends the correct embedded or standalone annotation atomically.
 - `markdownTheme`: The active `MarkdownTheme`. Prefer pulling `SpanStyle` / `ParagraphStyle` from here instead of hard‑coding colours, font sizes, etc., so that your builder stays theme‑aware.
 - `actionHandler`: Optional handler for interactions:
     - In the built‑in `Link` builder it is used to create `MarkdownLinkInteractionListener`.
@@ -908,6 +907,33 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
     - Provides grouped subcontexts for layout (`layoutContext`), text style (`designContext`), and platform/system access (`systemContext`);
     - Use `nodeStringBuilderContext.layoutContext` when text measurement or density conversion is needed;
     - Read caller-supplied objects from `nodeStringBuilderContext.renderDependencies`.
+
+**Registering inline content**
+
+Use the public helper instead of mutating `inlineContentMap` and appending an annotation separately:
+
+```kotlin
+fun AnnotatedString.Builder.appendMarkdownInlineContent(
+        id: String,
+        inlineContent: RichTextInlineContent,
+        inlineContentMap: MutableMap<String, MarkdownInlineView>,
+        alternateText: String = "\uFFFD",
+        overwrite: Boolean = false,
+): String
+```
+
+- With the default `overwrite = false`, an occupied ID is preserved and the helper registers the
+    new content under a deterministic suffix such as `_1` or `_2`. It returns the actual ID used.
+- With `overwrite = true`, the requested ID is reused and its map entry is replaced. Every
+    annotation that references that ID, including annotations appended earlier, resolves to the
+    replacement. Use this only when all occurrences are stateless and semantically interchangeable.
+- The helper automatically selects the embedded Compose annotation or the standalone RichText
+    annotation from the supplied `RichTextInlineContent` subtype.
+
+If you call Compose's native `appendInlineContent(...)` or the library's
+`appendStandaloneInlineTextContent(...)` directly, you must manage the map and IDs yourself. A map
+stores only one value per ID, so assigning the same ID again replaces the content used by every
+matching annotation. Generate unique IDs unless that sharing is deliberate.
 
 Top-level rendering components accept `renderDependencies: Map<String, Any>`. A custom Composable
 renderer can read the map with `currentRenderDependencies()`, while a non-Composable node string
@@ -959,10 +985,8 @@ Key points:
   parameters of `IInlineNodeStringBuilder` implementations.
 - `MarkdownRichTextInlineContent` wraps a `RichTextInlineContent` instance, which knows how to render
   a composable inline element (icon, chip, badge, custom widget, etc.).
-- Inline builders register entries in the `inlineContentMap` with a unique key; the text renderer
-  then references those keys from the `AnnotatedString` to display rich inline content alongside
-  normal text.
-- **notice**: If you only change the content and do not change the key in `inlineContentMap`, the inline content will not update.
+- Inline builders should use `appendMarkdownInlineContent(...)` to register content and append its
+    matching annotation with collision handling.
 
 **Conceptual usage in a custom inline builder**
 
@@ -978,16 +1002,12 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
         renderRegistry: RenderRegistry,
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
-        // 1. Register rich inline content under a unique key
-        val key = "icon-${node.id}"
-        inlineContentMap[key] =
-            MarkdownInlineView.MarkdownRichTextInlineContent(
-                inlineContent = /* build RichTextInlineContent for this icon */
-                    buildIconInlineContent(node),
-            )
-
-        // 2. Append a placeholder character with that key as an annotation
-        appendInlineContent(key, " ")
+        appendMarkdownInlineContent(
+            id = "icon-${node.id}",
+            inlineContent = buildIconInlineContent(node),
+            inlineContentMap = inlineContentMap,
+            alternateText = " ",
+        )
     }
 }
 ```

@@ -701,6 +701,11 @@ val config =
         .addInlineNodeStringBuilder(MentionNode::class.java, MentionInlineBuilder())
         .build()
 ```
+
+When a builder inserts composable inline content, use `appendMarkdownInlineContent(...)` to
+register the content and append its annotation together. Duplicate IDs receive deterministic
+suffixes by default; opt into `overwrite = true` only when all same-ID occurrences are
+semantically interchangeable. See [API.md](docs/API.md#iinlinenodestringbuilder) for details.
   
 ## 🔌 Plugins
 

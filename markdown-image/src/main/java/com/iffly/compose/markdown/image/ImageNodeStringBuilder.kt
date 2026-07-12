@@ -14,10 +14,10 @@ import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.render.appendMarkdownInlineContent
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.widget.LoadingView
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
-import com.iffly.compose.markdown.widget.richtext.appendStandaloneInlineTextContent
 import com.vladsch.flexmark.ast.Image
 import com.vladsch.flexmark.ast.ImageRef
 import com.vladsch.flexmark.util.ast.Node
@@ -131,8 +131,9 @@ class ImageNodeStringBuilder(
         val url = node.url.unescape()
         val contentDescription = node.text?.toString() ?: node.title?.unescape()
         if (url.isNotBlank()) {
-            inlineContentMap[imageId] =
-                MarkdownInlineView.MarkdownRichTextInlineContent(
+            appendMarkdownInlineContent(
+                id = imageId,
+                inlineContent =
                     RichTextInlineContent.StandaloneInlineContent(
                         modifier = Modifier,
                     ) { modifier ->
@@ -150,8 +151,9 @@ class ImageNodeStringBuilder(
                             errorView = errorView,
                         )
                     },
-                )
-            appendStandaloneInlineTextContent(imageId, "[${node.text ?: node.title ?: "Image"}]")
+                inlineContentMap = inlineContentMap,
+                alternateText = "[${node.text ?: node.title ?: "Image"}]",
+            )
         } else {
             contentDescription?.let {
                 append("[$it]")
@@ -185,8 +187,9 @@ class ImageRefNodeStringBuilder(
             node.text?.toString() ?: referenceNode?.title?.unescape()?.takeIf { node.isDefined }
         if (url.isNotBlank()) {
             val imageId = "image_$url"
-            inlineContentMap[imageId] =
-                MarkdownInlineView.MarkdownRichTextInlineContent(
+            appendMarkdownInlineContent(
+                id = imageId,
+                inlineContent =
                     RichTextInlineContent.StandaloneInlineContent(
                         modifier = Modifier,
                     ) { modifier ->
@@ -204,10 +207,8 @@ class ImageRefNodeStringBuilder(
                             errorView = errorView,
                         )
                     },
-                )
-            appendStandaloneInlineTextContent(
-                imageId,
-                "[${node.text ?: text ?: "ImageRef"}]",
+                inlineContentMap = inlineContentMap,
+                alternateText = "[${node.text ?: text ?: "ImageRef"}]",
             )
         } else {
             text?.let {
