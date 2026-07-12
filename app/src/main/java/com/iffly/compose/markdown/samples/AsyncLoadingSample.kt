@@ -27,6 +27,7 @@ fun AsyncLoadingExample(
     modifier: Modifier = Modifier,
 ) {
     var content by remember { mutableStateOf("") }
+    val markdownRenderConfig = remember { MarkdownRenderConfig.Builder().build() }
 
     LaunchedEffect(Unit) {
         content =
@@ -58,7 +59,7 @@ fun AsyncLoadingExample(
     ) {
         MarkdownView(
             content = content,
-            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+            markdownRenderConfig = markdownRenderConfig,
             parseDispatcher = Dispatchers.Default,
             modifier =
                 Modifier

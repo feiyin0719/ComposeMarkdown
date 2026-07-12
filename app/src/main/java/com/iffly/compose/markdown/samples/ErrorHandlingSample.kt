@@ -14,6 +14,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,7 @@ fun ErrorHandlingExample(
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
+    val markdownRenderConfig = remember { MarkdownRenderConfig.Builder().build() }
     // Intentionally create a scenario that might cause errors
     val invalidContent =
         """
@@ -70,7 +72,7 @@ fun ErrorHandlingExample(
 
         MarkdownView(
             content = invalidContent,
-            markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+            markdownRenderConfig = markdownRenderConfig,
             modifier = Modifier.padding(16.dp),
             onError = { throwable ->
                 Card(
