@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -23,11 +24,11 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMapIndexed
 import com.iffly.compose.markdown.util.toPlaceholderSp
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.collections.immutable.toImmutableMap
 
 /**
  * A Composable that displays rich text with support for both fixed-size and adaptive inline content.
@@ -75,7 +76,8 @@ fun AdaptiveInlineContentText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
-    val (fixedSizeInlineContent, adaptiveInlineContent) = groupInlineContent(inlineContent)
+    val (fixedSizeInlineContent, adaptiveInlineContent) =
+        remember(inlineContent) { groupInlineContent(inlineContent) }
 
     if (adaptiveInlineContent.isEmpty()) {
         // Fast path: no adaptive content, fall back to simple text rendering
@@ -95,7 +97,7 @@ fun AdaptiveInlineContentText(
             softWrap = softWrap,
             maxLines = maxLines,
             minLines = minLines,
-            inlineContent = fixedSizeInlineContent.toImmutableMap(),
+            inlineContent = fixedSizeInlineContent,
             onTextLayout = onTextLayout,
             style = style,
         )
@@ -141,17 +143,23 @@ private fun TextWithAdaptiveInlineContent(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    adaptiveInlineContent: Map<String, RichTextInlineContent.EmbeddedRichTextInlineContent> = persistentMapOf(),
-    fixedSizeInlineContent: Map<String, InlineTextContent> = persistentMapOf(),
+    adaptiveInlineContent: ImmutableList<Pair<String, RichTextInlineContent.EmbeddedRichTextInlineContent>> = persistentListOf(),
+    fixedSizeInlineContent: ImmutableMap<String, InlineTextContent> = persistentMapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
 ) {
     val density = LocalDensity.current
     SubcomposeLayout(modifier = modifier) { constraints ->
-        val measuredAdaptiveInlineContent: Map<String, InlineTextContent> =
+        val measuredAdaptiveInlineContent: ImmutableMap<String, InlineTextContent> =
             measureAdaptiveInlineContentSize(adaptiveInlineContent, constraints, density)
 
-        val combinedInlineContent = fixedSizeInlineContent + measuredAdaptiveInlineContent
+        val combinedInlineContent =
+            persistentMapOf<String, InlineTextContent>()
+                .builder()
+                .apply {
+                    putAll(fixedSizeInlineContent)
+                    putAll(measuredAdaptiveInlineContent)
+                }.build()
 
         // 2. Compose and measure the text with the final inlineContent in the same layout pass
         val textPlaceables =
@@ -171,7 +179,7 @@ private fun TextWithAdaptiveInlineContent(
                     softWrap = softWrap,
                     maxLines = maxLines,
                     minLines = minLines,
-                    inlineContent = combinedInlineContent.toImmutableMap(),
+                    inlineContent = combinedInlineContent,
                     onTextLayout = onTextLayout,
                     style = style,
                 )
@@ -189,12 +197,11 @@ private fun TextWithAdaptiveInlineContent(
 }
 
 private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
-    adaptiveInlineContent: Map<String, RichTextInlineContent.EmbeddedRichTextInlineContent>,
+    adaptiveInlineContent: ImmutableList<Pair<String, RichTextInlineContent.EmbeddedRichTextInlineContent>>,
     constraints: Constraints,
     density: Density,
-): Map<String, InlineTextContent> {
+): ImmutableMap<String, InlineTextContent> {
     // 1. Measure adaptive inline contents off-screen in this layout pass
-    val adaptiveKeys = adaptiveInlineContent.keys.toList()
     // adaptive inline contents are measured without constraints to get their "natural" size
     val adaptiveInlineConstraints =
         constraints.copy(
@@ -203,64 +210,43 @@ private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
         )
     val placeables =
         subcompose("adaptive_inline") {
-            adaptiveKeys.fastForEach { key ->
-                val value = adaptiveInlineContent.getValue(key)
+            adaptiveInlineContent.fastForEach { (key, value) ->
                 Box(modifier = Modifier.wrapContentSize()) {
                     value.content(key)
                 }
             }
         }.map { it.measure(adaptiveInlineConstraints) }
 
-    val measuredAdaptiveInlineContent: Map<String, InlineTextContent> =
-        adaptiveKeys
-            .fastMapIndexed { index, key ->
-                val value = adaptiveInlineContent.getValue(key)
-                val placeable = placeables.getOrNull(index)
-                val width =
-                    placeable?.width?.let(density::toPlaceholderSp)
-                        ?: value.placeholder.width
-                val height =
-                    placeable?.height?.let(density::toPlaceholderSp)
-                        ?: value.placeholder.height
-
-                key to
-                    InlineTextContent(
-                        placeholder =
-                            value.placeholder.copy(
-                                width = width,
-                                height = height,
-                            ),
-                        children = value.content,
-                    )
-            }.toMap()
-    return measuredAdaptiveInlineContent
+    val measuredAdaptiveInlineContent = persistentMapOf<String, InlineTextContent>().builder()
+    adaptiveInlineContent.forEachIndexed { index, (key, value) ->
+        val placeable = placeables.getOrNull(index)
+        val width = placeable?.width?.let(density::toPlaceholderSp) ?: value.placeholder.width
+        val height = placeable?.height?.let(density::toPlaceholderSp) ?: value.placeholder.height
+        measuredAdaptiveInlineContent[key] =
+            InlineTextContent(
+                placeholder = value.placeholder.copy(width = width, height = height),
+                children = value.content,
+            )
+    }
+    return measuredAdaptiveInlineContent.build()
 }
 
 private fun groupInlineContent(
-    inlineContent: Map<String, RichTextInlineContent.EmbeddedRichTextInlineContent>,
-): Pair<Map<String, InlineTextContent>, Map<String, RichTextInlineContent.EmbeddedRichTextInlineContent>> {
-    val fixedSizeInlineContent =
-        inlineContent
-            .mapNotNull { (key, value) ->
-                if (!value.adjustSizeByContent) {
-                    key to
-                        InlineTextContent(
-                            placeholder = value.placeholder,
-                            children = value.content,
-                        )
-                } else {
-                    null
-                }
-            }.toMap()
-
-    val adaptiveInlineContent =
-        inlineContent
-            .mapNotNull { (key, value) ->
-                if (value.adjustSizeByContent) {
-                    key to value
-                } else {
-                    null
-                }
-            }.toMap()
-    return Pair(fixedSizeInlineContent, adaptiveInlineContent)
+    inlineContent: ImmutableMap<String, RichTextInlineContent.EmbeddedRichTextInlineContent>,
+): GroupedInlineContent {
+    val fixed = persistentMapOf<String, InlineTextContent>().builder()
+    val adaptive = persistentListOf<Pair<String, RichTextInlineContent.EmbeddedRichTextInlineContent>>().builder()
+    inlineContent.forEach { (key, value) ->
+        if (value.adjustSizeByContent) {
+            adaptive.add(key to value)
+        } else {
+            fixed[key] = InlineTextContent(placeholder = value.placeholder, children = value.content)
+        }
+    }
+    return GroupedInlineContent(fixed = fixed.build(), adaptive = adaptive.build())
 }
+
+private data class GroupedInlineContent(
+    val fixed: ImmutableMap<String, InlineTextContent>,
+    val adaptive: ImmutableList<Pair<String, RichTextInlineContent.EmbeddedRichTextInlineContent>>,
+)

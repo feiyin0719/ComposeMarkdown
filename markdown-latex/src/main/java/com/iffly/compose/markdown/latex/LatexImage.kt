@@ -20,11 +20,11 @@ internal fun LatexImage(
     latexConfig: LatexConfig,
     modifier: Modifier = Modifier,
 ) {
-    var drawable by remember {
+    var drawable by remember(latex, latexConfig) {
         mutableStateOf<Drawable?>(null)
     }
 
-    LaunchedEffect(latexConfig) {
+    LaunchedEffect(latex, latexConfig) {
         drawable =
             withContext(Dispatchers.Default) {
                 LatexBitmapLoader.createDrawable(latex, latexConfig)
