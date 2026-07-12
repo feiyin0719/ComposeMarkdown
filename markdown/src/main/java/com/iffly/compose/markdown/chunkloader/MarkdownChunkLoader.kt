@@ -1,426 +1,403 @@
 package com.iffly.compose.markdown.chunkloader
 
-import com.iffly.compose.markdown.ScrollDirection
-import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * Chunk loading configuration
- * @param initialLines Number of lines to load initially
- * @param incrementalLines Number of lines to load incrementally
- * @param maxCachedChunks Maximum number of chunks to cache
- * @param maxCachedFileLines Maximum number of lines to cache in file reader
- * @param minRemovedBatchSize Minimum number of chunks to remove when recycling cache
- * @param chunkSize Number of blocks per chunk
- * @param parserDispatcher Coroutine dispatcher for parsing
- * @param ioDispatcher Coroutine dispatcher for IO operations
- */
+/** Stable, zero-based, rereadable source of Markdown lines. */
+fun interface MarkdownLineSource {
+    suspend fun readLines(
+        startLine: Int,
+        lineCount: Int,
+    ): List<String>
+}
+
+/** In-memory line source for Markdown already held as a string. */
+class StringMarkdownLineSource(
+    text: String,
+) : MarkdownLineSource {
+    private val lines = text.lines()
+
+    override suspend fun readLines(
+        startLine: Int,
+        lineCount: Int,
+    ): List<String> {
+        require(startLine >= 0) { "startLine must be non-negative" }
+        require(lineCount > 0) { "lineCount must be positive" }
+        if (startLine >= lines.size) return emptyList()
+        return lines.subList(startLine, minOf(startLine + lineCount, lines.size))
+    }
+}
+
+/** File-backed line source with bounded line caching. */
+class FileMarkdownLineSource(
+    file: File,
+    maxCachedFileLines: Int = 2000,
+    sourceDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : MarkdownLineSource,
+    AutoCloseable {
+    private val reader =
+        CachedMarkdownFileReader(
+            file = file,
+            maxCacheSize = maxCachedFileLines,
+            dispatcher = sourceDispatcher,
+        )
+
+    override suspend fun readLines(
+        startLine: Int,
+        lineCount: Int,
+    ): List<String> {
+        require(startLine >= 0) { "startLine must be non-negative" }
+        require(lineCount > 0) { "lineCount must be positive" }
+        return when (val result = reader.readLines(startLine + 1, startLine + lineCount)) {
+            is ReadResult.Success -> result.data
+            is ReadResult.EndOfFile -> emptyList()
+            is ReadResult.Error -> throw result.exception
+        }
+    }
+
+    override fun close() {
+        reader.close()
+    }
+}
+
+/** Configuration shared with the Multiplatform lazy node-window design. */
 data class ChunkLoaderConfig(
-    val initialLines: Int = 1000,
-    val incrementalLines: Int = 500,
-    val maxCachedChunks: Int = 1000,
+    val initialLineCount: Int = 1000,
+    val incrementalLineCount: Int = 500,
+    val minNodesAhead: Int = 100,
+    val minNodesBehind: Int = 30,
+    val maxCachedNodes: Int = 500,
+    val maxCachedSourceLines: Int = 10_000,
+    val minRecycleNodeCount: Int = 50,
     val maxCachedFileLines: Int = 2000,
-    val minRemovedBatchSize: Int = 10,
-    val chunkSize: Int = 5,
+    val sourceDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
+    init {
+        require(initialLineCount > 0) { "initialLineCount must be positive" }
+        require(incrementalLineCount > 0) { "incrementalLineCount must be positive" }
+        require(minNodesAhead > 0) { "minNodesAhead must be positive" }
+        require(minNodesBehind >= 0) { "minNodesBehind must be non-negative" }
+        require(maxCachedNodes > 0) { "maxCachedNodes must be positive" }
+        require(maxCachedSourceLines > 0) { "maxCachedSourceLines must be positive" }
+        require(minRecycleNodeCount > 0) { "minRecycleNodeCount must be positive" }
+        require(minRecycleNodeCount <= maxCachedNodes) {
+            "minRecycleNodeCount must not exceed maxCachedNodes"
+        }
+        require(minNodesAhead + minNodesBehind < maxCachedNodes) {
+            "minNodesAhead + minNodesBehind must be smaller than maxCachedNodes"
+        }
+        require(maxCachedFileLines > 0) { "maxCachedFileLines must be positive" }
+    }
+}
+
+internal data class MarkdownChunkNode(
+    val node: Block,
+    val startLine: Int,
+    val endLine: Int,
+    val key: String,
 )
 
-/**
- * Chunk loading result
- */
-internal sealed class LoadResult {
-    object Success : LoadResult()
+internal data class MarkdownChunkLoadResult(
+    val nodes: List<MarkdownChunkNode>,
+    val endOfSource: Boolean,
+)
 
-    data class Error(
-        val message: String,
-        val cause: Throwable? = null,
-    ) : LoadResult()
+internal data class MarkdownNodeWindowSnapshot(
+    val nodes: List<MarkdownChunkNode>,
+    val canLoadBefore: Boolean,
+    val canLoadAfter: Boolean,
+    val needsRecycle: Boolean,
+    val cachedSourceLineCount: Int,
+) {
+    companion object {
+        val Empty = MarkdownNodeWindowSnapshot(emptyList(), false, true, false, 0)
+    }
 }
 
-/**
- * Markdown chunk loader
- * Responsible for loading and parsing Markdown file content on demand
- */
+private data class EvictedNodeRange(
+    val lines: IntRange,
+    val nodeCount: Int,
+    val keyHash: Int,
+)
+
+/** Incremental parser that keeps only the unconfirmed trailing source block between reads. */
 internal class MarkdownChunkLoader(
-    fileSource: File,
-    renderConfig: MarkdownRenderConfig,
-    private val config: ChunkLoaderConfig = ChunkLoaderConfig(),
+    private val source: MarkdownLineSource,
+    private val parser: Parser,
+    private val maxCachedSourceLines: Int = 10_000,
+    private val sourceDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val parserDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
-    private var visibleLineRange: IntRange = IntRange.EMPTY
-    private val chunkCache = ChunkCache(config.maxCachedChunks, config.minRemovedBatchSize)
-    private val nodeToChunkMap = NodeToChunkMapper()
-    private val fileReader =
-        CachedMarkdownFileReader(
-            fileSource,
-            maxCacheSize = config.maxCachedFileLines,
-            dispatcher = config.ioDispatcher,
-        )
-    private val markdownChunkParser = MarkdownChunkParser(renderConfig, config.parserDispatcher)
+    private val mutex = Mutex()
+    private var pendingStartLine = 0
+    private val pendingLines = mutableListOf<String>()
+    private var nextLine = 0
+    private var endOfSource = false
 
-    // nodes flow
-    private val _nodesFlow = MutableStateFlow<List<Block>>(emptyList())
-    val nodesFlow: StateFlow<List<Block>> = _nodesFlow.asStateFlow()
+    suspend fun load(lineCount: Int): MarkdownChunkLoadResult =
+        mutex.withLock {
+            if (endOfSource) return@withLock MarkdownChunkLoadResult(emptyList(), true)
 
-    private val _loadingFlow = MutableStateFlow(false)
-    val loadingFlow: StateFlow<Boolean> = _loadingFlow.asStateFlow()
+            val loadedLines = readLines(nextLine, lineCount)
+            require(loadedLines.size <= lineCount) {
+                "MarkdownLineSource returned ${loadedLines.size} lines for a $lineCount-line request"
+            }
+            val reachedEnd = loadedLines.size < lineCount
+            nextLine += loadedLines.size
+            pendingLines.addAll(loadedLines)
 
-    /**
-     * Load initial chunks
-     */
-    suspend fun loadInitialChunks(): LoadResult =
-        try {
-            _loadingFlow.value = true
-            updateVisibleLineRange(0..config.initialLines, ScrollDirection.NONE)
-            LoadResult.Success
-        } catch (e: Exception) {
-            LoadResult.Error("Failed to load initial chunks", e)
-        } finally {
-            _loadingFlow.value = false
-        }
-
-    /**
-     * Load more chunks based on visible nodes
-     */
-    suspend fun loadMoreChunksIfNeeded(
-        firstVisibleNode: Node,
-        lastVisibleNode: Node,
-        scrollDirection: ScrollDirection = ScrollDirection.NONE,
-    ): LoadResult {
-        return try {
-            _loadingFlow.value = true
-
-            val newRange = calculateNewRange(firstVisibleNode, lastVisibleNode, scrollDirection)
-            if (newRange.isEmpty() || newRange == visibleLineRange) {
-                return LoadResult.Success
+            if (pendingLines.isEmpty()) {
+                endOfSource = true
+                return@withLock MarkdownChunkLoadResult(emptyList(), true)
             }
 
-            updateVisibleLineRange(newRange, scrollDirection)
-            LoadResult.Success
-        } catch (e: Exception) {
-            LoadResult.Error("Failed to load more chunks", e)
-        } finally {
-            _loadingFlow.value = false
-        }
-    }
-
-    /**
-     * Calculate new visible range
-     */
-    private fun calculateNewRange(
-        firstVisibleNode: Node,
-        lastVisibleNode: Node,
-        scrollDirection: ScrollDirection,
-    ): IntRange {
-        val startLineNumber = nodeToChunkMap.getChunk(firstVisibleNode)?.startLineNumber ?: 0
-        val endLineNumber = nodeToChunkMap.getChunk(lastVisibleNode)?.endLineNumber ?: 0
-
-        return when (scrollDirection) {
-            ScrollDirection.UP -> {
-                val newStart = (startLineNumber - config.incrementalLines * 2).coerceAtLeast(0)
-                newStart..endLineNumber
-            }
-
-            ScrollDirection.DOWN -> {
-                val newEnd = endLineNumber + config.incrementalLines * 2
-                startLineNumber..newEnd
-            }
-
-            ScrollDirection.NONE -> {
-                val newStart = (startLineNumber - config.incrementalLines).coerceAtLeast(0)
-                val newEnd = endLineNumber + config.incrementalLines
-                newStart..newEnd
-            }
-        }
-    }
-
-    /**
-     * Update visible line range
-     */
-    private suspend fun updateVisibleLineRange(
-        newRange: IntRange,
-        scrollDirection: ScrollDirection,
-    ) {
-        // Load content before current range
-        if (newRange.first < visibleLineRange.first) {
-            loadChunksBeforeCurrent(newRange.first, visibleLineRange.first - 1)
-        }
-
-        // Load content after current range
-        if (newRange.last > visibleLineRange.last) {
-            loadChunksAfterCurrent(visibleLineRange.last + 1, newRange.last)
-        }
-
-        // Clean up cache
-        chunkCache.recycleCacheIfNeeded(scrollDirection) {
-            nodeToChunkMap.removeChunk(it)
-        }
-
-        // Update state
-        updateState()
-    }
-
-    /**
-     * Load chunks before current range
-     */
-    private suspend fun loadChunksBeforeCurrent(
-        startLine: Int,
-        endLine: Int,
-    ) {
-        var currentStart = startLine.coerceAtLeast(0)
-        val currentEnd = endLine.coerceAtLeast(0)
-
-        while (currentStart <= currentEnd) {
-            val chunks = markdownChunkParser.parseRange(fileReader, currentStart, currentEnd)
-            if (chunks == null || chunks.isNotEmpty()) { // Allow null to indicate read failure
-                chunks?.let {
-                    chunkCache.addChunksAtBeginning(chunks)
-                    chunks.forEach { nodeToChunkMap.addChunk(it) }
+            val parsedNodes = parse(pendingLines)
+            val trailingNode =
+                parsedNodes.lastOrNull()?.takeIf { node ->
+                    !reachedEnd && node.endLineNumber >= pendingLines.lastIndex
                 }
-                break
-            }
-            // If no content, expand search range
-            currentStart = (currentStart - config.incrementalLines).coerceAtLeast(0)
-            if (currentStart == 0) break
-        }
-    }
+            val emittedNodes = if (trailingNode == null) parsedNodes else parsedNodes.dropLast(1)
+            val chunks = toChunkNodes(emittedNodes, pendingStartLine)
 
-    /**
-     * Load chunks after current range
-     */
-    private suspend fun loadChunksAfterCurrent(
-        startLine: Int,
-        endLine: Int,
-    ) {
-        var currentEnd = endLine
-
-        while (startLine <= currentEnd) {
-            val chunks =
-                markdownChunkParser.parseRange(
-                    fileReader,
-                    startLine,
-                    currentEnd,
-                    dropFirst = false,
-                )
-            if (chunks == null || chunks.isNotEmpty()) { // Allow null to indicate read failure
-                chunks?.let {
-                    chunkCache.addChunksAtEnd(chunks)
-                    chunks.forEach { nodeToChunkMap.addChunk(it) }
+            if (reachedEnd) {
+                pendingLines.clear()
+                endOfSource = true
+            } else {
+                if (chunks.isNotEmpty()) {
+                    val consumedLineCount = chunks.last().endLine - pendingStartLine + 1
+                    pendingLines.subList(0, consumedLineCount).clear()
+                    pendingStartLine += consumedLineCount
                 }
-                break
-            }
-            // If no content, expand search range
-            currentEnd += config.incrementalLines
-        }
-    }
-
-    /**
-     * Update state
-     */
-    private fun updateState() {
-        val allChunks = chunkCache.getAllChunks()
-        if (allChunks.isNotEmpty()) {
-            val newStart = allChunks.first().startLineNumber
-            val newEnd = allChunks.last().endLineNumber
-            visibleLineRange = newStart..newEnd
-        }
-        _nodesFlow.value = getNodes()
-    }
-
-    /**
-     * Get all current nodes
-     */
-    fun getNodes(): List<Block> = chunkCache.getAllChunks().flatMap { it.nodes }
-
-    /**
-     * Get cache information
-     */
-    fun getCacheInfo(): MarkdownChunkCacheInfo =
-        MarkdownChunkCacheInfo(
-            chunkCacheSize = chunkCache.size(),
-            visibleLineRange = visibleLineRange,
-            fileReaderCache = fileReader.getCacheInfo(),
-        )
-
-    /**
-     * Clean up resources
-     */
-    fun close() {
-        fileReader.close()
-        chunkCache.clear()
-        nodeToChunkMap.clear()
-    }
-
-    /**
-     * Cache information data class
-     */
-    data class MarkdownChunkCacheInfo(
-        val chunkCacheSize: Int,
-        val visibleLineRange: IntRange,
-        val fileReaderCache: FileCacheInfo,
-    )
-}
-
-/**
- * Markdown chunk data class
- */
-internal data class MarkdownChunk(
-    val nodes: List<Block>,
-    val startLineNumber: Int,
-    val endLineNumber: Int,
-) {
-    val isValid: Boolean
-        get() = nodes.isNotEmpty() && startLineNumber <= endLineNumber
-}
-
-/**
- * Chunk cache manager
- */
-private class ChunkCache(
-    private val maxSize: Int,
-    private val minRemovedBatchSize: Int = 10,
-) {
-    private val chunks = mutableListOf<MarkdownChunk>()
-
-    fun addChunksAtBeginning(newChunks: List<MarkdownChunk>) {
-        chunks.addAll(0, newChunks)
-    }
-
-    fun addChunksAtEnd(newChunks: List<MarkdownChunk>) {
-        chunks.addAll(newChunks)
-    }
-
-    fun getAllChunks(): List<MarkdownChunk> = chunks.toList()
-
-    fun size(): Int = chunks.size
-
-    fun recycleCacheIfNeeded(
-        scrollDirection: ScrollDirection,
-        onRecycleChunk: ((MarkdownChunk) -> Unit)? = null,
-    ) {
-        if (chunks.size <= maxSize) return
-
-        val toRemove = chunks.size - maxSize
-        if (toRemove < minRemovedBatchSize) return
-        repeat(toRemove) { num ->
-            val chunk =
-                when (scrollDirection) {
-                    ScrollDirection.UP -> {
-                        chunks.removeLastOrNull()
-                    }
-
-                    ScrollDirection.DOWN -> {
-                        chunks.removeFirstOrNull()
-                    }
-
-                    ScrollDirection.NONE -> {
-                        if (num % 2 == 0) {
-                            chunks.removeFirstOrNull()
-                        } else {
-                            chunks.removeLastOrNull()
-                        }
-                    }
+                discardLeadingBlankLines()
+                require(pendingLines.size <= maxCachedSourceLines) {
+                    "Unconfirmed Markdown source exceeded maxCachedSourceLines=$maxCachedSourceLines"
                 }
-            chunk?.let { onRecycleChunk?.invoke(it) }
+            }
+
+            MarkdownChunkLoadResult(chunks, endOfSource)
         }
-    }
 
-    fun clear() {
-        chunks.clear()
-    }
-}
-
-/**
- * Node to chunk mapping manager
- */
-private class NodeToChunkMapper {
-    private val nodeToChunkMap = mutableMapOf<Node, MarkdownChunk>()
-
-    fun addChunk(chunk: MarkdownChunk) {
-        chunk.nodes.forEach { node ->
-            nodeToChunkMap[node] = chunk
+    suspend fun reload(range: IntRange): List<MarkdownChunkNode> =
+        mutex.withLock {
+            require(!range.isEmpty()) { "range must not be empty" }
+            val expectedLineCount = range.last - range.first + 1
+            val lines = readLines(range.first, expectedLineCount)
+            require(lines.size == expectedLineCount) {
+                "MarkdownLineSource changed while reloading lines ${range.first}..${range.last}"
+            }
+            toChunkNodes(parse(lines), range.first)
         }
-    }
 
-    fun getChunk(node: Node): MarkdownChunk? = nodeToChunkMap[node]
-
-    fun removeChunk(chunk: MarkdownChunk) {
-        chunk.nodes.forEach { node ->
-            nodeToChunkMap.remove(node)
-        }
-    }
-
-    fun clear() {
-        nodeToChunkMap.clear()
-    }
-}
-
-/**
- * Markdown chunk parser
- */
-private class MarkdownChunkParser(
-    private val renderConfig: MarkdownRenderConfig,
-    private val dispatcher: CoroutineDispatcher,
-) {
-    suspend fun parseRange(
-        fileReader: CachedMarkdownFileReader,
+    private suspend fun readLines(
         startLine: Int,
-        endLine: Int,
-        chunkSize: Int = 5,
-        dropFirst: Boolean = true,
-    ): List<MarkdownChunk>? =
-        withContext(dispatcher) {
-            try {
-                val result = fileReader.readLines(startLine, endLine)
-                val lines = (result as? ReadResult.Success)?.data ?: return@withContext null
-                if (lines.isEmpty()) return@withContext null
+        lineCount: Int,
+    ): List<String> =
+        withContext(sourceDispatcher) {
+            source.readLines(startLine, lineCount)
+        }
 
-                val document = renderConfig.parser.parse(lines.joinToString("\n"))
-                val chunks = mutableListOf<MarkdownChunk>()
-                val blocks = mutableListOf<Block>()
-
-                var node = if (dropFirst) document.firstChild?.next else document.firstChild
-
+    private suspend fun parse(lines: List<String>): List<Block> =
+        withContext(parserDispatcher) {
+            val document = parser.parse(lines.joinToString("\n"))
+            buildList {
+                var node: Node? = document.firstChild
                 while (node != null) {
-                    if (!dropFirst && node == document.lastChild) break
-
+                    val next = node.next
                     if (node is Block) {
-                        blocks.add(node)
+                        node.unlink()
+                        add(node)
                     }
-
-                    if (blocks.size >= chunkSize) {
-                        chunks.add(createChunk(blocks.toList(), startLine))
-                        blocks.clear()
-                    }
-
-                    node = node.next
+                    node = next
                 }
-
-                if (blocks.isNotEmpty()) {
-                    chunks.add(createChunk(blocks, startLine))
-                }
-
-                chunks.filter { it.isValid }
-            } catch (e: Exception) {
-                emptyList()
             }
         }
 
-    private fun createChunk(
-        blocks: List<Block>,
-        baseLineNumber: Int,
-    ): MarkdownChunk =
-        MarkdownChunk(
-            nodes = blocks,
-            startLineNumber = baseLineNumber + blocks.first().startLineNumber,
-            endLineNumber = baseLineNumber + blocks.last().endLineNumber,
+    private fun discardLeadingBlankLines() {
+        val firstContentIndex = pendingLines.indexOfFirst(String::isNotBlank)
+        val discardCount = if (firstContentIndex < 0) pendingLines.size else firstContentIndex
+        if (discardCount > 0) {
+            pendingLines.subList(0, discardCount).clear()
+            pendingStartLine += discardCount
+        }
+    }
+
+    private fun toChunkNodes(
+        nodes: List<Block>,
+        baseLine: Int,
+    ): List<MarkdownChunkNode> {
+        val keys = mutableSetOf<String>()
+        return nodes.map { node ->
+            val startLine = baseLine + node.startLineNumber
+            val endLine = baseLine + node.endLineNumber
+            val sourceLineCount = endLine - startLine + 1
+            require(sourceLineCount <= maxCachedSourceLines) {
+                "${node.javaClass.simpleName} exceeded maxCachedSourceLines=$maxCachedSourceLines"
+            }
+            val key =
+                "${node.javaClass.name}:$startLine:$endLine:" +
+                    "${node.startOffset - node.startOfLine}:${node.chars.length}"
+            require(keys.add(key)) {
+                "LazyMarkdownView requires unique source positions for top-level nodes"
+            }
+            MarkdownChunkNode(node, startLine, endLine, key)
+        }
+    }
+}
+
+/** Bounded, bidirectional AST window shared conceptually with the MPP implementation. */
+internal class MarkdownNodeWindow(
+    private val loader: MarkdownChunkLoader,
+    private val config: ChunkLoaderConfig,
+) {
+    private val mutex = Mutex()
+    private var nodes = emptyList<MarkdownChunkNode>()
+    private val evictedBefore = ArrayDeque<EvictedNodeRange>()
+    private val evictedAfter = ArrayDeque<EvictedNodeRange>()
+    private var endOfSource = false
+
+    suspend fun loadInitial(): MarkdownNodeWindowSnapshot =
+        mutex.withLock {
+            if (nodes.isEmpty() && !endOfSource) {
+                appendFromSource(config.initialLineCount)
+                while (
+                    nodes.size < config.minNodesAhead &&
+                    nodes.size < config.maxCachedNodes &&
+                    cachedSourceLineCount() < config.maxCachedSourceLines &&
+                    !endOfSource
+                ) {
+                    appendFromSource(config.incrementalLineCount)
+                }
+            }
+            snapshot()
+        }
+
+    suspend fun loadBefore(lastVisibleKey: String?): MarkdownNodeWindowSnapshot =
+        mutex.withLock {
+            val range = evictedBefore.lastOrNull() ?: return@withLock snapshot()
+            val loaded = reload(range)
+            evictedBefore.removeLast()
+            nodes = loaded + nodes
+            recycleAfter(lastVisibleKey)
+            snapshot()
+        }
+
+    suspend fun loadAfter(firstVisibleKey: String?): MarkdownNodeWindowSnapshot =
+        mutex.withLock {
+            if (evictedAfter.isNotEmpty()) {
+                val range = evictedAfter.first()
+                val loaded = reload(range)
+                evictedAfter.removeFirst()
+                nodes = nodes + loaded
+            } else if (!endOfSource) {
+                appendFromSource(config.incrementalLineCount)
+            }
+            recycleBefore(firstVisibleKey)
+            snapshot()
+        }
+
+    suspend fun recycle(
+        firstVisibleKey: String?,
+        lastVisibleKey: String?,
+    ): MarkdownNodeWindowSnapshot =
+        mutex.withLock {
+            val firstVisibleIndex = nodes.indexOfFirst { it.key == firstVisibleKey }
+            val lastVisibleIndex = nodes.indexOfLast { it.key == lastVisibleKey }
+            if (firstVisibleIndex < 0 || lastVisibleIndex < 0) return@withLock snapshot()
+
+            val removableBefore = (firstVisibleIndex - config.minNodesBehind).coerceAtLeast(0)
+            val removableAfter = (nodes.lastIndex - lastVisibleIndex - config.minNodesAhead).coerceAtLeast(0)
+            if (removableBefore > removableAfter) {
+                recycleBefore(firstVisibleKey)
+            } else {
+                recycleAfter(lastVisibleKey)
+            }
+            snapshot()
+        }
+
+    private suspend fun appendFromSource(lineCount: Int) {
+        do {
+            val result = loader.load(lineCount)
+            nodes = nodes + result.nodes
+            endOfSource = result.endOfSource
+        } while (nodes.isEmpty() && !endOfSource)
+    }
+
+    private fun recycleBefore(firstVisibleKey: String?) {
+        val firstVisibleIndex = nodes.indexOfFirst { it.key == firstVisibleKey }
+        if (firstVisibleIndex < 0) return
+        val removableCount = (firstVisibleIndex - config.minNodesBehind).coerceAtLeast(0)
+        val recycleCount = requiredRecycleFromStart().coerceAtMost(removableCount)
+        if (!shouldRecycle(recycleCount)) return
+
+        val removed = nodes.take(recycleCount)
+        nodes = nodes.drop(recycleCount)
+        evictedBefore.addLast(removed.toEvictedRange())
+    }
+
+    private fun recycleAfter(lastVisibleKey: String?) {
+        val lastVisibleIndex = nodes.indexOfLast { it.key == lastVisibleKey }
+        if (lastVisibleIndex < 0) return
+        val removableCount = (nodes.lastIndex - lastVisibleIndex - config.minNodesAhead).coerceAtLeast(0)
+        val recycleCount = requiredRecycleFromEnd().coerceAtMost(removableCount)
+        if (!shouldRecycle(recycleCount)) return
+
+        val removed = nodes.takeLast(recycleCount)
+        nodes = nodes.dropLast(recycleCount)
+        evictedAfter.addFirst(removed.toEvictedRange())
+    }
+
+    private suspend fun reload(range: EvictedNodeRange): List<MarkdownChunkNode> {
+        val loaded = loader.reload(range.lines)
+        require(loaded.size == range.nodeCount && loaded.map { it.key }.hashCode() == range.keyHash) {
+            "MarkdownLineSource produced a different node structure while reloading ${range.lines}"
+        }
+        return loaded
+    }
+
+    private fun List<MarkdownChunkNode>.toEvictedRange(): EvictedNodeRange =
+        EvictedNodeRange(
+            lines = first().startLine..last().endLine,
+            nodeCount = size,
+            keyHash = map { it.key }.hashCode(),
+        )
+
+    private fun requiredRecycleFromStart(): Int {
+        var count = (nodes.size - config.maxCachedNodes).coerceAtLeast(0)
+        while (count < nodes.size && sourceLineCount(nodes.drop(count)) > config.maxCachedSourceLines) count++
+        return count
+    }
+
+    private fun requiredRecycleFromEnd(): Int {
+        var count = (nodes.size - config.maxCachedNodes).coerceAtLeast(0)
+        while (count < nodes.size && sourceLineCount(nodes.dropLast(count)) > config.maxCachedSourceLines) count++
+        return count
+    }
+
+    private fun shouldRecycle(recycleCount: Int): Boolean =
+        recycleCount >= config.minRecycleNodeCount ||
+            (recycleCount > 0 && cachedSourceLineCount() > config.maxCachedSourceLines)
+
+    private fun cachedSourceLineCount(): Int = sourceLineCount(nodes)
+
+    private fun sourceLineCount(nodes: List<MarkdownChunkNode>): Int =
+        if (nodes.isEmpty()) 0 else nodes.last().endLine - nodes.first().startLine + 1
+
+    private fun snapshot(): MarkdownNodeWindowSnapshot =
+        MarkdownNodeWindowSnapshot(
+            nodes = nodes,
+            canLoadBefore = evictedBefore.isNotEmpty(),
+            canLoadAfter = evictedAfter.isNotEmpty() || !endOfSource,
+            needsRecycle =
+                nodes.size - config.maxCachedNodes >= config.minRecycleNodeCount ||
+                    cachedSourceLineCount() > config.maxCachedSourceLines,
+            cachedSourceLineCount = cachedSourceLineCount(),
         )
 }

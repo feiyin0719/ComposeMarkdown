@@ -579,6 +579,9 @@ fun LazyMarkdownView(
     actionHandler: ActionHandler? = null,
     chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
     nestedPrefetchItemCount: Int = 3,
+    onLoadingChanged: (Boolean) -> Unit = {},
+    onStateChanged: (LazyMarkdownViewState) -> Unit = {},
+    onError: (Throwable) -> Unit = {},
 )
 ```
 
@@ -595,12 +598,16 @@ fun LargeMarkdownDocument() {
         markdownRenderConfig = config,
         modifier = Modifier.fillMaxSize(),
         chunkLoaderConfig =
-          ChunkLoaderConfig(
-            /* initialLines = 1000,
-            incrementalLines = 500,
-            chunkSize = 5, */
-            parserDispatcher = MarkdownThreadPool.dispatcher,
-          ),
+                        ChunkLoaderConfig(
+                                initialLineCount = 1000,
+                                incrementalLineCount = 500,
+                                minNodesAhead = 100,
+                                minNodesBehind = 30,
+                                maxCachedNodes = 500,
+                                maxCachedSourceLines = 10_000,
+                                sourceDispatcher = Dispatchers.IO,
+                                parserDispatcher = MarkdownThreadPool.dispatcher,
+                        ),
     )
 }
 ```
@@ -615,6 +622,9 @@ LazyMarkdownView(
 ```
 
 > For detailed configuration of `ChunkLoaderConfig`, see the source and [docs/API.md](docs/API.md).
+> `onLoadingChanged` only reports the initial empty-screen wait. Observe
+> `LazyMarkdownViewState` for optional background before/after loading UI; AST recycling is silent.
+> `maxCachedSourceLines` is also a hard limit for one unconfirmed trailing block or source context.
 
 #### 5. LazyColumn Display Version (LazyMarkdownColumn)
 

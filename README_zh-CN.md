@@ -531,6 +531,9 @@ fun LazyMarkdownView(
 	actionHandler: ActionHandler? = null,
 	chunkLoaderConfig: ChunkLoaderConfig = ChunkLoaderConfig(parserDispatcher = MarkdownThreadPool.dispatcher),
 	nestedPrefetchItemCount: Int = 3,
+	onLoadingChanged: (Boolean) -> Unit = {},
+	onStateChanged: (LazyMarkdownViewState) -> Unit = {},
+	onError: (Throwable) -> Unit = {},
 )
 ```
 
@@ -548,8 +551,13 @@ fun LargeMarkdownDocument() {
 		modifier = Modifier.fillMaxSize(),
 		chunkLoaderConfig =
 			ChunkLoaderConfig(
-				/* initialLines = 1000,
-				/* Lines 527-529 omitted */
+				initialLineCount = 1000,
+				incrementalLineCount = 500,
+				minNodesAhead = 100,
+				minNodesBehind = 30,
+				maxCachedNodes = 500,
+				maxCachedSourceLines = 10_000,
+				sourceDispatcher = Dispatchers.IO,
 				parserDispatcher = MarkdownThreadPool.dispatcher,
 			),
 	)
@@ -566,6 +574,9 @@ LazyMarkdownView(
 ```
 
 > 关于 `ChunkLoaderConfig` 的详细配置，请查看源码与 [docs/API.md](docs/API.md)。
+> `onLoadingChanged` 只表示首屏尚无内容时的等待；如需观察后台向前/向后加载，可使用
+> `LazyMarkdownViewState`。AST 回收始终静默。
+> `maxCachedSourceLines` 同时也是单个未确认尾部 block 或源码上下文的硬上限。
 
 #### 5. LazyColumn 显示版本（LazyMarkdownColumn）
 

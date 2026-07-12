@@ -131,10 +131,15 @@ LazyMarkdownView(
     file = File("huge_documentation.md"),  // 50MB technical documentation
     markdownRenderConfig = config,
     chunkLoaderConfig = ChunkLoaderConfig(
+        initialLineCount = 1000,
+        incrementalLineCount = 500,
+        minNodesAhead = 100,
+        minNodesBehind = 30,
+        maxCachedNodes = 500,
+        maxCachedSourceLines = 10_000,
         parserDispatcher = MarkdownThreadPool.dispatcher,
-        chunkSize = 1024 * 50  // 50KB chunk size
     ),
-    nestedPrefetchItemCount = 5  // Preload 5 chunks
+    nestedPrefetchItemCount = 5  // Precompose 5 Compose items
 )
 ```
 

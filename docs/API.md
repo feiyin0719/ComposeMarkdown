@@ -172,13 +172,14 @@ MarkdownView(
 
 ### LazyMarkdownView
 
-Lazy loading composable for **very large markdown files** stored on disk.
+Lazy loading composable for very large files, strings, or custom line sources.
 
 Instead of parsing and rendering the entire document at once, it:
 
 - Splits content into chunks.
-- Parses and renders chunks on demand as the user scrolls.
-- Uses `LazyColumn` with prefetching to balance memory usage and performance.
+- Maintains `minNodesAhead` / `minNodesBehind` watermarks during scrolling.
+- Recycles AST nodes when either node count or source-line span exceeds its configured limit.
+- Reloads recycled ranges with stable source-position keys to preserve the visible anchor.
 
 **Signature** (from `LazyMarkdownView.kt`):
 
@@ -196,8 +197,23 @@ fun LazyMarkdownView(
         parserDispatcher = MarkdownThreadPool.dispatcher,
     ),
     nestedPrefetchItemCount: Int = 3,
+    onLoadingChanged: (Boolean) -> Unit = {},
+    onStateChanged: (LazyMarkdownViewState) -> Unit = {},
+    onError: (Throwable) -> Unit = {},
 )
 ```
+
+Overloads accepting `text: String` or a stable, rereadable `MarkdownLineSource` are also available.
+Both expose `lazyListState`; the text overload uses `StringMarkdownLineSource` internally.
+
+```kotlin
+fun interface MarkdownLineSource {
+    suspend fun readLines(startLine: Int, lineCount: Int): List<String>
+}
+```
+
+Line indices are zero-based. Returning fewer lines than requested signals end-of-source. A custom
+source must remain immutable and support rereading old ranges so recycled AST nodes can be restored.
 
 **Parameters**
 
@@ -206,13 +222,17 @@ fun LazyMarkdownView(
 - `modifier`: Applied to the internal `LazyColumn`.
 - `showNotSupportedText`: Whether to show text for unsupported elements.
 - `actionHandler`: Optional handler for actions inside the markdown content.
-- `chunkLoaderConfig`: Controls how the file is split and parsed. There is a default `parserDispatcher` using `MarkdownThreadPool.dispatcher`.
-- `nestedPrefetchItemCount`: How many items before/after the visible viewport should be prefetched to make scrolling smoother.
+- `chunkLoaderConfig`: Controls line batches, node watermarks, cache limits, and source/parser dispatchers.
+- `nestedPrefetchItemCount`: Compose item precomposition distance. This is separate from Markdown node preloading.
+- `onLoadingChanged`: Reports only initial loading while no content is available.
+- `onStateChanged`: Reports `InitialLoading`, `LoadingBefore`, `LoadingAfter`, and `Idle`.
+- `onError`: Reports source, parser, or reload failures.
 
 **Usage notes**
 
 - Best suited for *read-only* long-form content like books, large docs, etc.
 - For editable or frequently changing content, prefer the async `MarkdownView` with your own pagination or diffing.
+- `maxCachedSourceLines` is also a hard limit for one unconfirmed trailing block or source context.
 
 ---
 
@@ -764,11 +784,14 @@ MarkdownView(
 
 Typical fields include:
 
-- `parserDispatcher`: Dispatcher used for background parsing (defaults to `MarkdownThreadPool.dispatcher`).
-- Other values controlling:
-  - Initial number of lines/chunks to load.
-  - Incremental load size when the user scrolls.
-  - Maximum number of chunks kept in memory.
+- `initialLineCount` / `incrementalLineCount`: source read batch sizes.
+- `minNodesAhead` / `minNodesBehind`: parsed-node watermarks around the viewport.
+- `maxCachedNodes`: AST node-count target.
+- `maxCachedSourceLines`: AST/source-span line target, protecting against a small number of huge nodes.
+- `minRecycleNodeCount`: regular recycle batch size.
+- `maxCachedFileLines`: Android file-source line cache.
+- `sourceDispatcher`: dispatcher used for source IO (defaults to `Dispatchers.IO`).
+- `parserDispatcher`: dispatcher used for parsing; the File overload defaults to `MarkdownThreadPool.dispatcher`.
 
 The exact fields may evolve; refer to the `ChunkLoaderConfig` source for the latest list.
 
@@ -776,9 +799,13 @@ The exact fields may evolve; refer to the `ChunkLoaderConfig` source for the lat
 
 ```kotlin
 val chunkConfig = ChunkLoaderConfig(
-    // initialLines = 800,
-    // incrementalLines = 400,
-    // maxCachedChunks = 8,
+    initialLineCount = 1000,
+    incrementalLineCount = 500,
+    minNodesAhead = 100,
+    minNodesBehind = 30,
+    maxCachedNodes = 500,
+    maxCachedSourceLines = 10_000,
+    sourceDispatcher = Dispatchers.IO,
     parserDispatcher = MarkdownThreadPool.dispatcher,
 )
 

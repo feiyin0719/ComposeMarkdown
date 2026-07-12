@@ -6,6 +6,8 @@
 
 - Added `appendMarkdownInlineContent()` to atomically register embedded or standalone inline content and append its annotation, with collision-safe IDs by default and explicit overwrite support
 - 新增 `appendMarkdownInlineContent()`，以原子方式注册 embedded 或 standalone inline content 并追加 annotation；默认安全处理 ID 冲突，同时支持显式覆盖
+- Rebuilt `LazyMarkdownView` around line sources, trailing-block preservation, node watermarks, node/source-line cache limits, bidirectional AST recycling, and structured loading states
+- 基于行数据源、尾部 block 保留、节点水位、node/source-line 双重缓存上限、双向 AST 回收和结构化 loading 状态重构 `LazyMarkdownView`
 
 ---
 

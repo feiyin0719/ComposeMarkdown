@@ -197,8 +197,23 @@ fun LazyMarkdownView(
   parserDispatcher = MarkdownThreadPool.dispatcher,
  ),
  nestedPrefetchItemCount: Int = 3,
+ onLoadingChanged: (Boolean) -> Unit = {},
+ onStateChanged: (LazyMarkdownViewState) -> Unit = {},
+ onError: (Throwable) -> Unit = {},
 )
 ```
+
+另有接收 `text: String` 或稳定、可重读 `MarkdownLineSource` 的公共重载。两者均暴露
+`lazyListState`；文本重载内部使用 `StringMarkdownLineSource`。
+
+```kotlin
+fun interface MarkdownLineSource {
+ suspend fun readLines(startLine: Int, lineCount: Int): List<String>
+}
+```
+
+行号从 0 开始；返回行数少于请求值表示数据源结束。自定义数据源必须在生命周期内保持不变，
+并支持重读旧范围，以便恢复已回收的 AST 节点。
 
 **参数说明**
 
@@ -207,13 +222,17 @@ fun LazyMarkdownView(
 - `modifier`：应用于内部 `LazyColumn` 的修饰符。
 - `showNotSupportedText`：是否对不支持的元素显示文本提示。
 - `actionHandler`：可选，处理文档内的交互行为（如链接、图片、自定义块等）。
-- `chunkLoaderConfig`：控制文件如何被切分和解析。默认会使用 `MarkdownThreadPool.dispatcher` 作为 `parserDispatcher`。
-- `nestedPrefetchItemCount`：视口前后预取的列表项数量，用于提升滚动流畅度。
+- `chunkLoaderConfig`：控制行读取批次、节点水位、双重缓存上限和 source/parser dispatcher。
+- `nestedPrefetchItemCount`：Compose 列表项预组合距离，与 Markdown node 预加载分离。
+- `onLoadingChanged`：只报告首屏尚无内容时的首次加载。
+- `onStateChanged`：报告 `InitialLoading`、`LoadingBefore`、`LoadingAfter` 与 `Idle`。
+- `onError`：报告数据源、解析或重载错误。
 
 **使用建议**
 
 - 适合只读的长篇内容，比如书籍、大型文档等。
 - 若是可编辑或频繁变动的内容，更推荐使用异步版 `MarkdownView`，并自行实现分页或 diff 逻辑。
+- `maxCachedSourceLines` 同时也是单个未确认尾部 block 或源码上下文的硬上限。
 
 ---
 
@@ -759,7 +778,7 @@ MarkdownView(
 
 ### ChunkLoaderConfig（概览）
 
-`ChunkLoaderConfig`（来自 `com.iffly.compose.markdown.chunkloader`）用于控制 `LazyMarkdownView` 如何切分和解析大文件。
+`ChunkLoaderConfig`（来自 `com.iffly.compose.markdown.chunkloader`）用于控制 `LazyMarkdownView` 的行读取、节点水位、缓存上限和 dispatcher。
 
 典型字段包括：
 
@@ -769,15 +788,26 @@ MarkdownView(
   - 用户滚动时增量加载的大小。
   - 内存中缓存的最大块数量等。
 
-具体字段可能随版本演进而变化，请以 `ChunkLoaderConfig` 源码为准。
+- `initialLineCount` / `incrementalLineCount`：源数据读取批次。
+- `minNodesAhead` / `minNodesBehind`：视口前后的已解析节点水位。
+- `maxCachedNodes`：AST 节点数量目标上限。
+- `maxCachedSourceLines`：缓存 AST 覆盖的源行数目标上限。
+- `minRecycleNodeCount`：常规回收的最小节点批次。
+- `maxCachedFileLines`：Android 文件数据源的行缓存。
+- `sourceDispatcher`：数据源 I/O dispatcher，默认 `Dispatchers.IO`。
+- `parserDispatcher`：解析 dispatcher，File 重载默认使用 `MarkdownThreadPool.dispatcher`。
 
 **概念示例：**
 
 ```kotlin
 val chunkConfig = ChunkLoaderConfig(
- // initialLines = 800,
- // incrementalLines = 400,
- // maxCachedChunks = 8,
+ initialLineCount = 1000,
+ incrementalLineCount = 500,
+ minNodesAhead = 100,
+ minNodesBehind = 30,
+ maxCachedNodes = 500,
+ maxCachedSourceLines = 10_000,
+ sourceDispatcher = Dispatchers.IO,
  parserDispatcher = MarkdownThreadPool.dispatcher,
 )
 
