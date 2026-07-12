@@ -926,6 +926,9 @@ val imageLoader = nodeStringBuilderContext.renderDependencies["imageLoader"] as?
 - When adding styling, prefer using `pushStyle` / `pop`, `withLink`, and similar `AnnotatedString.Builder` helpers instead of rebuilding the whole string from scratch.
 - For nodes that can contain children (e.g. `Link`, `Emphasis`), delegate to the common "build children" helper that uses `renderRegistry` instead of manually handling every possible child type; this way new node types added later are handled automatically.
 - Avoid storing `Context` or Compose state inside builders. They should be pure string‑building utilities; side‑effects and state belong in composables or the `ActionHandler` layer.
+- Custom nodes used by text-mode block rendering can implement `NodeContentHashProvider`. Override
+    `contentHash()` with only fields that affect rendering; the default implementation uses the node
+    class name for stateless nodes.
 
 ### MarkdownInlineView (inline views)
 

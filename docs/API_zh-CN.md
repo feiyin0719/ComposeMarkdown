@@ -925,6 +925,8 @@ val imageLoader = nodeStringBuilderContext.renderDependencies["imageLoader"] as?
 - 在扩展 `buildInlineNodeString` 时优先使用 `pushStyle` / `pop`、`withLink` 等 Compose 提供的 API 叠加样式，而不是重新构造整段文本。
 - 若你的节点可能包含子节点（如 `Link`、`Emphasis`），应通过 `renderRegistry` 调用通用的“构建子节点”工具方法，而不是手动遍历所有子类型，以便自动获得后续新节点类型的支持。
 - 避免在实现中持有 `Context` 或 `Composable` 状态，所有副作用都应交给 `ActionHandler` 或外层 Composable 处理，构建器本身只负责“描述文本 & 内联视图”。
+- 文本模式块渲染使用的自定义节点可以实现 `NodeContentHashProvider`。覆盖 `contentHash()` 时只纳入
+  会影响渲染的字段；无状态节点可直接使用基于类名的默认实现。
 
 ### MarkdownInlineView（内联视图）
 
