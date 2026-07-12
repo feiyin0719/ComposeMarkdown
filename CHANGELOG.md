@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.2.0
+
+### New Features
+
+#### Render Dependency Context
+- Added `renderDependencies` to the public Markdown rendering components so callers can provide services and other external objects to custom renderers
+- Added `currentRenderDependencies()` for Composable renderers and `NodeStringBuilderContext.renderDependencies` for node string builders
+
+#### Stable Text-Mode Content Identity
+- Replaced identity-only text-mode block keys with bounded, iterative content hashes
+- Added `NodeContentHashProvider` so custom nodes can define the fields that affect their rendered identity
+
+#### Shared Annotated Text Pipeline
+- Added `rememberMarkdownAnnotatedStringResult()` as the shared text and inline-content builder for `MarkdownText` and `MarkdownInlineText`
+- Text-mode registry overrides now flow through the Markdown CompositionLocal provider
+
+### Bug Fixes
+
+#### Placeholder Geometry Under Font Scaling
+- Added a linear pixel-to-sp conversion for measured placeholder dimensions, preserving inline content geometry under non-linear Android font scaling
+- Updated adaptive inline content and fixed-size LaTeX placeholders to use the new conversion
+
+#### LaTeX Image Refresh
+- Rebuilds LaTeX drawables when either the formula or rendering configuration changes
+
+### Performance Improvements
+
+- Made `MarkdownRenderConfig` immutable and kept custom/default instances stable with `remember`
+- Cached text-mode render registries and syntax-highlighted code results
+- Avoided line-layout state and offset calculations when line numbers are hidden
+- Reused RichText inline-content groups, adaptive entries, segment callbacks, and immutable measurement maps
+
+---
+
+## 更新日志
+
+## 0.2.0
+
+### 新增功能
+
+#### 渲染依赖上下文
+- 所有公开 Markdown 渲染组件新增 `renderDependencies`，调用方可向自定义 renderer 提供服务或其他外部对象
+- Composable renderer 可通过 `currentRenderDependencies()` 获取依赖，节点字符串构建器可通过 `NodeStringBuilderContext.renderDependencies` 获取依赖
+
+#### 稳定的文本模式内容标识
+- 将仅依赖对象 identity 的文本模式块 key 替换为有节点数上限的迭代式内容哈希
+- 新增 `NodeContentHashProvider`，自定义节点可声明影响渲染标识的字段
+
+#### 共享 AnnotatedString 构建流程
+- 新增 `rememberMarkdownAnnotatedStringResult()`，供 `MarkdownText` 与 `MarkdownInlineText` 共用文本及内联内容构建流程
+- 文本模式 registry 覆盖改为通过 Markdown CompositionLocal provider 向下传递
+
+### Bug 修复
+
+#### 字体缩放下的 Placeholder 几何尺寸
+- 新增用于测量型 placeholder 的线性 px-to-sp 转换，在 Android 非线性字体缩放下保持内联内容几何尺寸
+- Adaptive inline content 与固定尺寸 LaTeX placeholder 已改用新转换
+
+#### LaTeX 图片刷新
+- 公式或渲染配置变化时重新构建 LaTeX drawable
+
+### 性能优化
+
+- 将 `MarkdownRenderConfig` 改为不可变对象，并通过 `remember` 保持自定义及默认实例稳定
+- 缓存文本模式 render registry 与语法高亮结果
+- 关闭行号时不再维护文本布局状态或计算行偏移
+- 复用 RichText 内联内容分组、adaptive entries、segment 回调与测量阶段 immutable map
+
+---
+
 ## 0.1.9
 
 ### New Features
