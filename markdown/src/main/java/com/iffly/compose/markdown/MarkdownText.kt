@@ -48,7 +48,7 @@ import kotlinx.coroutines.withContext
  * This version parses the Markdown content synchronously within a remember block.
  *
  * @param content The Markdown content as a String.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -130,7 +130,7 @@ fun MarkdownText(
  * This version parses the Markdown content asynchronously using a coroutine.
  *
  * @param content The Markdown content as a String.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -222,7 +222,7 @@ fun MarkdownText(
  * this component renders the entire Markdown document through a single [RichText] composable.
  *
  * @param node The root node of the parsed Markdown content.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown text.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -303,7 +303,7 @@ private fun MarkdownTextContent(
     BoxWithConstraints(modifier = modifier) {
         val theme = currentTheme()
         val baseRegistry = currentRenderRegistry()
-        val renderRegistry = remember(baseRegistry) { baseRegistry.textModeRegistry() }
+        val renderRegistry = baseRegistry.textModeRegistry()
         val actionHandler = currentActionHandler()
         val isShowNotSupported = isShowNotSupported()
         val nodeStringBuilderContext =

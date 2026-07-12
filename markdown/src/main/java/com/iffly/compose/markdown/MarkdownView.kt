@@ -36,7 +36,7 @@ internal sealed class MarkdownState {
  * Use this for small to medium-sized content where parsing time is negligible.
  * For larger content, consider using the other overload that supports asynchronous parsing.
  * @param content The Markdown content as a String.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -91,7 +91,7 @@ fun MarkdownView(
  * This version parses the Markdown content asynchronously using a coroutine.
  * Use this for larger content where parsing time may be significant.
  * @param content The Markdown content as a String.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -153,7 +153,7 @@ fun MarkdownView(
 /**
  * A Composable function that renders a parsed Markdown AST node.
  * @param node The node of the parsed Markdown content.
- * @param markdownRenderConfig Configuration for rendering the Markdown.
+ * @param markdownRenderConfig Configuration for rendering the Markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the Markdown view.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
@@ -278,6 +278,6 @@ private fun MarkdownViewPreview() {
             greetUser("Compose")
             
             """.trimIndent(),
-        markdownRenderConfig = MarkdownRenderConfig.Builder().build(),
+        markdownRenderConfig = remember { MarkdownRenderConfig.Builder().build() },
     )
 }

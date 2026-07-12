@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.render
 
+import androidx.compose.runtime.Immutable
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
@@ -11,12 +12,15 @@ import com.vladsch.flexmark.util.ast.Node
  * @param markdownContentRenderer An optional renderer for markdown content nodes.
  * @param markdownInlineTextRenderer An optional renderer for inline markdown text nodes.
  */
+@Immutable
 data class RenderRegistry(
     private val blockRenderers: Map<Class<out Block>, IBlockRenderer<*>>,
     private val inlineNodeStringBuilders: Map<Class<out Node>, IInlineNodeStringBuilder<*>>,
     val markdownContentRenderer: MarkdownContentRenderer? = null,
     val markdownInlineTextRenderer: MarkdownInlineTextRenderer? = null,
 ) {
+    private val cachedTextModeRegistry: RenderRegistry by lazy { createTextModeRegistry() }
+
     @Suppress("UNCHECKED_CAST")
     fun getBlockRenderer(blockClass: Class<out Block>): IBlockRenderer<Block>? = blockRenderers[blockClass] as? IBlockRenderer<Block>
 
@@ -44,7 +48,10 @@ data class RenderRegistry(
      * without modifying the base registry at config-build time.
      */
     @Suppress("UNCHECKED_CAST")
-    fun textModeRegistry(): RenderRegistry {
+    fun textModeRegistry(): RenderRegistry = cachedTextModeRegistry
+
+    @Suppress("UNCHECKED_CAST")
+    private fun createTextModeRegistry(): RenderRegistry {
         val augmented = inlineNodeStringBuilders.toMutableMap()
         if (!augmented.containsKey(Document::class.java)) {
             augmented[Document::class.java] = DocumentInlineStringBuilder()

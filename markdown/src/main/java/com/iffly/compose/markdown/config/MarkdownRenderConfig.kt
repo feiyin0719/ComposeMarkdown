@@ -1,5 +1,6 @@
 package com.iffly.compose.markdown.config
 
+import androidx.compose.runtime.Immutable
 import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -22,36 +23,14 @@ import com.vladsch.flexmark.util.misc.Extension
  * The configuration for Markdown rendering.
  * Includes the markdown theme, parser, HTML renderer, and render registry.
  */
-class MarkdownRenderConfig {
-    var markdownTheme: MarkdownTheme
-        private set
-
-    var parser: Parser
-        private set
-
-    var htmlRenderer: HtmlRenderer
-        private set
-
-    var htmlToMdConverter: FlexmarkHtmlConverter
-        private set
-
-    var renderRegistry: RenderRegistry
-        private set
-
-    private constructor(
-        markdownTheme: MarkdownTheme,
-        renderRegistry: RenderRegistry,
-        parser: Parser,
-        htmlRenderer: HtmlRenderer,
-        htmlToMdConverter: FlexmarkHtmlConverter,
-    ) {
-        this.markdownTheme = markdownTheme
-        this.renderRegistry = renderRegistry
-        this.parser = parser
-        this.htmlRenderer = htmlRenderer
-        this.htmlToMdConverter = htmlToMdConverter
-    }
-
+@Immutable
+class MarkdownRenderConfig private constructor(
+    val markdownTheme: MarkdownTheme,
+    val renderRegistry: RenderRegistry,
+    val parser: Parser,
+    val htmlRenderer: HtmlRenderer,
+    val htmlToMdConverter: FlexmarkHtmlConverter,
+) {
     companion object {
         private val internalPlugins =
             listOf<IMarkdownRenderPlugin>(
@@ -250,7 +229,7 @@ class MarkdownRenderConfig {
             }
 
             return MarkdownRenderConfig(
-                markdownTheme ?: MarkdownTheme(),
+                markdownTheme ?: MarkdownTheme.Default,
                 RenderRegistry(
                     blockRenderers.toMap(),
                     inlineNodeStringBuilders.toMap(),

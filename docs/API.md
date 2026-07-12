@@ -57,7 +57,7 @@ fun MarkdownView(
 **Parameters**
 
 - `content`: Markdown text to render.
-- `markdownRenderConfig`: The rendering configuration, created via `MarkdownRenderConfig.Builder()`.
+- `markdownRenderConfig`: The rendering configuration, created via `MarkdownRenderConfig.Builder()` and remembered by the calling Composable.
 - `modifier`: Standard Compose modifier for sizing, padding, etc.
 - `showNotSupportedText`: If `true`, unsupported elements are rendered as a textual fallback instead of being silently ignored.
 - `actionHandler`: Optional handler for clickable actions (e.g. links, images, custom blocks). See project examples for concrete implementations.
@@ -448,6 +448,8 @@ Holds everything needed to parse and render markdown:
 - A `RenderRegistry` describing how nodes and blocks are rendered.
 
 Instances are created via `MarkdownRenderConfig.Builder`.
+When creating one inside a Composable, wrap the complete builder expression in `remember` so parser
+and renderer instances remain stable across recompositions.
 
 ```kotlin
 val config = MarkdownRenderConfig.Builder()

@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.iffly.compose.markdown.config.LocalMarkdownThemeProvider
@@ -243,14 +244,10 @@ private fun MarkdownContentPreview() {
         
         ![Image](https://office.visualstudio.com/2003b897-e349-46b6-a733-61b32410d686/_apis/git/repositories/09de2423-725a-49cf-acff-a50529f2917f/pullRequests/4297383/attachments/image.png)
         """.trimIndent()
-    val node =
-        MarkdownRenderConfig
-            .Builder()
-            .build()
-            .parser
-            .parse(testText)
+    val markdownRenderConfig = remember { MarkdownRenderConfig.Builder().build() }
+    val node = remember(testText, markdownRenderConfig) { markdownRenderConfig.parser.parse(testText) }
     CompositionLocalProvider(
-        LocalMarkdownThemeProvider provides MarkdownTheme(),
+        LocalMarkdownThemeProvider provides MarkdownTheme.Default,
     ) {
         Column(
             modifier =

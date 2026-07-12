@@ -21,7 +21,7 @@ import com.vladsch.flexmark.util.ast.Node
  * efficient rendering of the parsed nodes.
  *
  * @param content The markdown content as a String.
- * @param markdownRenderConfig Configuration for rendering the markdown.
+ * @param markdownRenderConfig Configuration for rendering the markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the LazyColumn.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the markdown content.

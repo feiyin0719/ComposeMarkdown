@@ -29,7 +29,7 @@ import java.io.File
  * It loads and renders markdown content in chunks as the user scrolls.
  * This is useful for displaying large markdown files efficiently.
  * @param file The markdown file to be displayed.
- * @param markdownRenderConfig Configuration for rendering the markdown.
+ * @param markdownRenderConfig Configuration for rendering the markdown. Create custom instances with [remember].
  * @param modifier Modifier to be applied to the LazyColumn.
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the markdown content.
