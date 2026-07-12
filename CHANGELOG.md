@@ -10,6 +10,7 @@
 
 #### Stable Text-Mode Content Identity
 - Replaced identity-only text-mode block keys with bounded, iterative content hashes
+- Kept repeated blocks with identical content distinct so each retains its own renderer and interaction node
 - Added `NodeContentHashProvider` so custom nodes can define the fields that affect their rendered identity
 
 #### Shared Annotated Text Pipeline
@@ -46,6 +47,7 @@
 
 #### 稳定的文本模式内容标识
 - 将仅依赖对象 identity 的文本模式块 key 替换为有节点数上限的迭代式内容哈希
+- 内容相同的重复块仍保持独立，确保每个块保留各自的 renderer 与交互节点
 - 新增 `NodeContentHashProvider`，自定义节点可声明影响渲染标识的字段
 
 #### 共享 AnnotatedString 构建流程
