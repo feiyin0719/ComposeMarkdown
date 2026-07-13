@@ -3,15 +3,34 @@ package com.iffly.compose.markdown.chunkloader
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.ast.Document
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MarkdownChunkLoaderTest {
     private val parser = Parser.builder().build()
+
+    @Test
+    fun `loaded blocks retain their document ancestor`() =
+        runBlocking {
+            val loader = MarkdownChunkLoader(StringMarkdownLineSource("# Heading"), parser)
+
+            val node =
+                loader
+                    .load(2)
+                    .nodes
+                    .single()
+                    .node
+
+            assertTrue(node.parent is Document)
+            assertSame(node.parent, node.document)
+        }
 
     @Test
     fun `trailing block is held until the next range confirms its boundary`() =
@@ -67,10 +86,13 @@ class MarkdownChunkLoaderTest {
 
             val initial = window.loadInitial()
             val firstKey = initial.nodes.first().key
+            val firstNode = initial.nodes.first().node
             val after = window.loadAfter(initial.nodes.last().key)
 
             assertTrue(after.canLoadBefore)
             assertFalse(after.nodes.any { it.key == firstKey })
+            assertNull(firstNode.parent)
+            assertTrue(after.nodes.all { it.node.parent is Document })
 
             val before = window.loadBefore(after.nodes.first().key)
             assertTrue(before.nodes.any { it.key == firstKey })

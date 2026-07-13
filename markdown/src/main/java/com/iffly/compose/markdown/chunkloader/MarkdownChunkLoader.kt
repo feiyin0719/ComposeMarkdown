@@ -166,6 +166,7 @@ internal class MarkdownChunkLoader(
                 }
             val emittedNodes = if (trailingNode == null) parsedNodes else parsedNodes.dropLast(1)
             val chunks = toChunkNodes(emittedNodes, pendingStartLine)
+            trailingNode?.unlink()
 
             if (reachedEnd) {
                 pendingLines.clear()
@@ -212,7 +213,6 @@ internal class MarkdownChunkLoader(
                 while (node != null) {
                     val next = node.next
                     if (node is Block) {
-                        node.unlink()
                         add(node)
                     }
                     node = next
@@ -340,6 +340,7 @@ internal class MarkdownNodeWindow(
         val removed = nodes.take(recycleCount)
         nodes = nodes.drop(recycleCount)
         evictedBefore.addLast(removed.toEvictedRange())
+        removed.unlinkNodes()
     }
 
     private fun recycleAfter(lastVisibleKey: String?) {
@@ -352,6 +353,7 @@ internal class MarkdownNodeWindow(
         val removed = nodes.takeLast(recycleCount)
         nodes = nodes.dropLast(recycleCount)
         evictedAfter.addFirst(removed.toEvictedRange())
+        removed.unlinkNodes()
     }
 
     private suspend fun reload(range: EvictedNodeRange): List<MarkdownChunkNode> {
@@ -368,6 +370,10 @@ internal class MarkdownNodeWindow(
             nodeCount = size,
             keyHash = map { it.key }.hashCode(),
         )
+
+    private fun List<MarkdownChunkNode>.unlinkNodes() {
+        forEach { it.node.unlink() }
+    }
 
     private fun requiredRecycleFromStart(): Int {
         var count = (nodes.size - config.maxCachedNodes).coerceAtLeast(0)
