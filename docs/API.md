@@ -50,6 +50,8 @@ fun MarkdownView(
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -88,6 +90,8 @@ fun MarkdownView(
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
     parseDispatcher: CoroutineDispatcher? = null,
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
@@ -103,6 +107,27 @@ fun MarkdownView(
 - When `content` or the underlying parser instance changes, parsing restarts and `onLoading` is invoked (if provided).
 - On success, the parsed AST is passed to the node-based `MarkdownView` under the hood.
 - On failure, `onError` is invoked with the thrown exception.
+
+**Streaming parsing**
+
+Set `isStreaming = true` while `content` grows by appending at the end. The parser reuses every
+top-level block except the previous last block, then reparses from that block's source-line start
+through the new end. Replacing or truncating an earlier part of `content` automatically falls back
+to a full parse. Set `isStreaming = false` when the stream completes; that transition always runs a
+final full parse so document-wide parser state is authoritative.
+
+`MarkdownText` supports the same parameters and behavior. To customize tail parsing, pass a
+`StreamingMarkdownParser`. It receives the complete `BasedSequence` and the tail start offset; the
+returned `Document` must cover that tail and retain offsets in the complete source coordinate space.
+
+```kotlin
+MarkdownView(
+    content = streamedMarkdown,
+    markdownRenderConfig = config,
+    parseDispatcher = Dispatchers.Default,
+    isStreaming = streamInProgress,
+)
+```
 
 **Example**
 
@@ -352,6 +377,8 @@ fun MarkdownText(
     letterSpacing: TextUnit = TextUnit.Unspecified,
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -412,6 +439,8 @@ fun MarkdownText(
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     parseDispatcher: CoroutineDispatcher? = null,
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )

@@ -4,12 +4,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
@@ -24,7 +20,6 @@ import com.iffly.compose.markdown.render.rememberMarkdownAnnotatedStringResult
 import com.iffly.compose.markdown.widget.richtext.RichText
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 
 /**
  * Text-based Markdown rendering component.
@@ -55,6 +50,9 @@ import kotlinx.coroutines.withContext
  * @param letterSpacing The spacing between letters.
  * @param textDecoration The text decoration to apply.
  * @param onTextLayout Callback invoked when the text layout is computed.
+ * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
+ * forces a final full parse.
+ * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onError Composable to display in case of an error during parsing.
  *
  * @see MarkdownView
@@ -75,17 +73,18 @@ fun MarkdownText(
     letterSpacing: TextUnit = TextUnit.Unspecified,
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val parser = markdownRenderConfig.parser
     val markdownState =
-        remember(content, parser) {
-            try {
-                MarkdownState.Success(parser.parse(content))
-            } catch (e: Exception) {
-                MarkdownState.Error(e)
-            }
-        }
+        rememberMarkdownState(
+            content = content,
+            parser = parser,
+            isStreaming = isStreaming,
+            streamingParser = streamingMarkdownParser,
+        )
 
     when (markdownState) {
         is MarkdownState.Loading -> {}
@@ -110,7 +109,7 @@ fun MarkdownText(
         }
 
         is MarkdownState.Error -> {
-            onError?.invoke(markdownState.exception)
+            onError?.invoke(markdownState.throwable)
         }
     }
 }
@@ -138,6 +137,9 @@ fun MarkdownText(
  * @param textDecoration The text decoration to apply.
  * @param onTextLayout Callback invoked when the text layout is computed.
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
+ * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
+ * forces a final full parse.
+ * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
  *
@@ -160,24 +162,20 @@ fun MarkdownText(
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     parseDispatcher: CoroutineDispatcher? = null,
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-    val parser by rememberUpdatedState(markdownRenderConfig.parser)
-    var markdownState by remember { mutableStateOf<MarkdownState>(MarkdownState.Loading) }
-
-    LaunchedEffect(content, parser) {
-        markdownState = MarkdownState.Loading
-        try {
-            val parsedNode =
-                withContext(parseDispatcher ?: MarkdownThreadPool.dispatcher) {
-                    parser.parse(content)
-                }
-            markdownState = MarkdownState.Success(parsedNode)
-        } catch (e: Exception) {
-            markdownState = MarkdownState.Error(e)
-        }
-    }
+    val parser = markdownRenderConfig.parser
+    val markdownState by
+        rememberAsyncMarkdownState(
+            content = content,
+            parser = parser,
+            isStreaming = isStreaming,
+            streamingParser = streamingMarkdownParser,
+            dispatcher = parseDispatcher ?: MarkdownThreadPool.dispatcher,
+        )
 
     when (val state = markdownState) {
         is MarkdownState.Loading -> {
@@ -204,7 +202,7 @@ fun MarkdownText(
         }
 
         is MarkdownState.Error -> {
-            onError?.invoke(state.exception)
+            onError?.invoke(state.throwable)
         }
     }
 }

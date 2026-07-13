@@ -1,34 +1,15 @@
 package com.iffly.compose.markdown
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.iffly.compose.markdown.dispatcher.MarkdownThreadPool
 import com.iffly.compose.markdown.render.MarkdownContent
 import com.iffly.compose.markdown.util.PreviewMarkdown
-import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-
-internal sealed class MarkdownState {
-    object Loading : MarkdownState()
-
-    data class Success(
-        val node: Document,
-    ) : MarkdownState()
-
-    data class Error(
-        val exception: Throwable,
-    ) : MarkdownState()
-}
 
 /**
  * A Composable function that renders Markdown content.
@@ -41,6 +22,9 @@ internal sealed class MarkdownState {
  * @param showNotSupportedText Whether to show text for unsupported elements.
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
  * @param renderDependencies Dependencies available to custom renderers and node string builders.
+ * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
+ * forces a final full parse.
+ * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onError Composable to display in case of an error during parsing.
  */
 @Composable
@@ -51,17 +35,18 @@ fun MarkdownView(
     showNotSupportedText: Boolean = false,
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val parser = markdownRenderConfig.parser
     val markdownState =
-        remember(content, parser) {
-            try {
-                MarkdownState.Success(parser.parse(content))
-            } catch (e: Exception) {
-                MarkdownState.Error(e)
-            }
-        }
+        rememberMarkdownState(
+            content = content,
+            parser = parser,
+            isStreaming = isStreaming,
+            streamingParser = streamingMarkdownParser,
+        )
 
     when (markdownState) {
         is MarkdownState.Loading -> {
@@ -81,7 +66,7 @@ fun MarkdownView(
         }
 
         is MarkdownState.Error -> {
-            onError?.invoke(markdownState.exception)
+            onError?.invoke(markdownState.throwable)
         }
     }
 }
@@ -97,6 +82,9 @@ fun MarkdownView(
  * @param actionHandler An optional ActionHandler to handle actions within the Markdown content.
  * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
+ * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
+ * forces a final full parse.
+ * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
  */
@@ -109,24 +97,20 @@ fun MarkdownView(
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
     parseDispatcher: CoroutineDispatcher? = null,
+    isStreaming: Boolean = false,
+    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-    val parser by rememberUpdatedState(markdownRenderConfig.parser)
-    var markdownState by remember { mutableStateOf<MarkdownState>(MarkdownState.Loading) }
-
-    LaunchedEffect(content, parser) {
-        markdownState = MarkdownState.Loading
-        try {
-            val parsedNode =
-                withContext(parseDispatcher ?: MarkdownThreadPool.dispatcher) {
-                    parser.parse(content)
-                }
-            markdownState = MarkdownState.Success(parsedNode)
-        } catch (e: Exception) {
-            markdownState = MarkdownState.Error(e)
-        }
-    }
+    val parser = markdownRenderConfig.parser
+    val markdownState by
+        rememberAsyncMarkdownState(
+            content = content,
+            parser = parser,
+            isStreaming = isStreaming,
+            streamingParser = streamingMarkdownParser,
+            dispatcher = parseDispatcher ?: MarkdownThreadPool.dispatcher,
+        )
 
     when (val state = markdownState) {
         is MarkdownState.Loading -> {
@@ -145,7 +129,7 @@ fun MarkdownView(
         }
 
         is MarkdownState.Error -> {
-            onError?.invoke(state.exception)
+            onError?.invoke(state.throwable)
         }
     }
 }
