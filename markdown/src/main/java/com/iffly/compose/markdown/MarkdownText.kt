@@ -77,8 +77,8 @@ fun MarkdownText(
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val streamingParser =
-        remember(markdownRenderConfig, isStreaming) {
-            if (isStreaming) markdownRenderConfig.createStreamingMarkdownParser() else null
+        remember(markdownRenderConfig) {
+            markdownRenderConfig.createStreamingMarkdownParser()
         }
     val markdownState =
         rememberMarkdownState(
@@ -169,8 +169,8 @@ fun MarkdownText(
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
     val streamingParser =
-        remember(markdownRenderConfig, isStreaming) {
-            if (isStreaming) markdownRenderConfig.createStreamingMarkdownParser() else null
+        remember(markdownRenderConfig) {
+            markdownRenderConfig.createStreamingMarkdownParser()
         }
     val markdownState by
         rememberAsyncMarkdownState(
