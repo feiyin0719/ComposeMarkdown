@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -210,22 +211,28 @@ private fun SubcomposeMeasureScope.measureAdaptiveInlineContentSize(
         )
     val placeables =
         subcompose("adaptive_inline") {
-            adaptiveInlineContent.fastForEach { (key, value) ->
-                Box(modifier = Modifier.wrapContentSize()) {
-                    value.content(key)
+            adaptiveInlineContent.fastForEach { (id, value) ->
+                key(id) {
+                    Box(modifier = Modifier.wrapContentSize()) {
+                        value.content(id)
+                    }
                 }
             }
         }.map { it.measure(adaptiveInlineConstraints) }
 
     val measuredAdaptiveInlineContent = persistentMapOf<String, InlineTextContent>().builder()
-    adaptiveInlineContent.forEachIndexed { index, (key, value) ->
+    adaptiveInlineContent.forEachIndexed { index, (id, value) ->
         val placeable = placeables.getOrNull(index)
         val width = placeable?.width?.let(density::toPlaceholderSp) ?: value.placeholder.width
         val height = placeable?.height?.let(density::toPlaceholderSp) ?: value.placeholder.height
-        measuredAdaptiveInlineContent[key] =
+        measuredAdaptiveInlineContent[id] =
             InlineTextContent(
                 placeholder = value.placeholder.copy(width = width, height = height),
-                children = value.content,
+                children = { alternateText ->
+                    key(id) {
+                        value.content(alternateText)
+                    }
+                },
             )
     }
     return measuredAdaptiveInlineContent.build()
@@ -236,11 +243,19 @@ private fun groupInlineContent(
 ): GroupedInlineContent {
     val fixed = persistentMapOf<String, InlineTextContent>().builder()
     val adaptive = persistentListOf<Pair<String, RichTextInlineContent.EmbeddedRichTextInlineContent>>().builder()
-    inlineContent.forEach { (key, value) ->
+    inlineContent.forEach { (id, value) ->
         if (value.adjustSizeByContent) {
-            adaptive.add(key to value)
+            adaptive.add(id to value)
         } else {
-            fixed[key] = InlineTextContent(placeholder = value.placeholder, children = value.content)
+            fixed[id] =
+                InlineTextContent(
+                    placeholder = value.placeholder,
+                    children = { alternateText ->
+                        key(id) {
+                            value.content(alternateText)
+                        }
+                    },
+                )
         }
     }
     return GroupedInlineContent(fixed = fixed.build(), adaptive = adaptive.build())
