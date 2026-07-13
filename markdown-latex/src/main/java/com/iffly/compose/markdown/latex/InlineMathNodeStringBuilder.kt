@@ -50,8 +50,6 @@ open class InlineMathNodeStringBuilder<T : Node>(
                 is InlineLatexNode -> node.formula
                 else -> return
             }
-        val placeholderId =
-            "inline_math_$latexBody"
         val latexConfig = textStyle.toLatexConfig(nodeStringBuilderContext.layoutContext.density, paddingValues)
         val inlineContent =
             if (useAdaptiveInlineContent) {
@@ -101,7 +99,7 @@ open class InlineMathNodeStringBuilder<T : Node>(
             }
 
         appendMarkdownInlineContent(
-            id = placeholderId,
+            id = node.javaClass.simpleName,
             inlineContent = inlineContent,
             inlineContentMap = inlineContentMap,
             alternateText = "${'$'}$latexBody${'$'}",

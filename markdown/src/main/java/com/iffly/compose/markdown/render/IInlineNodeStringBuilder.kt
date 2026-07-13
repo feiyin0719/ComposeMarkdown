@@ -43,7 +43,9 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
  * Registers [inlineContent] and appends its matching annotation in one operation.
  *
  * When [overwrite] is `false`, an existing [id] is preserved and a deterministic occurrence
- * suffix is added to the new entry. When [overwrite] is `true`, the existing entry is replaced;
+ * suffix is added to the new entry. A node's class name is therefore sufficient as the base ID;
+ * callers do not need to include node content or source positions. When [overwrite] is `true`,
+ * the existing entry is replaced;
  * all annotations that reference [id], including ones appended earlier, then resolve to the new
  * content. Existing and replacement content must use the same embedded or standalone annotation
  * type. Use overwrite only when those occurrences are semantically interchangeable.
@@ -51,7 +53,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
  * Prefer this helper over writing to [inlineContentMap] and calling Compose's native
  * `appendInlineContent` directly, because the native API does not manage map key collisions.
  *
- * @param id Preferred ID for the inline content.
+ * @param id Base ID for the inline content, normally the node class name.
  * @param inlineContent Embedded or standalone rich text content to register.
  * @param inlineContentMap Map supplied to [IInlineNodeStringBuilder.buildInlineNodeString].
  * @param alternateText Text used for accessibility and when the inline content cannot be resolved.

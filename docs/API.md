@@ -951,6 +951,10 @@ fun AnnotatedString.Builder.appendMarkdownInlineContent(
 
 - With the default `overwrite = false`, an occupied ID is preserved and the helper registers the
     new content under a deterministic suffix such as `_1` or `_2`. It returns the actual ID used.
+- Pass the node class name as the base ID. The helper's occurrence suffix makes each annotation
+    unique, so adding content, URLs, formulas, hashes, or source positions to the base ID is
+    unnecessary. Class-only IDs are shorter, avoid exposing content, and keep ID generation in one
+    place.
 - With `overwrite = true`, the requested ID is reused and its map entry is replaced. Every
     annotation that references that ID, including annotations appended earlier, resolves to the
     replacement. Existing and replacement content must both be embedded or both be standalone;
@@ -1032,7 +1036,7 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         appendMarkdownInlineContent(
-            id = "icon-${node.id}",
+            id = node.javaClass.simpleName,
             inlineContent = buildIconInlineContent(node),
             inlineContentMap = inlineContentMap,
             alternateText = " ",

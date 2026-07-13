@@ -952,6 +952,7 @@ fun AnnotatedString.Builder.appendMarkdownInlineContent(
 ```
 
 - 默认 `overwrite = false`：若 ID 已存在，保留原条目，并为新内容分配 `_1`、`_2` 等确定性后缀；返回值是实际使用的 ID。
+- base ID 只需传入节点 class name。helper 会用 occurrence 后缀保证每个 annotation 唯一，因此无需再拼接内容、URL、公式、hash 或源码位置。仅使用类名可缩短 ID、避免暴露内容，并将 ID 生成规则集中在一处。
 - `overwrite = true`：复用请求的 ID 并替换 Map 条目。此前及此后所有引用该 ID 的 annotation 都会解析到替换后的内容。原内容与替换内容必须同为 embedded 或同为 standalone，跨类型覆盖会被拒绝；仅当所有 occurrence 均无状态且语义可互换时使用。
 - helper 会根据 `RichTextInlineContent` 的类型自动追加 embedded Compose annotation 或 standalone RichText annotation。
 
@@ -1023,7 +1024,7 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
   nodeStringBuilderContext: NodeStringBuilderContext,
  ) {
     appendMarkdownInlineContent(
-     id = "icon-${node.id}",
+   id = node.javaClass.simpleName,
      inlineContent = buildIconInlineContent(node),
      inlineContentMap = inlineContentMap,
      alternateText = " ",

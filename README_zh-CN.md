@@ -665,8 +665,9 @@ val config =
 ```
 
 当构建器需要插入 Composable inline content 时，使用 `appendMarkdownInlineContent(...)`
-同时注册内容并追加 annotation。默认会为重复 ID 分配确定性后缀；只有同 ID 的所有 occurrence
-在语义上可互换时才使用 `overwrite = true`。详见
+同时注册内容并追加 annotation。默认会为重复 ID 分配确定性后缀，因此 base ID 只需使用节点
+class name，不要拼接内容、URL 或 hash；只有同 ID 的所有 occurrence 在语义上可互换时才使用
+`overwrite = true`。详见
 [API_zh-CN.md](docs/API_zh-CN.md#iinlinenodestringbuilder)。
   
 ## 🔌 插件

@@ -127,12 +127,11 @@ class ImageNodeStringBuilder(
         renderRegistry: RenderRegistry,
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
-        val imageId = "image_${node.url}"
         val url = node.url.unescape()
         val contentDescription = node.text?.toString() ?: node.title?.unescape()
         if (url.isNotBlank()) {
             appendMarkdownInlineContent(
-                id = imageId,
+                id = node.javaClass.simpleName,
                 inlineContent =
                     RichTextInlineContent.StandaloneInlineContent(
                         modifier = Modifier,
@@ -186,9 +185,8 @@ class ImageRefNodeStringBuilder(
         val text =
             node.text?.toString() ?: referenceNode?.title?.unescape()?.takeIf { node.isDefined }
         if (url.isNotBlank()) {
-            val imageId = "image_$url"
             appendMarkdownInlineContent(
-                id = imageId,
+                id = node.javaClass.simpleName,
                 inlineContent =
                     RichTextInlineContent.StandaloneInlineContent(
                         modifier = Modifier,

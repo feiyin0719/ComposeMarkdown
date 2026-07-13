@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.sp
 import com.iffly.compose.markdown.ActionHandler
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.iffly.compose.markdown.util.StringExt
-import com.iffly.compose.markdown.util.contentHash
 import com.iffly.compose.markdown.widget.richtext.RichTextInlineContent
 import com.vladsch.flexmark.util.ast.Block
 import com.vladsch.flexmark.util.ast.Document
@@ -54,7 +53,7 @@ class BlockRendererInlineStringBuilder<T : Block>(
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
         appendMarkdownInlineContent(
-            id = "${node.javaClass.simpleName}_${node.contentHash()}",
+            id = node.javaClass.simpleName,
             inlineContent =
                 RichTextInlineContent.EmbeddedRichTextInlineContent(
                     placeholder =
