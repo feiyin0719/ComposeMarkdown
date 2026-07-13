@@ -96,7 +96,7 @@ class CopyRenderer<T : Block> : CodeWidgetRenderer<T> {
             style = codeBlockTheme.codeCopyTextStyle,
             modifier =
                 modifier.clickable {
-                    actionHandler?.handleCopyClick(block)
+                    actionHandler.value?.handleCopyClick(block)
                 },
         )
     }

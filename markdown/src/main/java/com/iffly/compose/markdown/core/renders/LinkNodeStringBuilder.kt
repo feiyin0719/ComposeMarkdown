@@ -3,7 +3,7 @@ package com.iffly.compose.markdown.core.renders
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
-import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.ActionHandlerState
 import com.iffly.compose.markdown.MarkdownLinkInteractionListener
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
@@ -22,7 +22,7 @@ private fun AnnotatedString.Builder.buildStyleString(
     inlineContentMap: MutableMap<String, MarkdownInlineView>,
     markdownTheme: MarkdownTheme,
     renderRegistry: RenderRegistry,
-    actionHandler: ActionHandler?,
+    actionHandler: ActionHandlerState?,
     isShowNotSupported: Boolean,
     nodeStringBuilderContext: NodeStringBuilderContext,
 ) {
@@ -47,16 +47,13 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         node: Link,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
-        val linkInteractionListener =
-            actionHandler?.let {
-                MarkdownLinkInteractionListener(actionHandler = it, node = node)
-            }
+        val linkInteractionListener = MarkdownLinkInteractionListener(actionHandler = actionHandler, node = node)
         val linkAnnotation =
             LinkAnnotation.Url(
                 url = node.url.toString(),
@@ -88,7 +85,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
         node: LinkRef,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
@@ -98,10 +95,7 @@ class LinkRefNodeStringBuilder : IInlineNodeStringBuilder<LinkRef> {
         val url =
             referenceNode?.url?.unescape()?.takeIf { node.isDefined } ?: node.reference.unescape()
         if (url.isNotBlank()) {
-            val linkInteractionListener =
-                actionHandler?.let {
-                    MarkdownLinkInteractionListener(actionHandler = it, node = node)
-                }
+            val linkInteractionListener = MarkdownLinkInteractionListener(actionHandler = actionHandler, node = node)
             val linkAnnotation =
                 LinkAnnotation.Url(
                     url = url,
@@ -147,7 +141,7 @@ class ReferenceNodeStringBuilder : IInlineNodeStringBuilder<Reference> {
         node: Reference,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,

@@ -124,6 +124,11 @@ The factory is `null` by default. If it is not configured, `isStreaming = true` 
 normal parser and performs a full parse for every content update. Configure the default
 implementation explicitly to enable the built-in incremental workflow:
 
+For each changed input, a custom streaming parser must return a **new root `Document` instance**.
+Returning the same root object can make Compose treat the parse result as unchanged. At the same
+time, preserve the identity of completed, unchanged top-level child blocks so keyed block renderers
+can skip recomposing the stable prefix; only the replaced tail should receive new node instances.
+
 ```kotlin
 val config = MarkdownRenderConfig.Builder()
     .streamingMarkdownParserFactory(::DefaultStreamingMarkdownParser)
@@ -938,7 +943,7 @@ interface IInlineNodeStringBuilder<in T> where T : Node {
                 node: T,
                 inlineContentMap: MutableMap<String, MarkdownInlineView>,
                 markdownTheme: MarkdownTheme,
-                actionHandler: ActionHandler?,
+                actionHandler: ActionHandlerState?,
                 indentLevel: Int,
                 isShowNotSupported: Boolean,
                 renderRegistry: RenderRegistry,
@@ -1009,6 +1014,12 @@ Top-level rendering components accept `renderDependencies: Map<String, Any>`. A 
 renderer can read the map with `currentRenderDependencies()`, while a non-Composable node string
 builder reads the same map from `NodeStringBuilderContext`:
 
+`actionHandler` is provided internally as a stable `ActionHandlerState` updated with
+`rememberUpdatedState`. Node string builders and interaction listeners keep that State and read its
+value only when an event occurs, so changing the external handler does not rebuild annotated text.
+`renderDependencies` and the unsupported-content flag remain direct values because they affect the
+rendered result and therefore must invalidate rendering when changed.
+
 ```kotlin
 MarkdownText(
     content = markdown,
@@ -1066,7 +1077,7 @@ class IconInlineNodeStringBuilder : IInlineNodeStringBuilder<IconNode> {
         node: IconNode,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
@@ -1249,16 +1260,13 @@ class LinkNodeStringBuilder : IInlineNodeStringBuilder<Link> {
         node: Link,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
-        val linkInteractionListener =
-            actionHandler?.let {
-                MarkdownLinkInteractionListener(actionHandler = it, node = node)
-            }
+        val linkInteractionListener = MarkdownLinkInteractionListener(actionHandler, node)
         val linkAnnotation =
             LinkAnnotation.Url(
                 url = node.url.toString(),

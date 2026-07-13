@@ -488,6 +488,9 @@ fun AsyncMarkdownExample() {
 factory 默认为 `null`；未配置时，`isStreaming = true` 会回退到普通全量解析。需显式配置
 `::DefaultStreamingMarkdownParser` 才会启用内置增量流程。
 
+自定义 streaming parser 对每次变化的输入都必须返回新的根 `Document`，让 Compose 能观察到更新；
+已完成且未变化的 child block 应保持对象身份不变，使带 key 的 renderer 能跳过重组。
+
 #### 3. 预解析 Node 版本
 
 适用于已经有解析后的 Node 的场景。

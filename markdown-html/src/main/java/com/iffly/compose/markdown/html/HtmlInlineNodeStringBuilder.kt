@@ -1,7 +1,7 @@
 package com.iffly.compose.markdown.html
 
 import androidx.compose.ui.text.AnnotatedString
-import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.ActionHandlerState
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
@@ -22,7 +22,7 @@ class HtmlInlineNodeStringBuilder(
         node: HtmlInline,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,

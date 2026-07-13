@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import com.iffly.compose.markdown.config.LocalActionHandlerProvider
 import com.iffly.compose.markdown.config.LocalHtmlRenderProvider
 import com.iffly.compose.markdown.config.LocalHtmlToMdConverterProvider
@@ -29,12 +30,13 @@ internal fun MarkdownLocalProviders(
     val theme = markdownRenderConfig.markdownTheme
     val htmlRenderer = markdownRenderConfig.htmlRenderer
     val nodeDataMap = remember { mutableStateMapOf<Node, Any>() }
+    val actionHandlerState = rememberUpdatedState(actionHandler)
     CompositionLocalProvider(
         LocalRenderRegistryProvider provides renderRegistry,
         LocalParserProvider provides markdownRenderConfig.parser,
         LocalMarkdownThemeProvider provides theme,
         LocalShowNotSupportedProvider provides showNotSupportedText,
-        LocalActionHandlerProvider provides actionHandler,
+        LocalActionHandlerProvider provides actionHandlerState,
         LocalRenderDependencies provides renderDependencies,
         LocalHtmlRenderProvider provides htmlRenderer,
         LocalHtmlToMdConverterProvider provides markdownRenderConfig.htmlToMdConverter,

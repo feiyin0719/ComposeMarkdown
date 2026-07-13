@@ -10,6 +10,10 @@
 - 基于行数据源、尾部 block 保留、节点水位、node/source-line 双重缓存上限、双向 AST 回收和结构化 loading 状态重构 `LazyMarkdownView`
 - Added append-only streaming parsing to `MarkdownView` and `MarkdownText`, with tail-block reparsing, final full parsing, and custom `StreamingMarkdownParser` support
 - 为 `MarkdownView` 与 `MarkdownText` 新增 append-only streaming 解析，支持尾部 block 重解析、结束时全量解析及自定义 `StreamingMarkdownParser`
+- Changed node string builders to receive `ActionHandlerState`, allowing interaction callbacks to read the latest handler without rebuilding annotated content
+- NodeStringBuilder 改为接收 `ActionHandlerState`，交互回调可读取最新 handler，而无需重建 annotated content
+- Documented that streaming parsers return a new root document for changed input while preserving unchanged child-node identity
+- 明确 streaming parser 在输入变化时返回新的根 Document，同时保持未变化 child node 的对象身份
 
 ---
 

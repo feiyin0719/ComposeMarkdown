@@ -75,9 +75,7 @@ class LinkTagHandler : HtmlInlineTagHandler {
     ) {
         val href = HREF_REGEX.find(rawTag)?.groupValues?.get(1) ?: ""
         val linkInteractionListener =
-            context.actionHandler?.let {
-                MarkdownLinkInteractionListener(actionHandler = it, node = context.node)
-            }
+            MarkdownLinkInteractionListener(actionHandler = context.actionHandler, node = context.node)
         builder.pushLink(
             LinkAnnotation.Url(
                 url = href,

@@ -51,7 +51,7 @@ fun MarkdownImage(
         alignment = alignment,
         modifier =
             modifier.clickable {
-                actionHandler?.handleImageClick(url, node)
+                actionHandler.value?.handleImageClick(url, node)
             },
         loading = {
             loadingView(

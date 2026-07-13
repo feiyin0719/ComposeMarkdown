@@ -5,7 +5,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.withLink
-import com.iffly.compose.markdown.ActionHandler
+import com.iffly.compose.markdown.ActionHandlerState
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownInlineView
 import com.iffly.compose.markdown.render.NodeStringBuilderContext
@@ -16,12 +16,12 @@ import com.vladsch.flexmark.ast.MailLink
 import com.vladsch.flexmark.util.ast.Node
 
 class MailLinkInteractionListener(
-    private val actionHandler: ActionHandler,
+    private val actionHandler: ActionHandlerState?,
     private val node: Node,
 ) : LinkInteractionListener {
     override fun onClick(link: LinkAnnotation) {
         (link as? LinkAnnotation.Url)?.let {
-            actionHandler.handleUrlClick(link.url, node)
+            actionHandler?.value?.handleUrlClick(link.url, node)
         }
     }
 }
@@ -33,16 +33,13 @@ class MailLinkNodeStringBuilder(
         node: MailLink,
         inlineContentMap: MutableMap<String, MarkdownInlineView>,
         markdownTheme: MarkdownTheme,
-        actionHandler: ActionHandler?,
+        actionHandler: ActionHandlerState?,
         indentLevel: Int,
         isShowNotSupported: Boolean,
         renderRegistry: RenderRegistry,
         nodeStringBuilderContext: NodeStringBuilderContext,
     ) {
-        val linkInteractionListener =
-            actionHandler?.let {
-                MailLinkInteractionListener(actionHandler = it, node = node)
-            }
+        val linkInteractionListener = MailLinkInteractionListener(actionHandler = actionHandler, node = node)
 
         val email = node.text.toString()
         val url = if (email.startsWith("mailto:")) email else "mailto:$email"

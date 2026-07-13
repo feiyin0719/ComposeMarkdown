@@ -10,6 +10,9 @@ import com.vladsch.flexmark.util.sequence.BasedSequence
  *
  * Implementations receive only the latest complete [content] and [isStreaming] state, and have full
  * control over caching, incremental parsing, fallback behavior, and final parsing.
+ * Every changed input must return a new root [org.commonmark.node.Document] instance so Compose
+ * observes the parsed-node change. Reuse unchanged completed child blocks by identity so keyed
+ * renderers can skip recomposing the stable prefix.
  */
 interface StreamingMarkdownParser {
     val markdownRenderConfig: MarkdownRenderConfig

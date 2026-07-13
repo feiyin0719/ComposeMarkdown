@@ -537,6 +537,10 @@ the complete content and streaming flag and can control the entire parsing lifec
 defaults to `null`; without one, `isStreaming = true` falls back to normal full parsing. Configure
 `::DefaultStreamingMarkdownParser` explicitly to enable the built-in workflow.
 
+A custom streaming parser must return a new root `Document` for each changed input so Compose sees
+the update, while reusing unchanged completed child blocks by identity so their keyed renderers can
+skip recomposition.
+
 #### 3. Pre-parsed Node Version
 
 Suitable for cases where you already have parsed Nodes.
