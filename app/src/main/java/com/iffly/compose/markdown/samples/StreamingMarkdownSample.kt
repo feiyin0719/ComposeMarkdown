@@ -30,15 +30,38 @@ fun StreamingMarkdownExample(
     val chunks =
         remember {
             listOf(
-                "# Streaming Markdown\n\n",
-                "Completed blocks remain stable while content is appended.",
-                "\n\n## Incremental tail\n\n",
-                "```kotlin\n",
-                "val message = \"Hello",
-                ", streaming Markdown!\"\n",
-                "println(message)\n",
-                "```\n\n",
-                "The completed stream receives one final full parse.",
+                StreamingChunk("# Streaming", 120),
+                StreamingChunk(" Markdown\n\n", 260),
+                StreamingChunk("This sample appends ", 90),
+                StreamingChunk("**short tokens**", 180),
+                StreamingChunk(
+                    ", medium fragments, and a much longer paragraph so the final block changes " +
+                        "shape several times before its boundary becomes stable.",
+                    620,
+                ),
+                StreamingChunk("\n\n## Uneven cadence\n\n", 850),
+                StreamingChunk("- Fast item", 80),
+                StreamingChunk(
+                    "\n- A second item arrives after a longer pause and contains enough text to wrap across lines.",
+                    720,
+                ),
+                StreamingChunk("\n- Tiny", 110),
+                StreamingChunk("\n\n> Completed blocks stay in the document", 430),
+                StreamingChunk("\n> while only the active tail is reparsed.", 170),
+                StreamingChunk("\n\n## Incremental code fence\n\n```kotlin\n", 760),
+                StreamingChunk("val message", 130),
+                StreamingChunk(" = \"Hello", 70),
+                StreamingChunk(", streaming Markdown!\"", 480),
+                StreamingChunk("\nrepeat(3) { index ->\n", 240),
+                StreamingChunk("    println(\"${'$'}index: ${'$'}message\")\n", 360),
+                StreamingChunk("}\n```\n\n", 140),
+                StreamingChunk(
+                    "The completed stream receives one final full parse, restoring document-wide " +
+                        "parser semantics after all partial updates have arrived.",
+                    880,
+                ),
+                StreamingChunk("\n\n---\n\n", 220),
+                StreamingChunk("_Streaming complete._", 540),
             )
         }
     val markdownRenderConfig =
@@ -53,8 +76,8 @@ fun StreamingMarkdownExample(
 
     LaunchedEffect(chunks) {
         chunks.forEach { chunk ->
-            delay(350)
-            content += chunk
+            delay(chunk.delayMillis)
+            content += chunk.content
         }
         isStreaming = false
     }
@@ -78,3 +101,8 @@ fun StreamingMarkdownExample(
         )
     }
 }
+
+private data class StreamingChunk(
+    val content: String,
+    val delayMillis: Long,
+)
