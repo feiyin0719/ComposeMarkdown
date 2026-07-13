@@ -1,25 +1,14 @@
 # Changelog
 
-## Unreleased / 未发布
-
-### New Features / 新增功能
-
-- Added `appendMarkdownInlineContent()` to atomically register embedded or standalone inline content and append its annotation, with collision-safe IDs by default and explicit overwrite support
-- 新增 `appendMarkdownInlineContent()`，以原子方式注册 embedded 或 standalone inline content 并追加 annotation；默认安全处理 ID 冲突，同时支持显式覆盖
-- Rebuilt `LazyMarkdownView` around line sources, trailing-block preservation, node watermarks, node/source-line cache limits, bidirectional AST recycling, and structured loading states
-- 基于行数据源、尾部 block 保留、节点水位、node/source-line 双重缓存上限、双向 AST 回收和结构化 loading 状态重构 `LazyMarkdownView`
-- Added append-only streaming parsing to `MarkdownView` and `MarkdownText`, with tail-block reparsing, final full parsing, and custom `StreamingMarkdownParser` support
-- 为 `MarkdownView` 与 `MarkdownText` 新增 append-only streaming 解析，支持尾部 block 重解析、结束时全量解析及自定义 `StreamingMarkdownParser`
-- Changed node string builders to receive `ActionHandlerState`, allowing interaction callbacks to read the latest handler without rebuilding annotated content
-- NodeStringBuilder 改为接收 `ActionHandlerState`，交互回调可读取最新 handler，而无需重建 annotated content
-- Documented that streaming parsers return a new root document for changed input while preserving unchanged child-node identity
-- 明确 streaming parser 在输入变化时返回新的根 Document，同时保持未变化 child node 的对象身份
-
----
-
 ## 0.2.0
 
 ### New Features
+
+- Added `appendMarkdownInlineContent()` to atomically register embedded or standalone inline content and append its annotation, with collision-safe IDs by default and explicit overwrite support
+- Rebuilt `LazyMarkdownView` around line sources, trailing-block preservation, node watermarks, node/source-line cache limits, bidirectional AST recycling, and structured loading states
+- Added append-only streaming parsing to `MarkdownView` and `MarkdownText`, with tail-block reparsing, final full parsing, and custom `StreamingMarkdownParser` support
+- Changed node string builders to receive `ActionHandlerState`, allowing interaction callbacks to read the latest handler without rebuilding annotated content
+- Documented that streaming parsers return a new root document for changed input while preserving unchanged child-node identity
 
 #### Render Dependency Context
 - Added `renderDependencies` to the public Markdown rendering components so callers can provide services and other external objects to custom renderers
@@ -57,6 +46,12 @@
 ## 0.2.0
 
 ### 新增功能
+
+- 新增 `appendMarkdownInlineContent()`，以原子方式注册 embedded 或 standalone inline content 并追加 annotation；默认安全处理 ID 冲突，同时支持显式覆盖
+- 基于行数据源、尾部 block 保留、节点水位、node/source-line 双重缓存上限、双向 AST 回收和结构化 loading 状态重构 `LazyMarkdownView`
+- 为 `MarkdownView` 与 `MarkdownText` 新增 append-only streaming 解析，支持尾部 block 重解析、结束时全量解析及自定义 `StreamingMarkdownParser`
+- NodeStringBuilder 改为接收 `ActionHandlerState`，交互回调可读取最新 handler，而无需重建 annotated content
+- 明确 streaming parser 在输入变化时返回新的根 Document，同时保持未变化 child node 的对象身份
 
 #### 渲染依赖上下文
 - 所有公开 Markdown 渲染组件新增 `renderDependencies`，调用方可向自定义 renderer 提供服务或其他外部对象
