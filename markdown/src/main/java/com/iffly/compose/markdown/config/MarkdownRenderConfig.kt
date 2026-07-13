@@ -1,6 +1,8 @@
 package com.iffly.compose.markdown.config
 
 import androidx.compose.runtime.Immutable
+import com.iffly.compose.markdown.DefaultStreamingMarkdownParser
+import com.iffly.compose.markdown.StreamingMarkdownParser
 import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
@@ -30,7 +32,10 @@ class MarkdownRenderConfig private constructor(
     val parser: Parser,
     val htmlRenderer: HtmlRenderer,
     val htmlToMdConverter: FlexmarkHtmlConverter,
+    private val streamingMarkdownParserFactory: (MarkdownRenderConfig) -> StreamingMarkdownParser,
 ) {
+    fun createStreamingMarkdownParser(): StreamingMarkdownParser = streamingMarkdownParserFactory(this)
+
     companion object {
         private val internalPlugins =
             listOf<IMarkdownRenderPlugin>(
@@ -70,6 +75,8 @@ class MarkdownRenderConfig private constructor(
 
         private val extensions: MutableList<Extension> = mutableListOf()
         private val options = MutableDataSet()
+        private var streamingMarkdownParserFactory: (MarkdownRenderConfig) -> StreamingMarkdownParser =
+            ::DefaultStreamingMarkdownParser
 
         /**
          * Sets the [MarkdownTheme] for the configuration.
@@ -186,6 +193,12 @@ class MarkdownRenderConfig private constructor(
             return this
         }
 
+        /** Configures the per-component streaming parser factory. */
+        fun streamingMarkdownParserFactory(factory: (MarkdownRenderConfig) -> StreamingMarkdownParser): Builder {
+            streamingMarkdownParserFactory = factory
+            return this
+        }
+
         /**
          * Builds the [MarkdownRenderConfig] with the configured settings.
          * @return The constructed [MarkdownRenderConfig].
@@ -239,6 +252,7 @@ class MarkdownRenderConfig private constructor(
                 parserBuilder.build(),
                 htmlRendererBuilder.build(),
                 htmlToMdConverterBuilder.build(),
+                streamingMarkdownParserFactory,
             )
         }
     }

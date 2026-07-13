@@ -24,7 +24,6 @@ import kotlinx.coroutines.CoroutineDispatcher
  * @param renderDependencies Dependencies available to custom renderers and node string builders.
  * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
  * forces a final full parse.
- * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onError Composable to display in case of an error during parsing.
  */
 @Composable
@@ -36,16 +35,17 @@ fun MarkdownView(
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-    val parser = markdownRenderConfig.parser
+    val parser =
+        remember(markdownRenderConfig) {
+            markdownRenderConfig.createStreamingMarkdownParser()
+        }
     val markdownState =
         rememberMarkdownState(
             content = content,
             parser = parser,
             isStreaming = isStreaming,
-            streamingParser = streamingMarkdownParser,
         )
 
     when (markdownState) {
@@ -84,7 +84,6 @@ fun MarkdownView(
  * @param parseDispatcher Optional dispatcher for parsing. Defaults to a background thread pool.
  * @param isStreaming Whether [content] is an append-only partial stream. Setting it to `false`
  * forces a final full parse.
- * @param streamingMarkdownParser Parser used for incremental tail updates while streaming.
  * @param onLoading Composable to display while loading.
  * @param onError Composable to display in case of an error during parsing.
  */
@@ -98,17 +97,18 @@ fun MarkdownView(
     renderDependencies: Map<String, Any> = emptyMap(),
     parseDispatcher: CoroutineDispatcher? = null,
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 ) {
-    val parser = markdownRenderConfig.parser
+    val parser =
+        remember(markdownRenderConfig) {
+            markdownRenderConfig.createStreamingMarkdownParser()
+        }
     val markdownState by
         rememberAsyncMarkdownState(
             content = content,
             parser = parser,
             isStreaming = isStreaming,
-            streamingParser = streamingMarkdownParser,
             dispatcher = parseDispatcher ?: MarkdownThreadPool.dispatcher,
         )
 

@@ -423,7 +423,6 @@ fun MarkdownView(
 	actionHandler: ActionHandler? = null,
 	parseDispatcher: CoroutineDispatcher? = null,
 	isStreaming: Boolean = false,
-	streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
 	onLoading: (@Composable () -> Unit)? = null,
 	onError: (@Composable (Throwable) -> Unit)? = null,
 )
@@ -484,7 +483,8 @@ fun AsyncMarkdownExample() {
 对于只在尾部追加的生成内容，可在 `MarkdownView` 或 `MarkdownText` 中设置
 `isStreaming = true`。每次追加只重新解析旧文档的最后一个 block，稳定前缀节点会被复用。生成
 结束时设置 `isStreaming = false`，以强制执行一次最终全量解析。也可以传入自定义
-`StreamingMarkdownParser` 替换默认尾部解析器，但必须保留绝对源码 offset。
+`StreamingMarkdownParser`，并通过 `MarkdownRenderConfig.Builder.streamingMarkdownParserFactory`
+替换默认流程；其 `parse` 方法只接收完整 content 与 streaming 状态，可自主控制整个解析生命周期。
 
 #### 3. 预解析 Node 版本
 

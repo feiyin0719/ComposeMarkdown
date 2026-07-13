@@ -52,7 +52,6 @@ fun MarkdownView(
  actionHandler: ActionHandler? = null,
  renderDependencies: Map<String, Any> = emptyMap(),
  isStreaming: Boolean = false,
- streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
  onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -92,7 +91,6 @@ fun MarkdownView(
  renderDependencies: Map<String, Any> = emptyMap(),
  parseDispatcher: CoroutineDispatcher? = null,
  isStreaming: Boolean = false,
- streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
  onLoading: (@Composable () -> Unit)? = null,
  onError: (@Composable (Throwable) -> Unit)? = null,
 )
@@ -116,9 +114,18 @@ fun MarkdownView(
 或前部发生变化，会自动回退为全量解析。流结束时必须设置 `isStreaming = false`；这个状态切换
 始终执行一次最终全量解析，使 document-wide parser state 以完整文本为准。
 
-`MarkdownText` 支持相同参数和行为。自定义尾部解析可传入 `StreamingMarkdownParser`。它会收到
-完整 `BasedSequence` 和尾部起始 offset，返回的 `Document` 必须覆盖该尾部，并保留完整源码坐标
-中的 offset。
+`MarkdownText` 支持相同参数和行为。parser 通过
+`MarkdownRenderConfig.Builder.streamingMarkdownParserFactory` 统一配置，每个组件都会得到独立的
+有状态 parser 实例。自定义 `StreamingMarkdownParser` 可完全控制缓存、增量解析、AST 合并、回退
+与最终解析；它的解析方法只接收 `content` 和 `isStreaming`。
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+  .streamingMarkdownParserFactory { renderConfig ->
+    CustomStreamingMarkdownParser(renderConfig)
+  }
+  .build()
+```
 
 ```kotlin
 MarkdownView(

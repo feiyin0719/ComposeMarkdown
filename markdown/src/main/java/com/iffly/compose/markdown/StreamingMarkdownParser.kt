@@ -4,43 +4,95 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import com.vladsch.flexmark.parser.Parser
+import com.iffly.compose.markdown.config.MarkdownRenderConfig
 import com.vladsch.flexmark.util.ast.Document
+import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /**
- * Parses the replaceable tail of an append-only Markdown stream.
+ * Owns the parsing lifecycle for Markdown content that may be streaming.
  *
- * [source] contains the complete current Markdown input. [startOffset] is the start of the source
- * line containing the previous document's last top-level block. Implementations must return a
- * document parsed from that offset through the end of [source], with node offsets still expressed
- * in the coordinate space of [source].
+ * Implementations receive only the latest complete [content] and [isStreaming] state, and have full
+ * control over caching, incremental parsing, fallback behavior, and final parsing.
  */
-fun interface StreamingMarkdownParser {
+interface StreamingMarkdownParser {
+    val markdownRenderConfig: MarkdownRenderConfig
+
     fun parse(
-        parser: Parser,
-        source: BasedSequence,
-        startOffset: Int,
-    ): Document
+        content: String,
+        isStreaming: Boolean,
+    ): Node
 }
 
-/** Default offset-preserving Flexmark streaming parser. */
-object DefaultStreamingMarkdownParser : StreamingMarkdownParser {
+/**
+ * Default append-only Flexmark streaming parser.
+ *
+ * While streaming, it reparses from the source-line start of the previous final block and reuses
+ * the stable prefix. A non-append update or [isStreaming] set to `false` performs a full parse.
+ */
+class DefaultStreamingMarkdownParser(
+    override val markdownRenderConfig: MarkdownRenderConfig,
+) : StreamingMarkdownParser {
+    private val parser = markdownRenderConfig.parser
+    private var snapshot: MarkdownSnapshot? = null
+
+    @Synchronized
     override fun parse(
-        parser: Parser,
+        content: String,
+        isStreaming: Boolean,
+    ): Document {
+        if (!isStreaming) return parseFull(content)
+
+        val previous = snapshot ?: return parseFull(content)
+        if (content == previous.content) return previous.document
+        if (!content.startsWith(previous.content)) return parseFull(content)
+
+        val lastBlock = previous.document.lastChild ?: return parseFull(content)
+        val startOffset = lastBlock.startOfLine
+        if (startOffset !in 0..content.length) return parseFull(content)
+
+        val source = BasedSequence.of(content)
+        val tailDocument = parser.parse(source.subSequence(startOffset, source.length))
+        val document = mergeTail(previous.document, tailDocument, source)
+        snapshot = MarkdownSnapshot(content, document)
+        return document
+    }
+
+    private fun parseFull(content: String): Document {
+        val document = parser.parse(content)
+        snapshot = MarkdownSnapshot(content, document)
+        return document
+    }
+
+    private fun mergeTail(
+        previousDocument: Document,
+        tailDocument: Document,
         source: BasedSequence,
-        startOffset: Int,
-    ): Document = parser.parse(source.subSequence(startOffset, source.length))
+    ): Document {
+        val previousLastBlock = previousDocument.lastChild
+        val document = Document(previousDocument, source)
+
+        parser.transferReferences(document, tailDocument, null)
+
+        var child = previousDocument.firstChild
+        while (child != null && child !== previousLastBlock) {
+            val next = child.next
+            document.appendChild(child)
+            child = next
+        }
+        document.takeChildren(tailDocument)
+        return document
+    }
 }
 
 internal sealed interface MarkdownState {
     data object Loading : MarkdownState
 
     data class Success(
-        val node: Document,
+        val node: Node,
     ) : MarkdownState
 
     data class Error(
@@ -53,167 +105,47 @@ private data class MarkdownSnapshot(
     val document: Document,
 )
 
-private sealed interface MarkdownParseRequest {
-    val content: String
-
-    data class Reuse(
-        override val content: String,
-        val document: Document,
-    ) : MarkdownParseRequest
-
-    data class Full(
-        override val content: String,
-    ) : MarkdownParseRequest
-
-    data class Tail(
-        override val content: String,
-        val source: BasedSequence,
-        val startOffset: Int,
-        val previousDocument: Document,
-    ) : MarkdownParseRequest
-}
-
-private class StreamingMarkdownParseSession {
-    private var snapshot: MarkdownSnapshot? = null
-
-    fun createRequest(
-        content: String,
-        isStreaming: Boolean,
-    ): MarkdownParseRequest {
-        if (!isStreaming) return MarkdownParseRequest.Full(content)
-
-        val previous = snapshot ?: return MarkdownParseRequest.Full(content)
-        if (content == previous.content) {
-            return MarkdownParseRequest.Reuse(content, previous.document)
-        }
-        if (!content.startsWith(previous.content)) {
-            return MarkdownParseRequest.Full(content)
-        }
-
-        val lastBlock = previous.document.lastChild ?: return MarkdownParseRequest.Full(content)
-        val startOffset = lastBlock.startOfLine
-        if (startOffset !in 0..content.length) return MarkdownParseRequest.Full(content)
-
-        return MarkdownParseRequest.Tail(
-            content = content,
-            source = BasedSequence.of(content),
-            startOffset = startOffset,
-            previousDocument = previous.document,
-        )
-    }
-
-    fun complete(
-        request: MarkdownParseRequest,
-        parsedDocument: Document?,
-        parser: Parser,
-    ): Document {
-        val document =
-            when (request) {
-                is MarkdownParseRequest.Reuse -> {
-                    request.document
-                }
-
-                is MarkdownParseRequest.Full -> {
-                    requireNotNull(parsedDocument)
-                }
-
-                is MarkdownParseRequest.Tail -> {
-                    mergeTail(
-                        request = request,
-                        tailDocument = requireNotNull(parsedDocument),
-                        parser = parser,
-                    )
-                }
-            }
-        snapshot = MarkdownSnapshot(request.content, document)
-        return document
-    }
-}
-
-private fun MarkdownParseRequest.parse(
-    parser: Parser,
-    streamingParser: StreamingMarkdownParser,
-): Document? =
-    when (this) {
-        is MarkdownParseRequest.Reuse -> null
-        is MarkdownParseRequest.Full -> parser.parse(content)
-        is MarkdownParseRequest.Tail -> streamingParser.parse(parser, source, startOffset)
-    }
-
-private fun mergeTail(
-    request: MarkdownParseRequest.Tail,
-    tailDocument: Document,
-    parser: Parser,
-): Document {
-    val previousDocument = request.previousDocument
-    val previousLastBlock = previousDocument.lastChild
-    val document = Document(previousDocument, request.source)
-
-    parser.transferReferences(document, tailDocument, null)
-
-    var child = previousDocument.firstChild
-    while (child != null && child !== previousLastBlock) {
-        val next = child.next
-        document.appendChild(child)
-        child = next
-    }
-    document.takeChildren(tailDocument)
-    return document
-}
-
 @Composable
 internal fun rememberMarkdownState(
     content: String,
-    parser: Parser,
     isStreaming: Boolean,
-    streamingParser: StreamingMarkdownParser,
-): MarkdownState {
-    val session = remember(parser, streamingParser) { StreamingMarkdownParseSession() }
-    return remember(content, isStreaming, session) {
+    parser: StreamingMarkdownParser,
+): MarkdownState =
+    remember(content, isStreaming, parser) {
         try {
-            val request = session.createRequest(content, isStreaming)
-            MarkdownState.Success(
-                session.complete(
-                    request = request,
-                    parsedDocument = request.parse(parser, streamingParser),
-                    parser = parser,
-                ),
-            )
+            MarkdownState.Success(parser.parse(content, isStreaming))
         } catch (throwable: Throwable) {
             MarkdownState.Error(throwable)
         }
     }
-}
 
 @Composable
 internal fun rememberAsyncMarkdownState(
     content: String,
-    parser: Parser,
     isStreaming: Boolean,
-    streamingParser: StreamingMarkdownParser,
+    parser: StreamingMarkdownParser,
     dispatcher: CoroutineDispatcher,
-): State<MarkdownState> {
-    val session = remember(parser, streamingParser) { StreamingMarkdownParseSession() }
-    return produceState<MarkdownState>(
+): State<MarkdownState> =
+    produceState<MarkdownState>(
         initialValue = MarkdownState.Loading,
         content,
         isStreaming,
-        session,
+        parser,
         dispatcher,
     ) {
-        value = MarkdownState.Loading
+        if (!isStreaming || value !is MarkdownState.Success) {
+            value = MarkdownState.Loading
+        }
         value =
             try {
-                val request = session.createRequest(content, isStreaming)
-                val parsedDocument =
+                val parsedNode =
                     withContext(dispatcher) {
-                        request.parse(parser, streamingParser)
+                        parser.parse(content, isStreaming)
                     }
-                MarkdownState.Success(session.complete(request, parsedDocument, parser))
+                MarkdownState.Success(parsedNode)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (throwable: Throwable) {
                 MarkdownState.Error(throwable)
             }
     }
-}

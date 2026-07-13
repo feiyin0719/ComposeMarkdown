@@ -51,7 +51,6 @@ fun MarkdownView(
     actionHandler: ActionHandler? = null,
     renderDependencies: Map<String, Any> = emptyMap(),
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -91,7 +90,6 @@ fun MarkdownView(
     renderDependencies: Map<String, Any> = emptyMap(),
     parseDispatcher: CoroutineDispatcher? = null,
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
@@ -116,9 +114,19 @@ through the new end. Replacing or truncating an earlier part of `content` automa
 to a full parse. Set `isStreaming = false` when the stream completes; that transition always runs a
 final full parse so document-wide parser state is authoritative.
 
-`MarkdownText` supports the same parameters and behavior. To customize tail parsing, pass a
-`StreamingMarkdownParser`. It receives the complete `BasedSequence` and the tail start offset; the
-returned `Document` must cover that tail and retain offsets in the complete source coordinate space.
+`MarkdownText` supports the same parameter and behavior. The parser is configured once through
+`MarkdownRenderConfig.Builder.streamingMarkdownParserFactory`. Each component receives its own
+stateful parser instance. A custom `StreamingMarkdownParser` fully controls caching, incremental
+parsing, AST merging, fallback, and final parsing; its parsing method receives only `content` and
+`isStreaming`.
+
+```kotlin
+val config = MarkdownRenderConfig.Builder()
+    .streamingMarkdownParserFactory { renderConfig ->
+        CustomStreamingMarkdownParser(renderConfig)
+    }
+    .build()
+```
 
 ```kotlin
 MarkdownView(
@@ -378,7 +386,6 @@ fun MarkdownText(
     textDecoration: TextDecoration? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )
 ```
@@ -440,7 +447,6 @@ fun MarkdownText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     parseDispatcher: CoroutineDispatcher? = null,
     isStreaming: Boolean = false,
-    streamingMarkdownParser: StreamingMarkdownParser = DefaultStreamingMarkdownParser,
     onLoading: (@Composable () -> Unit)? = null,
     onError: (@Composable (Throwable) -> Unit)? = null,
 )

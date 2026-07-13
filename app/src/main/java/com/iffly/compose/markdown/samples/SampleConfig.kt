@@ -21,6 +21,12 @@ val markdownExamples =
             AsyncLoadingExample(paddingValues)
         },
         MarkdownExample(
+            title = "Streaming Markdown Example",
+            description = "Incrementally parses an append-only Markdown stream and finalizes it",
+        ) { paddingValues ->
+            StreamingMarkdownExample(paddingValues)
+        },
+        MarkdownExample(
             title = "Error Handling Example",
             description = "Shows graceful handling of error states",
         ) { paddingValues ->
