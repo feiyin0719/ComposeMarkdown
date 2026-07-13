@@ -119,11 +119,12 @@ fun MarkdownView(
 有状态 parser 实例。自定义 `StreamingMarkdownParser` 可完全控制缓存、增量解析、AST 合并、回退
 与最终解析；它的解析方法只接收 `content` 和 `isStreaming`。
 
+factory 默认为 `null`。若未配置，即使设置 `isStreaming = true`，也会回退到普通 parser，并在每次
+content 更新时执行全量解析。要启用内置增量流程，需要显式配置默认实现：
+
 ```kotlin
 val config = MarkdownRenderConfig.Builder()
-  .streamingMarkdownParserFactory { renderConfig ->
-    CustomStreamingMarkdownParser(renderConfig)
-  }
+  .streamingMarkdownParserFactory(::DefaultStreamingMarkdownParser)
   .build()
 ```
 

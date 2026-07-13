@@ -120,11 +120,13 @@ stateful parser instance. A custom `StreamingMarkdownParser` fully controls cach
 parsing, AST merging, fallback, and final parsing; its parsing method receives only `content` and
 `isStreaming`.
 
+The factory is `null` by default. If it is not configured, `isStreaming = true` falls back to the
+normal parser and performs a full parse for every content update. Configure the default
+implementation explicitly to enable the built-in incremental workflow:
+
 ```kotlin
 val config = MarkdownRenderConfig.Builder()
-    .streamingMarkdownParserFactory { renderConfig ->
-        CustomStreamingMarkdownParser(renderConfig)
-    }
+    .streamingMarkdownParserFactory(::DefaultStreamingMarkdownParser)
     .build()
 ```
 

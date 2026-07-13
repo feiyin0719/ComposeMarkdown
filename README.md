@@ -533,7 +533,9 @@ Only the previous final block is reparsed as text is appended; stable prefix nod
 `isStreaming = false` when generation finishes to force one authoritative full parse. A custom
 `StreamingMarkdownParser` can replace the default workflow through
 `MarkdownRenderConfig.Builder.streamingMarkdownParserFactory`; its `parse` method receives only
-the complete content and streaming flag and can control the entire parsing lifecycle.
+the complete content and streaming flag and can control the entire parsing lifecycle. The factory
+defaults to `null`; without one, `isStreaming = true` falls back to normal full parsing. Configure
+`::DefaultStreamingMarkdownParser` explicitly to enable the built-in workflow.
 
 #### 3. Pre-parsed Node Version
 

@@ -16,9 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.iffly.compose.markdown.DefaultStreamingMarkdownParser
 import com.iffly.compose.markdown.MarkdownView
 import com.iffly.compose.markdown.config.MarkdownRenderConfig
+import com.iffly.compose.markdown.streaming.DefaultStreamingMarkdownParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 

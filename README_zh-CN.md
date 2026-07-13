@@ -485,6 +485,8 @@ fun AsyncMarkdownExample() {
 结束时设置 `isStreaming = false`，以强制执行一次最终全量解析。也可以传入自定义
 `StreamingMarkdownParser`，并通过 `MarkdownRenderConfig.Builder.streamingMarkdownParserFactory`
 替换默认流程；其 `parse` 方法只接收完整 content 与 streaming 状态，可自主控制整个解析生命周期。
+factory 默认为 `null`；未配置时，`isStreaming = true` 会回退到普通全量解析。需显式配置
+`::DefaultStreamingMarkdownParser` 才会启用内置增量流程。
 
 #### 3. 预解析 Node 版本
 

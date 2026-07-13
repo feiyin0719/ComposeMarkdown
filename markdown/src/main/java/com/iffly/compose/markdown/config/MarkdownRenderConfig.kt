@@ -1,14 +1,13 @@
 package com.iffly.compose.markdown.config
 
 import androidx.compose.runtime.Immutable
-import com.iffly.compose.markdown.DefaultStreamingMarkdownParser
-import com.iffly.compose.markdown.StreamingMarkdownParser
 import com.iffly.compose.markdown.core.plugins.CorePlugin
 import com.iffly.compose.markdown.render.IBlockRenderer
 import com.iffly.compose.markdown.render.IInlineNodeStringBuilder
 import com.iffly.compose.markdown.render.MarkdownContentRenderer
 import com.iffly.compose.markdown.render.MarkdownInlineTextRenderer
 import com.iffly.compose.markdown.render.RenderRegistry
+import com.iffly.compose.markdown.streaming.StreamingMarkdownParser
 import com.iffly.compose.markdown.style.MarkdownTheme
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter
@@ -32,9 +31,9 @@ class MarkdownRenderConfig private constructor(
     val parser: Parser,
     val htmlRenderer: HtmlRenderer,
     val htmlToMdConverter: FlexmarkHtmlConverter,
-    private val streamingMarkdownParserFactory: (MarkdownRenderConfig) -> StreamingMarkdownParser,
+    private val streamingMarkdownParserFactory: ((MarkdownRenderConfig) -> StreamingMarkdownParser)?,
 ) {
-    fun createStreamingMarkdownParser(): StreamingMarkdownParser = streamingMarkdownParserFactory(this)
+    fun createStreamingMarkdownParser(): StreamingMarkdownParser? = streamingMarkdownParserFactory?.invoke(this)
 
     companion object {
         private val internalPlugins =
@@ -75,8 +74,7 @@ class MarkdownRenderConfig private constructor(
 
         private val extensions: MutableList<Extension> = mutableListOf()
         private val options = MutableDataSet()
-        private var streamingMarkdownParserFactory: (MarkdownRenderConfig) -> StreamingMarkdownParser =
-            ::DefaultStreamingMarkdownParser
+        private var streamingMarkdownParserFactory: ((MarkdownRenderConfig) -> StreamingMarkdownParser)? = null
 
         /**
          * Sets the [MarkdownTheme] for the configuration.
@@ -193,8 +191,14 @@ class MarkdownRenderConfig private constructor(
             return this
         }
 
-        /** Configures the per-component streaming parser factory. */
-        fun streamingMarkdownParserFactory(factory: (MarkdownRenderConfig) -> StreamingMarkdownParser): Builder {
+        /**
+         * Configures the per-component streaming parser factory.
+         *
+         * The default is `null`. Without a factory, [com.iffly.compose.markdown.MarkdownView] and
+         * [com.iffly.compose.markdown.MarkdownText] use the normal full parser even when their
+         * `isStreaming` parameter is `true`.
+         */
+        fun streamingMarkdownParserFactory(factory: ((MarkdownRenderConfig) -> StreamingMarkdownParser)?): Builder {
             streamingMarkdownParserFactory = factory
             return this
         }
